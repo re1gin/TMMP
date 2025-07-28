@@ -1,6 +1,6 @@
 package com.teladanprimaagro.tmpp.ui.navigation
 
-import android.content.Intent // Import Intent
+import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -22,30 +22,25 @@ import com.teladanprimaagro.tmpp.ui.screens.PengaturanScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
-import androidx.compose.runtime.State // Import State
+import androidx.compose.runtime.State
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
-    // Tambahkan parameter nfcIntent di sini
-    nfcIntent: State<Intent?> // Menerima State<Intent?> dari MainActivity
+    nfcIntent: State<Intent?>
 ) {
     val navController = rememberNavController()
     val panenViewModel: PanenViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel()
+    val settingsViewModel: SettingsViewModel = viewModel() // Dapatkan instance SettingsViewModel
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
-            SplashScreen(navController = navController)
+            // SplashScreen sekarang menerima settingsViewModel
+            SplashScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
         composable("login_screen") {
-            LoginScreen(
-                onSuccessLogin = { route ->
-                    navController.navigate(route) {
-                        popUpTo("login_screen") { inclusive = true }
-                    }
-                }
-            )
+            // LoginScreen sekarang menerima settingsViewModel
+            LoginScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
 
         composable("harvester_screen") {
@@ -63,7 +58,7 @@ fun AppNavigation(
                 navController = navController,
                 panenViewModel = panenViewModel,
                 settingsViewModel = settingsViewModel,
-                nfcIntentFromActivity = nfcIntent // <-- TERUSKAN nfcIntent ke PanenInputScreen
+                nfcIntentFromActivity = nfcIntent
             )
         }
 

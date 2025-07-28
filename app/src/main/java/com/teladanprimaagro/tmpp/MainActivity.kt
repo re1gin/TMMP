@@ -20,8 +20,6 @@ import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
 
 
 class MainActivity : ComponentActivity() {
-    // Gunakan _nfcIntent sebagai private MutableState dan expose nfcIntent sebagai public State
-    // Ini memungkinkan pembaruan hanya dari dalam MainActivity
     internal var _nfcIntent: MutableState<Intent?> = mutableStateOf(null)
     val nfcIntent: State<Intent?> = _nfcIntent
 

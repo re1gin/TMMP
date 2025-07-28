@@ -13,6 +13,7 @@ val BackgroundLightGray = Color(0xFF333333)
 
 val TextWhite = Color(0xFFFFFFFF)
 val TextGray = Color(0xFFCCCCCC)
+val TextBlack = Color(0xFF000000)
 
 val IconOrange = Color(0xFFFF8C00)
 val DotGray = Color(0xFF696969)

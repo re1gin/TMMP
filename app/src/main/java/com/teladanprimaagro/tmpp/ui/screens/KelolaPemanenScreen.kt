@@ -8,6 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +33,10 @@ fun KelolaPemanenScreen(
     settingsViewModel: SettingsViewModel
 ) {
     var newPemanenName by remember { mutableStateOf("") }
+    // State untuk melacak pemanen yang sedang diedit
+    var editingPemanen by remember { mutableStateOf<String?>(null) }
+    // State untuk menyimpan teks edit sementara
+    var editedPemanenName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -58,7 +66,7 @@ fun KelolaPemanenScreen(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.width(48.dp))
+            Spacer(modifier = Modifier.width(48.dp)) // Untuk menyeimbangkan header
         }
 
         Column(
@@ -73,6 +81,7 @@ fun KelolaPemanenScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Input untuk nama pemanen baru
             OutlinedTextField(
                 value = newPemanenName,
                 onValueChange = { newPemanenName = it },
@@ -92,11 +101,12 @@ fun KelolaPemanenScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Tombol Tambah
             Button(
                 onClick = {
                     if (newPemanenName.isNotBlank()) {
-                        settingsViewModel.addPemanen(newPemanenName)
-                        newPemanenName = ""
+                        settingsViewModel.addPemanen(newPemanenName.trim()) // Gunakan trim() untuk membersihkan spasi
+                        newPemanenName = "" // Bersihkan input setelah ditambahkan
                     }
                 },
                 modifier = Modifier
@@ -125,22 +135,76 @@ fun KelolaPemanenScreen(
             HorizontalDivider(thickness = 1.dp, color = DotGray)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Daftar pemanen yang sudah ada
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(settingsViewModel.pemanenList) { pemanen ->
+                // Gunakan key untuk performa dan stabilitas UI saat daftar berubah
+                items(settingsViewModel.pemanenList, key = { it }) { pemanen ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = pemanen,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f)
-                        )
+                        if (editingPemanen == pemanen) {
+                            // Tampilan saat mode edit
+                            OutlinedTextField(
+                                value = editedPemanenName,
+                                onValueChange = { editedPemanenName = it },
+                                singleLine = true,
+                                shape = RoundedCornerShape(8.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = DotGray,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedContainerColor = BackgroundLightGray,
+                                    unfocusedContainerColor = BackgroundLightGray,
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Simpan
+                            IconButton(
+                                onClick = {
+                                    // Validasi: Pastikan nama baru tidak kosong dan tidak sama dengan nama lama (setelah trim)
+                                    if (editedPemanenName.isNotBlank() && editedPemanenName.trim() != pemanen) {
+                                        settingsViewModel.updatePemanen(pemanen, editedPemanenName.trim())
+                                    }
+                                    editingPemanen = null // Keluar dari mode edit setelah simpan
+                                },
+                                // Tombol aktif hanya jika ada teks dan teksnya berbeda dari yang lama
+                                enabled = editedPemanenName.isNotBlank() && editedPemanenName.trim() != pemanen
+                            ) {
+                                Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
+                            }
+                            // Tombol Batal
+                            IconButton(onClick = { editingPemanen = null }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
+                            }
+                        } else {
+                            // Tampilan normal
+                            Text(
+                                text = pemanen,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Edit
+                            IconButton(onClick = {
+                                editingPemanen = pemanen // Masuk mode edit untuk item ini
+                                editedPemanenName = pemanen // Inisialisasi teks edit dengan nama pemanen saat ini
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
+                            }
+                            // Tombol Hapus
+                            IconButton(onClick = { settingsViewModel.removePemanen(pemanen) }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     }
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
                 }

@@ -19,14 +19,18 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.IconOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray // Pastikan ini diimpor atau didefinisikan
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
+import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onSuccessLogin: (route: String) -> Unit
+    navController: NavController,
+    settingsViewModel: SettingsViewModel
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -175,7 +179,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password Input - DIUBAH untuk Material3 terbaru
             TextField(
                 value = password,
                 onValueChange = {
@@ -259,17 +262,21 @@ fun LoginScreen(
                         return@Button
                     }
 
-                    // Logika autentikasi dummy untuk Pemanen dan Supir
-                    when {
-                        username == "pemanen" && password == "panen123" -> {
-                            onSuccessLogin("harvester_screen")
+                    // Logika autentikasi dummy
+                    val role: String? = when {
+                        username == "pemanen" && password == "panen123" -> "harvester"
+                        username == "supir" && password == "supir123" -> "driver"
+                        else -> null
+                    }
+
+                    if (role != null) {
+                        settingsViewModel.loginSuccess(role) // Panggil fungsi ini dengan peran pengguna
+                        val targetRoute = if (role == "harvester") "harvester_screen" else "driver_screen"
+                        navController.navigate(targetRoute) {
+                            popUpTo("login_screen") { inclusive = true }
                         }
-                        username == "supir" && password == "supir123" -> {
-                            onSuccessLogin("driver_screen")
-                        }
-                        else -> {
-                            loginError = true
-                        }
+                    } else {
+                        loginError = true
                     }
                 },
                 modifier = Modifier

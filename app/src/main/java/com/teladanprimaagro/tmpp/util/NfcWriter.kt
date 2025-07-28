@@ -69,18 +69,6 @@ fun writeNdefMessageToTag(
     }
 }
 
-/**
- * Composable untuk mengelola dialog penulisan NFC dan foreground dispatch.
- * Ini harus dipanggil dari Composable yang memiliki akses ke lifecycle (misalnya, layar).
- *
- * @param showDialog State boolean untuk menunjukkan apakah dialog harus ditampilkan.
- * @param onDismissRequest Callback ketika dialog ditutup (misalnya, user menekan batal).
- * @param dataToWrite Data PanenData yang akan ditulis ke tag NFC. Null jika tidak ada data yang akan ditulis.
- * @param onWriteComplete Callback setelah proses penulisan NFC selesai (berhasil/gagal).
- * Parameter: Boolean (true jika berhasil), String (pesan status).
- * @param nfcIntentFromActivity State<Intent?> yang menyediakan intent NFC dari Activity.
- */
-
 @SuppressLint("NewApi")
 @Composable
 fun NfcWriteDialog(
@@ -170,7 +158,7 @@ fun NfcWriteDialog(
                     dataToWrite.tanggalWaktu.split(" ")[0].replace('-', '/')
                 }
 
-                val nfcDataString = "${dataToWrite.uniqueNo},${formattedDate},${dataToWrite.blok},${dataToWrite.totalBuah},${dataToWrite.buahBL}"
+                val nfcDataString = "${dataToWrite.uniqueNo},${formattedDate},${dataToWrite.blok},${dataToWrite.totalBuah}"
                 Log.d("NFCWriter", "NFC data string prepared: $nfcDataString")
 
                 val lang = Locale.getDefault().language.toByteArray(Charset.forName("US-ASCII"))

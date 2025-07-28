@@ -8,7 +8,6 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,6 +22,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -59,6 +60,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -95,6 +97,32 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.FusedLocationProviderClient
+
+// Mendapatkan lokasi GPS.
+fun getLocation(
+    fusedLocationClient: FusedLocationProviderClient,
+    context: Context,
+    onLocationReceived: (String, String) -> Unit
+) {
+    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+    ) {
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location ->
+                if (location != null) {
+                    onLocationReceived(location.latitude.toString(), location.longitude.toString())
+                    Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(context, "Tidak dapat menemukan lokasi. Pastikan GPS aktif.", Toast.LENGTH_LONG).show()
+                }
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Gagal mendapatkan lokasi: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+    }
+}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,8 +140,8 @@ fun PanenInputScreen(
     val currentDateTime = remember { LocalDateTime.now() }
     val formatter = remember { DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") }
     val dateTimeDisplay = remember { currentDateTime.format(formatter) }
-    var locationPart1 by remember { mutableStateOf("") }
-    var locationPart2 by remember { mutableStateOf("") }
+    var locationPart1 by remember { mutableStateOf("") } // Latitude
+    var locationPart2 by remember { mutableStateOf("") } // Longitude
 
     val foremanOptions = settingsViewModel.mandorList.toList()
     var selectedForeman by remember(foremanOptions) { mutableStateOf(foremanOptions.firstOrNull() ?: "") }
@@ -147,6 +175,53 @@ fun PanenInputScreen(
     var nfcDataToPass by remember { mutableStateOf<PanenData?>(null) }
     val nfcAdapter: NfcAdapter? = remember { NfcAdapter.getDefaultAdapter(context) }
 
+    val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    /** Launcher untuk meminta izin lokasi. */
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+        onResult = { permissions ->
+            when {
+                permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
+                    getLocation(fusedLocationClient, context) { lat, lon ->
+                        locationPart1 = lat
+                        locationPart2 = lon
+                    }
+                }
+                permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
+                    getLocation(fusedLocationClient, context) { lat, lon ->
+                        locationPart1 = lat
+                        locationPart2 = lon
+                    }
+                }
+                else -> {
+                    Toast.makeText(context, "Izin lokasi ditolak.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    )
+
+    fun generateUniqueCode(
+        dateTime: LocalDateTime,
+        block: String,
+        totalBuah: Int // Tambahkan totalBuah sebagai parameter
+    ): String {
+        val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+        val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
+        val formattedDate = dateTime.format(dateFormatter)
+        val formattedTime = dateTime.format(timeFormatter)
+
+        val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
+        // Gunakan totalBuah yang diterima sebagai parameter
+        val formattedBuah = totalBuah.toString().padStart(3, '0')
+
+        return "AME1$formattedDate$formattedTime$cleanBlock$formattedBuah"
+    }
+
+    LaunchedEffect(currentDateTime, selectedBlock, totalBuah) {
+        uniqueNo = generateUniqueCode(currentDateTime, selectedBlock, totalBuah)
+    }
+
     fun createImageUri(context: Context): Uri {
         val photosDir = File(context.cacheDir, "panen_photos")
         photosDir.mkdirs()
@@ -174,50 +249,44 @@ fun PanenInputScreen(
                 val capturedUri = imageUri
                 if (capturedUri != null) {
                     CoroutineScope(Dispatchers.Main).launch {
-                        delay(500)
+                        delay(500) // Penundaan kecil untuk memastikan gambar ditulis ke sistem file
 
                         try {
                             context.contentResolver.openInputStream(capturedUri)?.use { inputStream ->
                                 val bitmap = BitmapFactory.decodeStream(inputStream)
                                 if (bitmap != null) {
                                     imageBitmap = bitmap
-                                } else {
-                                    Log.e("PanenInputScreen", "Failed to decode bitmap from stream.")
                                 }
                             }
                         } catch (e: Exception) {
-                            Log.e("PanenInputScreen", "Error loading bitmap from URI: ${e.message}", e)
+                            Toast.makeText(context, "Gagal memuat gambar: ${e.message}", Toast.LENGTH_LONG).show()
                         }
 
                         imageUri = null
                         imageUri = capturedUri
-                        Log.d("PanenInputScreen", "cameraLauncher: Re-assigned imageUri to $imageUri after delay to force recomposition.")
                     }
-                } else {
-                    Log.w("PanenInputScreen", "cameraLauncher: capturedUri was null after success. This should not happen.")
                 }
             } else {
-                Log.d("PanenInputScreen", "cameraLauncher: Image capture cancelled or failed. Resetting imageUri and bitmap.")
                 imageUri = null
                 imageBitmap = null
             }
         }
     )
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    // Launcher untuk izin kamera.
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                Log.d("PanenInputScreen", "permissionLauncher: Camera permission granted.")
                 cameraLauncher.launch(createImageUri(context))
             } else {
-                Log.w("PanenInputScreen", "permissionLauncher: Camera permission denied by user.")
+                Toast.makeText(context, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
             }
         }
     )
 
+    // Mereset input formulir.
     fun resetForm() {
-        uniqueNo = ""
         locationPart1 = ""
         locationPart2 = ""
         selectedForeman = foremanOptions.firstOrNull() ?: ""
@@ -284,7 +353,13 @@ fun PanenInputScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            TextInputField(label = "No. Unik", value = uniqueNo, onValueChange = { uniqueNo = it })
+            TextInputField(
+                label = "No. Unik",
+                value = uniqueNo,
+                onValueChange = {},
+                readOnly = true,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
             TextInputField(
@@ -301,21 +376,46 @@ fun PanenInputScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextInputField(
-                    label = "Lokasi",
+                    label = "Latitude",
                     value = locationPart1,
                     onValueChange = { locationPart1 = it },
                     modifier = Modifier
                         .weight(0.5f)
-                        .padding(end = 8.dp)
+                        .padding(end = 8.dp),
+                    keyboardType = KeyboardType.Decimal
                 )
                 TextInputField(
-                    label = "",
+                    label = "Longitude",
                     value = locationPart2,
                     onValueChange = { locationPart2 = it },
                     modifier = Modifier
                         .weight(0.5f)
-                        .padding(start = 8.dp)
+                        .padding(start = 8.dp),
+                    keyboardType = KeyboardType.Decimal
                 )
+                IconButton(
+                    onClick = {
+                        locationPermissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    },
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .fillMaxHeight()
+                        .background(
+                            color = IconOrange,
+                            shape = RoundedCornerShape(10.dp))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = "Dapatkan Lokasi",
+                        tint = Color.Black,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -423,6 +523,7 @@ fun PanenInputScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
+            //Input Gambar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -438,13 +539,12 @@ fun PanenInputScreen(
                         ) {
                             cameraLauncher.launch(createImageUri(context))
                         } else {
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
                 if (imageBitmap != null) {
-                    Log.d("PanenInputScreen", "Displaying image from Bitmap.")
                     Image(
                         bitmap = imageBitmap!!.asImageBitmap(),
                         contentDescription = "Captured Image (Manual)",
@@ -481,7 +581,7 @@ fun PanenInputScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol Kirim
+            // Tombol untuk mengirim data panen.
             Button(
                 onClick = {
                     val newPanenData = PanenData(
@@ -503,19 +603,17 @@ fun PanenInputScreen(
                         imageUri = imageUri?.toString()
                     )
 
-                    // Cek ketersediaan NFC
                     if (nfcAdapter == null) {
                         Toast.makeText(context, "NFC tidak tersedia di perangkat ini.", Toast.LENGTH_LONG).show()
-                        panenViewModel.addPanenData(newPanenData) // Tetap simpan lokal
+                        panenViewModel.addPanenData(newPanenData)
                         navController.popBackStack()
                         resetForm()
                     } else if (!nfcAdapter.isEnabled) {
                         Toast.makeText(context, "NFC dinonaktifkan. Harap aktifkan di pengaturan.", Toast.LENGTH_LONG).show()
-                        panenViewModel.addPanenData(newPanenData) // Tetap simpan lokal
+                        panenViewModel.addPanenData(newPanenData)
                         navController.popBackStack()
                         resetForm()
                     } else {
-                        // NFC tersedia dan diaktifkan, siapkan untuk menulis
                         nfcDataToPass = newPanenData.toNfcWriteableData()
                         showNfcWriteDialog = true
                     }
@@ -552,37 +650,31 @@ fun PanenInputScreen(
                     if (it < 2) Spacer(modifier = Modifier.width(8.dp))
                 }
             }
-            Text(
-                text = "Version: V 1.0.0.0",
-                color = TextGray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
         }
-    }
 
-    // Panggil Composable NFC Write Dialog yang baru
-    NfcWriteDialog(
-        showDialog = showNfcWriteDialog,
-        onDismissRequest = {
-            showNfcWriteDialog = false
-            nfcDataToPass = null
-        },
-        dataToWrite = nfcDataToPass,
-        onWriteComplete = { success, message ->
-            if (success) {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                nfcDataToPass?.let { panenViewModel.addPanenData(it) }
-                navController.popBackStack()
-                resetForm()
-            } else {
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-            }
-            showNfcWriteDialog = false
-            nfcDataToPass = null
-        },
-        nfcIntentFromActivity = nfcIntentFromActivity
-    )
+        /** Dialog penulisan NFC. */
+        NfcWriteDialog(
+            showDialog = showNfcWriteDialog,
+            onDismissRequest = {
+                showNfcWriteDialog = false
+                nfcDataToPass = null
+            },
+            dataToWrite = nfcDataToPass,
+            onWriteComplete = { success, message ->
+                if (success) {
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    nfcDataToPass?.let { panenViewModel.addPanenData(it) }
+                    navController.popBackStack()
+                    resetForm()
+                } else {
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
+                showNfcWriteDialog = false
+                nfcDataToPass = null
+            },
+            nfcIntentFromActivity = nfcIntentFromActivity
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

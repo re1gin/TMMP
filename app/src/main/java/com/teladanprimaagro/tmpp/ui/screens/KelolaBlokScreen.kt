@@ -8,6 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear // Ikon untuk batal edit
+import androidx.compose.material.icons.filled.Done // Ikon untuk simpan edit
+import androidx.compose.material.icons.filled.Delete // Ikon untuk hapus
+import androidx.compose.material.icons.filled.Edit // Ikon untuk edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +33,10 @@ fun KelolaBlokScreen(
     settingsViewModel: SettingsViewModel
 ) {
     var newBlokName by remember { mutableStateOf("") }
+    // State untuk melacak blok yang sedang diedit
+    var editingBlok by remember { mutableStateOf<String?>(null) }
+    // State untuk menyimpan teks edit sementara
+    var editedBlokName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -58,7 +66,7 @@ fun KelolaBlokScreen(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            Spacer(modifier = Modifier.width(48.dp))
+            Spacer(modifier = Modifier.width(48.dp)) // Untuk menyeimbangkan header
         }
 
         Column(
@@ -73,6 +81,7 @@ fun KelolaBlokScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Input untuk nama blok baru
             OutlinedTextField(
                 value = newBlokName,
                 onValueChange = { newBlokName = it },
@@ -92,11 +101,12 @@ fun KelolaBlokScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Tombol Tambah
             Button(
                 onClick = {
                     if (newBlokName.isNotBlank()) {
-                        settingsViewModel.addBlok(newBlokName)
-                        newBlokName = ""
+                        settingsViewModel.addBlok(newBlokName.trim()) // Gunakan trim() untuk membersihkan spasi
+                        newBlokName = "" // Bersihkan input setelah ditambahkan
                     }
                 },
                 modifier = Modifier
@@ -125,22 +135,73 @@ fun KelolaBlokScreen(
             HorizontalDivider(thickness = 1.dp, color = DotGray)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Daftar blok yang sudah ada
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(settingsViewModel.blokList) { blok ->
+                items(settingsViewModel.blokList, key = { it }) { blok -> // Tambahkan key untuk performa
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = blok,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f)
-                        )
+                        if (editingBlok == blok) {
+                            // Tampilan saat mode edit
+                            OutlinedTextField(
+                                value = editedBlokName,
+                                onValueChange = { editedBlokName = it },
+                                singleLine = true,
+                                shape = RoundedCornerShape(8.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = DotGray,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedContainerColor = BackgroundLightGray,
+                                    unfocusedContainerColor = BackgroundLightGray,
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Simpan
+                            IconButton(
+                                onClick = {
+                                    if (editedBlokName.isNotBlank() && editedBlokName.trim() != blok) {
+                                        settingsViewModel.updateBlok(blok, editedBlokName.trim())
+                                    }
+                                    editingBlok = null // Keluar dari mode edit
+                                },
+                                enabled = editedBlokName.isNotBlank() // Aktifkan hanya jika ada teks
+                            ) {
+                                Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
+                            }
+                            // Tombol Batal
+                            IconButton(onClick = { editingBlok = null }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
+                            }
+                        } else {
+                            // Tampilan normal
+                            Text(
+                                text = blok,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Edit
+                            IconButton(onClick = {
+                                editingBlok = blok // Masuk mode edit untuk item ini
+                                editedBlokName = blok // Inisialisasi teks edit dengan nama blok saat ini
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
+                            }
+                            // Tombol Hapus
+                            IconButton(onClick = { settingsViewModel.removeBlok(blok) }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     }
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
                 }

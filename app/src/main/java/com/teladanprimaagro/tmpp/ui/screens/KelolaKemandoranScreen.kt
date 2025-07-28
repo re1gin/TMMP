@@ -8,6 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +33,10 @@ fun KelolaKemandoranScreen(
     settingsViewModel: SettingsViewModel
 ) {
     var newMandorName by remember { mutableStateOf("") }
+    // State untuk melacak mandor yang sedang diedit
+    var editingMandor by remember { mutableStateOf<String?>(null) }
+    // State untuk menyimpan teks edit sementara
+    var editedMandorName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -97,7 +105,7 @@ fun KelolaKemandoranScreen(
             Button(
                 onClick = {
                     if (newMandorName.isNotBlank()) {
-                        settingsViewModel.addMandor(newMandorName)
+                        settingsViewModel.addMandor(newMandorName.trim()) // Gunakan trim() untuk membersihkan spasi
                         newMandorName = "" // Bersihkan input setelah ditambahkan
                     }
                 },
@@ -131,20 +139,69 @@ fun KelolaKemandoranScreen(
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(settingsViewModel.mandorList) { mandor ->
+                items(settingsViewModel.mandorList, key = { it }) { mandor ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = mandor,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 16.sp,
-                            modifier = Modifier.weight(1f)
-                        )
-                        // Anda bisa menambahkan ikon delete/edit di sini jika mau
+                        if (editingMandor == mandor) {
+                            // Tampilan saat mode edit
+                            OutlinedTextField(
+                                value = editedMandorName,
+                                onValueChange = { editedMandorName = it },
+                                singleLine = true,
+                                shape = RoundedCornerShape(8.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = DotGray,
+                                    cursorColor = MaterialTheme.colorScheme.primary,
+                                    focusedContainerColor = BackgroundLightGray,
+                                    unfocusedContainerColor = BackgroundLightGray,
+                                ),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Simpan
+                            IconButton(
+                                onClick = {
+                                    if (editedMandorName.isNotBlank() && editedMandorName.trim() != mandor) {
+                                        settingsViewModel.updateMandor(mandor, editedMandorName.trim())
+                                    }
+                                    editingMandor = null // Keluar dari mode edit
+                                },
+                                enabled = editedMandorName.isNotBlank() // Aktifkan hanya jika ada teks
+                            ) {
+                                Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
+                            }
+                            // Tombol Batal
+                            IconButton(onClick = { editingMandor = null }) {
+                                Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
+                            }
+                        } else {
+                            // Tampilan normal
+                            Text(
+                                text = mandor,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                modifier = Modifier.weight(1f)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            // Tombol Edit
+                            IconButton(onClick = {
+                                editingMandor = mandor
+                                editedMandorName = mandor
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
+                            }
+                            // Tombol Hapus
+                            IconButton(onClick = { settingsViewModel.removeMandor(mandor) }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                            }
+                        }
                     }
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
                 }

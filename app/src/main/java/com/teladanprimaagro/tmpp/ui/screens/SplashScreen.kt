@@ -1,46 +1,58 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.teladanprimaagro.tmpp.R
+import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.delay
-import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SplashScreen(navController: NavController) {
-    LaunchedEffect(key1 = true) {
-        delay(2000L)
-        navController.popBackStack()
-        navController.navigate("login_screen")
-    }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
+fun SplashScreen(
+    navController: NavController,
+    settingsViewModel: SettingsViewModel
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .background(Color(0xFFFF8C00))
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            contentDescription = "Logo Aplikasi",
+            modifier = Modifier.size(200.dp)
         )
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun SplashScreenPreview() {
-    TeladanPrimaAgroTheme {
-        SplashScreen(rememberNavController())
+    LaunchedEffect(key1 = true) {
+        delay(2000L)
+
+        if (settingsViewModel.isUserLoggedIn()) {
+            val userRole = settingsViewModel.getUserRole()
+            val targetRoute = when (userRole) {
+                "harvester" -> "harvester_screen"
+                "driver" -> "driver_screen"
+                else -> "login_screen"
+            }
+            navController.navigate(targetRoute) {
+                popUpTo("splash_screen") { inclusive = true }
+            }
+        } else {
+            navController.navigate("login_screen") {
+                popUpTo("splash_screen") { inclusive = true }
+            }
+        }
     }
 }

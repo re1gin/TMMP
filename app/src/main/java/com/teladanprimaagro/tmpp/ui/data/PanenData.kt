@@ -15,7 +15,7 @@ data class PanenData(
     val buahOR: Int, // Buah OR
     val buahE: Int, // Buah E
     val buahAB: Int, // Buah AB
-    val buahBL: Int,
+    val buahBL: Int, //Berondolan Lepas
     val imageUri: String? = null
 ) {
     fun toNfcWriteableData(): PanenData {
@@ -25,7 +25,7 @@ data class PanenData(
             locationPart2 = "",
             kemandoran = "",
             namaPemanen = "",
-            noTph = ""
+            noTph = "",
         )
     }
 }
