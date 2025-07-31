@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
-import com.teladanprimaagro.tmpp.ui.data.PanenData
+import com.teladanprimaagro.tmpp.data.PanenData
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

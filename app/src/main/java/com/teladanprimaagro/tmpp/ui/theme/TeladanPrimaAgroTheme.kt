@@ -50,17 +50,17 @@ private val DarkColorPalette = darkColorScheme(
 
 private val LightColorPalette = lightColorScheme(
     primary = PrimaryOrange,
-    onPrimary = TextWhite,
+    onPrimary = TextBlack,
     primaryContainer = PrimaryDarkOrange,
     onPrimaryContainer = TextWhite,
 
     secondary = SecondaryGray,
     onSecondary = TextWhite,
 
-    background = Color.White,
+    background = BackgroundWhite,
     onBackground = Color.Black,
 
-    surface = Color.LightGray,
+    surface = BackgroundWhite,
     onSurface = Color.Black,
 
     error = Color.Red,

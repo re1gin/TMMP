@@ -19,46 +19,34 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -76,13 +64,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.data.PanenData
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.teladanprimaagro.tmpp.ui.components.BuahCounter
+import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
+import com.teladanprimaagro.tmpp.ui.components.TextInputField
+import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.IconOrange
@@ -97,10 +89,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.FusedLocationProviderClient
 
-// Mendapatkan lokasi GPS.
 fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
     context: Context,
@@ -177,7 +166,9 @@ fun PanenInputScreen(
 
     val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-    /** Launcher untuk meminta izin lokasi. */
+    // VARIABEL UNTUK MENYIMPAN DATA LENGKAP YANG AKAN DISIMPAN KE ROOM
+    var dataToSaveToRoom by remember { mutableStateOf<PanenData?>(null) }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
@@ -204,7 +195,7 @@ fun PanenInputScreen(
     fun generateUniqueCode(
         dateTime: LocalDateTime,
         block: String,
-        totalBuah: Int // Tambahkan totalBuah sebagai parameter
+        totalBuah: Int
     ): String {
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
         val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
@@ -212,7 +203,6 @@ fun PanenInputScreen(
         val formattedTime = dateTime.format(timeFormatter)
 
         val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
-        // Gunakan totalBuah yang diterima sebagai parameter
         val formattedBuah = totalBuah.toString().padStart(3, '0')
 
         return "AME1$formattedDate$formattedTime$cleanBlock$formattedBuah"
@@ -249,7 +239,7 @@ fun PanenInputScreen(
                 val capturedUri = imageUri
                 if (capturedUri != null) {
                     CoroutineScope(Dispatchers.Main).launch {
-                        delay(500) // Penundaan kecil untuk memastikan gambar ditulis ke sistem file
+                        delay(500) // Small delay to ensure the image is written to the file system
 
                         try {
                             context.contentResolver.openInputStream(capturedUri)?.use { inputStream ->
@@ -273,7 +263,6 @@ fun PanenInputScreen(
         }
     )
 
-    // Launcher untuk izin kamera.
     val cameraPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
@@ -285,7 +274,6 @@ fun PanenInputScreen(
         }
     )
 
-    // Mereset input formulir.
     fun resetForm() {
         locationPart1 = ""
         locationPart2 = ""
@@ -346,7 +334,6 @@ fun PanenInputScreen(
                 .weight(1f)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                 )
                 .padding(16.dp)
                 .verticalScroll(scrollState)
@@ -523,7 +510,7 @@ fun PanenInputScreen(
             }
             Spacer(modifier = Modifier.height(24.dp))
 
-            //Input Gambar
+            // Input Gambar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -558,7 +545,9 @@ fun PanenInputScreen(
                         color = Color.White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(4.dp)
                     )
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -584,6 +573,31 @@ fun PanenInputScreen(
             // Tombol untuk mengirim data panen.
             Button(
                 onClick = {
+
+                    // Validasi Lokasi
+                    if (locationPart1.isBlank() || locationPart2.isBlank()) {
+                        Toast.makeText(context, "Lokasi (Latitude/Longitude) tidak boleh kosong. Gunakan tombol lokasi atau isi manual.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    // totalBuah adalah hasil penjumlahan buahN, buahAB, buahOR
+                    if (totalBuah <= 0) {
+                        Toast.makeText(context, "Total Buah harus lebih dari 0. Pastikan setidaknya Buah N, Buah AB, atau Buah OR memiliki nilai.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    if (buahN == 0) {
+                        Toast.makeText(context, "Minimal satu buah tidak boleh 0.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+
+                    if (imageUri == null || imageBitmap == null) {
+                        Toast.makeText(context, "Harap ambil gambar panen.", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    // --- AKHIR VALIDASI INPUT ---
+
+
+                    // Buat objek PanenData LENGKAP
                     val newPanenData = PanenData(
                         tanggalWaktu = dateTimeDisplay,
                         uniqueNo = uniqueNo,
@@ -603,14 +617,53 @@ fun PanenInputScreen(
                         imageUri = imageUri?.toString()
                     )
 
+                    // Simpan data lengkap ke state untuk diakses nanti jika NFC berhasil
+                    dataToSaveToRoom = newPanenData
+
+                    // Cek ketersediaan dan status NFC
                     if (nfcAdapter == null) {
-                        Toast.makeText(context, "NFC tidak tersedia di perangkat ini.", Toast.LENGTH_LONG).show()
-                        panenViewModel.addPanenData(newPanenData)
+                        Toast.makeText(context, "NFC tidak tersedia di perangkat ini. Data akan langsung disimpan.", Toast.LENGTH_LONG).show()
+                        // Jika NFC tidak tersedia, langsung simpan ke Room
+                        panenViewModel.addPanenData(
+                            newPanenData.tanggalWaktu,
+                            newPanenData.uniqueNo,
+                            newPanenData.locationPart1,
+                            newPanenData.locationPart2,
+                            newPanenData.kemandoran,
+                            newPanenData.namaPemanen,
+                            newPanenData.blok,
+                            newPanenData.noTph,
+                            newPanenData.totalBuah,
+                            newPanenData.buahN,
+                            newPanenData.buahA,
+                            newPanenData.buahOR,
+                            newPanenData.buahE,
+                            newPanenData.buahAB,
+                            newPanenData.buahBL,
+                            newPanenData.imageUri
+                        )
                         navController.popBackStack()
                         resetForm()
                     } else if (!nfcAdapter.isEnabled) {
-                        Toast.makeText(context, "NFC dinonaktifkan. Harap aktifkan di pengaturan.", Toast.LENGTH_LONG).show()
-                        panenViewModel.addPanenData(newPanenData)
+                        Toast.makeText(context, "NFC dinonaktifkan. Harap aktifkan di pengaturan. Data akan langsung disimpan.", Toast.LENGTH_LONG).show()
+                        panenViewModel.addPanenData(
+                            newPanenData.tanggalWaktu,
+                            newPanenData.uniqueNo,
+                            newPanenData.locationPart1,
+                            newPanenData.locationPart2,
+                            newPanenData.kemandoran,
+                            newPanenData.namaPemanen,
+                            newPanenData.blok,
+                            newPanenData.noTph,
+                            newPanenData.totalBuah,
+                            newPanenData.buahN,
+                            newPanenData.buahA,
+                            newPanenData.buahOR,
+                            newPanenData.buahE,
+                            newPanenData.buahAB,
+                            newPanenData.buahBL,
+                            newPanenData.imageUri
+                        )
                         navController.popBackStack()
                         resetForm()
                     } else {
@@ -652,18 +705,39 @@ fun PanenInputScreen(
             }
         }
 
-        /** Dialog penulisan NFC. */
+        // Dialog penulisan NFC.
         NfcWriteDialog(
             showDialog = showNfcWriteDialog,
             onDismissRequest = {
                 showNfcWriteDialog = false
                 nfcDataToPass = null
+                dataToSaveToRoom = null // Reset dataToSaveToRoom jika NFC dibatalkan/ditutup tanpa disimpan
             },
             dataToWrite = nfcDataToPass,
             onWriteComplete = { success, message ->
                 if (success) {
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                    nfcDataToPass?.let { panenViewModel.addPanenData(it) }
+                    // Jika NFC berhasil ditulis, baru simpan data LENGKAP ke Room
+                    dataToSaveToRoom?.let { originalData ->
+                        panenViewModel.addPanenData(
+                            originalData.tanggalWaktu,
+                            originalData.uniqueNo,
+                            originalData.locationPart1,
+                            originalData.locationPart2,
+                            originalData.kemandoran,
+                            originalData.namaPemanen, // Menggunakan namaPemanen dari data LENGKAP
+                            originalData.blok,
+                            originalData.noTph,
+                            originalData.totalBuah,
+                            originalData.buahN,
+                            originalData.buahA,
+                            originalData.buahOR,
+                            originalData.buahE,
+                            originalData.buahAB,
+                            originalData.buahBL,
+                            originalData.imageUri
+                        )
+                    }
                     navController.popBackStack()
                     resetForm()
                 } else {
@@ -671,198 +745,9 @@ fun PanenInputScreen(
                 }
                 showNfcWriteDialog = false
                 nfcDataToPass = null
+                dataToSaveToRoom = null // Reset setelah selesai, baik berhasil maupun gagal NFC
             },
             nfcIntentFromActivity = nfcIntentFromActivity
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TextInputField(
-    label: String,
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    keyboardType: KeyboardType = KeyboardType.Text,
-    readOnly: Boolean = false
-) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        label = { Text(label, color = TextGray) },
-        singleLine = true,
-        readOnly = readOnly,
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier.heightIn(min = 56.dp),
-        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-        colors = TextFieldDefaults.colors(
-            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-            disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-            errorTextColor = MaterialTheme.colorScheme.error,
-            focusedContainerColor = BackgroundLightGray,
-            unfocusedContainerColor = BackgroundLightGray,
-            disabledContainerColor = BackgroundLightGray,
-            errorContainerColor = BackgroundLightGray,
-            cursorColor = MaterialTheme.colorScheme.primary,
-            errorCursorColor = MaterialTheme.colorScheme.error,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            errorIndicatorColor = MaterialTheme.colorScheme.error,
-            focusedLabelColor = TextGray,
-            unfocusedLabelColor = TextGray,
-            disabledLabelColor = TextGray.copy(alpha = 0.38f),
-            errorLabelColor = MaterialTheme.colorScheme.error,
-        )
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DropdownInputField(
-    label: String,
-    options: List<String>,
-    selectedOption: String,
-    onOptionSelected: (String) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = onExpandedChange,
-        modifier = modifier
-    ) {
-        TextField(
-            value = selectedOption,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text(label, color = TextGray) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-                .heightIn(min = 56.dp),
-            colors = TextFieldDefaults.colors(
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                errorTextColor = MaterialTheme.colorScheme.error,
-                focusedContainerColor = BackgroundLightGray,
-                unfocusedContainerColor = BackgroundLightGray,
-                disabledContainerColor = BackgroundLightGray,
-                errorContainerColor = BackgroundLightGray,
-                cursorColor = MaterialTheme.colorScheme.primary,
-                errorCursorColor = MaterialTheme.colorScheme.error,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                errorIndicatorColor = MaterialTheme.colorScheme.error,
-                focusedLabelColor = TextGray,
-                unfocusedLabelColor = TextGray,
-                disabledLabelColor = TextGray.copy(alpha = 0.38f),
-                errorLabelColor = MaterialTheme.colorScheme.error,
-            )
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { onExpandedChange(false) }
-        ) {
-            options.forEach { item ->
-                DropdownMenuItem(
-                    text = { Text(item) },
-                    onClick = {
-                        onOptionSelected(item)
-                        onExpandedChange(false)
-                    }
-                )
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .width(IntrinsicSize.Max)
-        ) {
-            IconButton(
-                onClick = { if (count > 0) onCountChange(count - 1) },
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(IconOrange, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Remove,
-                    contentDescription = "Kurang",
-                    tint = Color.Black
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            OutlinedTextField(
-                value = count.toString(),
-                onValueChange = { newValue ->
-                    val num = newValue.toIntOrNull()
-                    if (num != null && num >= 0) {
-                        onCountChange(num)
-                    } else if (newValue.isBlank()) {
-                        onCountChange(0)
-                    }
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = DotGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = Color.White,
-                ),
-                modifier = Modifier.width(100.dp),
-                textStyle = LocalTextStyle.current.copy(
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center
-                )
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            IconButton(
-                onClick = { onCountChange(count + 1) },
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(IconOrange, CircleShape)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Tambah",
-                    tint = Color.Black
-                )
-            }
-        }
     }
 }

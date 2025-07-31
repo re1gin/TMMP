@@ -84,7 +84,7 @@ fun KelolaKemandoranScreen(
             // Input untuk nama mandor baru
             OutlinedTextField(
                 value = newMandorName,
-                onValueChange = { newMandorName = it },
+                onValueChange = { newMandorName = it.uppercase()},
                 label = { Text("Nama Mandor Baru") },
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),
@@ -105,8 +105,8 @@ fun KelolaKemandoranScreen(
             Button(
                 onClick = {
                     if (newMandorName.isNotBlank()) {
-                        settingsViewModel.addMandor(newMandorName.trim()) // Gunakan trim() untuk membersihkan spasi
-                        newMandorName = "" // Bersihkan input setelah ditambahkan
+                        settingsViewModel.addMandor(newMandorName.trim())
+                        newMandorName = ""
                     }
                 },
                 modifier = Modifier

@@ -84,7 +84,7 @@ fun KelolaPemanenScreen(
             // Input untuk nama pemanen baru
             OutlinedTextField(
                 value = newPemanenName,
-                onValueChange = { newPemanenName = it },
+                onValueChange = { newPemanenName = it.uppercase()},
                 label = { Text("Nama Pemanen Baru") },
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),

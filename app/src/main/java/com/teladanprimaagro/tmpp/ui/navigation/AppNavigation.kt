@@ -8,57 +8,69 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.compose.runtime.State
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
-
-import com.teladanprimaagro.tmpp.ui.screens.HarvesterScreen
-import com.teladanprimaagro.tmpp.ui.screens.DriverScreen
+import com.teladanprimaagro.tmpp.ui.screens.HomeScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
+import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
 import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengaturanScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
-import androidx.compose.runtime.State
+import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
-    nfcIntent: State<Intent?>
+    nfcIntent: State<Intent?>, // Ini sekarang digunakan oleh kedua dialog
+    pengirimanViewModel: PengirimanViewModel,
+    sharedNfcViewModel: SharedNfcViewModel
 ) {
     val navController = rememberNavController()
     val panenViewModel: PanenViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel() // Dapatkan instance SettingsViewModel
+    val settingsViewModel: SettingsViewModel = viewModel() // SettingsViewModel diinstansiasi di sini
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
-            // SplashScreen sekarang menerima settingsViewModel
             SplashScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
         composable("login_screen") {
-            // LoginScreen sekarang menerima settingsViewModel
             LoginScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
 
-        composable("harvester_screen") {
-            HarvesterScreen(
-                navController = navController
+        composable(
+            route = "home_screen/{userRole}",
+            arguments = listOf(navArgument("userRole") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val userRoleString = backStackEntry.arguments?.getString("userRole")
+            val userRole = userRoleString?.let { UserRole.valueOf(it) }
+                ?: UserRole.HARVESTER // Default role jika tidak ada
+
+            HomeScreen(
+                navController = navController,
+                userRole = userRole
             )
         }
-        composable("driver_screen") {
-            DriverScreen(
-                navController = navController
-            )
-        }
+
         composable("panen_input_screen") {
             PanenInputScreen(
                 navController = navController,
                 panenViewModel = panenViewModel,
                 settingsViewModel = settingsViewModel,
-                nfcIntentFromActivity = nfcIntent
+                nfcIntentFromActivity = nfcIntent,
             )
         }
 
@@ -69,9 +81,11 @@ fun AppNavigation(
             )
         }
         composable("pengaturan_screen") {
+            val currentUserRole = settingsViewModel.getUserRole() ?: UserRole.HARVESTER // Default jika null
             PengaturanScreen(
                 navController = navController,
-                settingsViewModel = settingsViewModel
+                settingsViewModel = settingsViewModel,
+                userRole = currentUserRole
             )
         }
         composable("kelola_kemandoran_screen") {
@@ -92,6 +106,39 @@ fun AppNavigation(
         composable("kelola_tph_screen") {
             KelolaTphScreen(
                 navController, settingsViewModel
+            )
+        }
+
+        composable("scan_input_screen") {
+            ScanInputScreen(
+                navController = navController,
+                pengirimanViewModel = pengirimanViewModel,
+                sharedNfcViewModel = sharedNfcViewModel,
+                nfcIntentFromActivity = nfcIntent
+            )
+        }
+        composable("pengiriman_input_screen") {
+            PengirimanInputScreen(
+                navController = navController,
+                pengirimanViewModel = pengirimanViewModel
+            )
+        }
+        composable("rekap_pengiriman_screen") {
+            RekapPengirimanScreen(
+                navController = navController,
+                pengirimanViewModel = pengirimanViewModel
+            )
+        }
+        composable("kelola_supir_screen") {
+            KelolaSupirScreen(
+                navController = navController,
+                settingsViewModel = settingsViewModel
+            )
+        }
+        composable("kelola_kendaraan_screen") {
+            KelolaKendaraanScreen(
+                navController = navController,
+                settingsViewModel = settingsViewModel
             )
         }
     }

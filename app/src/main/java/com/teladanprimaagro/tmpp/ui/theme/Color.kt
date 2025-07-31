@@ -8,6 +8,7 @@ val PrimaryDarkOrange = Color(0xFFE07B00)
 val SecondaryGray = Color(0xFF6C757D)
 
 val BackgroundBlack = Color(0xFF000000)
+val BackgroundWhite= Color(0xFFFFFFFF)
 val BackgroundDarkGray = Color(0xFF1A1A1A)
 val BackgroundLightGray = Color(0xFF333333)
 

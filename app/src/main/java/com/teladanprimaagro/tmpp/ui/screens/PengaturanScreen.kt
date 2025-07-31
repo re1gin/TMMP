@@ -9,8 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
@@ -28,12 +26,14 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.data.UserRole // Asumsi Anda punya enum atau sealed class ini
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PengaturanScreen(
     navController: NavController,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    userRole: UserRole // Tambahkan parameter userRole
 ) {
     // State untuk mengontrol dialog konfirmasi sandi
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -86,39 +86,65 @@ fun PengaturanScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Menu Item: Tema (bisa jadi tidak perlu sandi)
+            // Menu Item: Tema (bisa jadi tidak perlu sandi, tersedia untuk semua peran)
             SettingMenuItem(text = "Tema") {
                 // TODO: Aksi untuk mengubah tema (misalnya, menampilkan dialog pilihan tema)
             }
             HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            // Menu Item: Kemandoran (perlu sandi)
-            SettingMenuItem(text = "Kemandoran") {
-                pendingNavigationRoute = "kelola_kemandoran_screen"
-                showPasswordDialog = true
-            }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+            // Menu Item berdasarkan Peran Pengguna
+            when (userRole) {
+                UserRole.HARVESTER -> {
+                    // Menu untuk Pemanen
+                    SettingMenuItem(text = "Kemandoran") {
+                        pendingNavigationRoute = "kelola_kemandoran_screen"
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            // Menu Item: Pemanen (perlu sandi)
-            SettingMenuItem(text = "Pemanen") {
-                pendingNavigationRoute = "kelola_pemanen_screen"
-                showPasswordDialog = true
-            }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                    SettingMenuItem(text = "Pemanen") {
+                        pendingNavigationRoute = "kelola_pemanen_screen"
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            // Menu Item: Blok (perlu sandi)
-            SettingMenuItem(text = "Blok") {
-                pendingNavigationRoute = "kelola_blok_screen"
-                showPasswordDialog = true
-            }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                    SettingMenuItem(text = "Blok") {
+                        pendingNavigationRoute = "kelola_blok_screen"
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            // Menu Item: No. TPH (perlu sandi)
-            SettingMenuItem(text = "No. TPH") {
-                pendingNavigationRoute = "kelola_tph_screen"
-                showPasswordDialog = true
+                    SettingMenuItem(text = "No. TPH") {
+                        pendingNavigationRoute = "kelola_tph_screen"
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                }
+                UserRole.DRIVER -> {
+                    // Menu untuk Driver
+                    SettingMenuItem(text = "Nama Supir") {
+                        pendingNavigationRoute = "kelola_supir_screen" // Rute baru
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+
+                    SettingMenuItem(text = "Nomor Polisi") {
+                        pendingNavigationRoute = "kelola_kendaraan_screen" // Rute baru
+                        showPasswordDialog = true
+                    }
+                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                }
+                // Jika ada peran lain yang tidak spesifik, Anda bisa menambahkan 'else' atau case lain
+                else -> {
+                    // Mungkin tidak ada menu khusus atau pesan "Tidak ada pengaturan spesifik"
+                    Text(
+                        text = "Tidak ada pengaturan spesifik untuk peran ini.",
+                        color = TextGray,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+
 
             Spacer(modifier = Modifier.weight(1f)) // Dorong footer ke bawah
 
@@ -167,13 +193,12 @@ fun PengaturanScreen(
     if (showPasswordDialog) {
         PasswordConfirmationDialog(
             onConfirm = { enteredPassword ->
-                if (enteredPassword == adminPassword) { // Bandingkan dengan sandi admin
+                if (enteredPassword == adminPassword) {
                     pendingNavigationRoute?.let { route ->
                         navController.navigate(route)
                     }
                     showPasswordDialog = false
                     pendingNavigationRoute = null
-                } else {
                 }
             },
             onDismiss = {

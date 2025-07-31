@@ -8,10 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear // Ikon untuk batal edit
-import androidx.compose.material.icons.filled.Done // Ikon untuk simpan edit
-import androidx.compose.material.icons.filled.Delete // Ikon untuk hapus
-import androidx.compose.material.icons.filled.Edit // Ikon untuk edit
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,18 +23,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray // Pastikan ini diimpor jika digunakan
+import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KelolaTphScreen(
+fun KelolaKendaraanScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel
 ) {
-    var newTphName by remember { mutableStateOf("") }
-    var editingTph by remember { mutableStateOf<String?>(null) }
-    var editedTphName by remember { mutableStateOf("") }
+    var newKendaraanName by remember { mutableStateOf("") }
+    // State untuk melacak kendaraan yang sedang diedit
+    var editingKendaraan by remember { mutableStateOf<String?>(null) }
+    // State untuk menyimpan teks edit sementara
+    var editedKendaraanName by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -59,7 +61,7 @@ fun KelolaTphScreen(
                 )
             }
             Text(
-                text = "Kelola No. TPH",
+                text = "Kelola Kendaraan",
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
@@ -79,11 +81,11 @@ fun KelolaTphScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Input untuk nama TPH baru
+            // Input untuk nama kendaraan baru (nomor polisi)
             OutlinedTextField(
-                value = newTphName,
-                onValueChange = { newTphName = it.uppercase() },
-                label = { Text("No. TPH Baru") },
+                value = newKendaraanName,
+                onValueChange = { newKendaraanName = it.uppercase() },
+                label = { Text("Nomor Polisi Baru") },
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -102,9 +104,9 @@ fun KelolaTphScreen(
             // Tombol Tambah
             Button(
                 onClick = {
-                    if (newTphName.isNotBlank()) {
-                        settingsViewModel.addTph(newTphName.trim())
-                        newTphName = ""
+                    if (newKendaraanName.isNotBlank()) {
+                        settingsViewModel.addKendaraan(newKendaraanName.trim()) // Gunakan trim() untuk membersihkan spasi
+                        newKendaraanName = "" // Bersihkan input setelah ditambahkan
                     }
                 },
                 modifier = Modifier
@@ -112,18 +114,18 @@ fun KelolaTphScreen(
                     .height(48.dp),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFADFF2F),
+                    containerColor = Color(0xFFADFF2F), // Warna hijau terang
                     contentColor = Color.Black
                 )
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Tambah")
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Tambah TPH", fontWeight = FontWeight.Bold)
+                Text("Tambah Kendaraan", fontWeight = FontWeight.Bold)
             }
             Spacer(modifier = Modifier.height(24.dp))
 
             Text(
-                text = "Daftar No. TPH:",
+                text = "Daftar Kendaraan:",
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -133,21 +135,23 @@ fun KelolaTphScreen(
             HorizontalDivider(thickness = 1.dp, color = DotGray)
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Daftar kendaraan yang sudah ada
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(settingsViewModel.tphList, key = { it }) { tph ->
+                // Gunakan key untuk performa dan stabilitas UI saat daftar berubah
+                items(settingsViewModel.kendaraanList, key = { it }) { kendaraan ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (editingTph == tph) {
+                        if (editingKendaraan == kendaraan) {
                             // Tampilan saat mode edit
                             OutlinedTextField(
-                                value = editedTphName,
-                                onValueChange = { editedTphName = it },
+                                value = editedKendaraanName,
+                                onValueChange = { editedKendaraanName = it.uppercase() },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -165,23 +169,25 @@ fun KelolaTphScreen(
                             // Tombol Simpan
                             IconButton(
                                 onClick = {
-                                    if (editedTphName.isNotBlank() && editedTphName.trim() != tph) {
-                                        settingsViewModel.updateTph(tph, editedTphName.trim())
+                                    // Validasi: Pastikan nama baru tidak kosong dan tidak sama dengan nama lama (setelah trim)
+                                    if (editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan) {
+                                        settingsViewModel.updateKendaraan(kendaraan, editedKendaraanName.trim())
                                     }
-                                    editingTph = null // Keluar dari mode edit
+                                    editingKendaraan = null // Keluar dari mode edit setelah simpan
                                 },
-                                enabled = editedTphName.isNotBlank() // Aktifkan hanya jika ada teks
+                                // Tombol aktif hanya jika ada teks dan teksnya berbeda dari yang lama
+                                enabled = editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan
                             ) {
                                 Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
                             }
                             // Tombol Batal
-                            IconButton(onClick = { editingTph = null }) {
+                            IconButton(onClick = { editingKendaraan = null }) {
                                 Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
                             }
                         } else {
                             // Tampilan normal
                             Text(
-                                text = tph,
+                                text = kendaraan,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 16.sp,
                                 modifier = Modifier.weight(1f)
@@ -189,13 +195,13 @@ fun KelolaTphScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             // Tombol Edit
                             IconButton(onClick = {
-                                editingTph = tph // Masuk mode edit untuk item ini
-                                editedTphName = tph // Inisialisasi teks edit dengan nama TPH saat ini
+                                editingKendaraan = kendaraan // Masuk mode edit untuk item ini
+                                editedKendaraanName = kendaraan // Inisialisasi teks edit dengan nama kendaraan saat ini
                             }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
                             }
                             // Tombol Hapus
-                            IconButton(onClick = { settingsViewModel.removeTph(tph) }) {
+                            IconButton(onClick = { settingsViewModel.removeKendaraan(kendaraan) }) {
                                 Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
                             }
                         }

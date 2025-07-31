@@ -25,6 +25,7 @@ import com.teladanprimaagro.tmpp.ui.theme.IconOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.data.UserRole // <-- IMPORT BARU INI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -263,16 +264,18 @@ fun LoginScreen(
                     }
 
                     // Logika autentikasi dummy
-                    val role: String? = when {
-                        username == "pemanen" && password == "panen123" -> "harvester"
-                        username == "supir" && password == "supir123" -> "driver"
+                    val authenticatedUserRole: UserRole? = when {
+                        username == "pemanen" && password == "panen123" -> UserRole.HARVESTER
+                        username == "supir" && password == "supir123" -> UserRole.DRIVER
                         else -> null
                     }
 
-                    if (role != null) {
-                        settingsViewModel.loginSuccess(role) // Panggil fungsi ini dengan peran pengguna
-                        val targetRoute = if (role == "harvester") "harvester_screen" else "driver_screen"
-                        navController.navigate(targetRoute) {
+                    if (authenticatedUserRole != null) {
+                        // Panggil fungsi loginSuccess dengan objek UserRole
+                        settingsViewModel.loginSuccess(authenticatedUserRole)
+
+                        // Navigasi ke home_screen dengan peran pengguna
+                        navController.navigate("home_screen/${authenticatedUserRole.name}") {
                             popUpTo("login_screen") { inclusive = true }
                         }
                     } else {

@@ -171,7 +171,7 @@ fun KelolaBlokScreen(
                                     if (editedBlokName.isNotBlank() && editedBlokName.trim() != blok) {
                                         settingsViewModel.updateBlok(blok, editedBlokName.trim())
                                     }
-                                    editingBlok = null // Keluar dari mode edit
+                                    editingBlok = null
                                 },
                                 enabled = editedBlokName.isNotBlank() // Aktifkan hanya jika ada teks
                             ) {
@@ -192,8 +192,8 @@ fun KelolaBlokScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             // Tombol Edit
                             IconButton(onClick = {
-                                editingBlok = blok // Masuk mode edit untuk item ini
-                                editedBlokName = blok // Inisialisasi teks edit dengan nama blok saat ini
+                                editingBlok = blok
+                                editedBlokName = blok
                             }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
                             }

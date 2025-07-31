@@ -1,8 +1,13 @@
-package com.teladanprimaagro.tmpp.ui.data
+package com.teladanprimaagro.tmpp.data
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "panen_entries")
 data class PanenData(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0, // Tambahkan ID unik sebagai Primary Key
     val tanggalWaktu: String,
-    val uniqueNo: String, // No. Unik
+    val uniqueNo: String,
     val locationPart1: String, // Lokasi Bagian 1
     val locationPart2: String, // Lokasi Bagian 2
     val kemandoran: String, // Kemandoran
@@ -20,12 +25,6 @@ data class PanenData(
 ) {
     fun toNfcWriteableData(): PanenData {
         return this.copy(
-            imageUri = null,
-            locationPart1 = "",
-            locationPart2 = "",
-            kemandoran = "",
-            namaPemanen = "",
-            noTph = "",
         )
     }
 }
