@@ -47,9 +47,9 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
 import com.teladanprimaagro.tmpp.data.PengirimanData
 // Import all components from the common components file
-import com.teladanprimaagro.tmpp.ui.components.TableHeaderText // Changed from TableHeaderCell
+import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.components.PengirimanTableRow
-import com.teladanprimaagro.tmpp.ui.components.SummaryBox // Changed from DataSummaryCard
+import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
@@ -57,6 +57,7 @@ import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 
+// Hapus import com.teladanprimaagro.tmpp.navigation.Screen jika ada
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,11 +70,6 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
 
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPengirimanData by remember { mutableStateOf<PengirimanData?>(null) }
-
-    // State untuk Dropdown Mandor Loading
-    val mandorOptions = listOf("A", "B", "C", "D")
-    var selectedMandor by remember { mutableStateOf("A") } // Default selection
-    var expanded by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -117,7 +113,6 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Header Tabel (Diselaraskan dengan perubahan kolom dan bobot yang dirapikan)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -126,9 +121,9 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TableHeaderText(text = "Tanggal", weight = 0.20f) // DIUBAH dari 0.35f
-                TableHeaderText(text = "No. SPB", weight = 0.35f) // DIUBAH dari 0.35f
-                TableHeaderText(text = "Total", weight = 0.20f) // DIUBAH dari 0.20f
+                TableHeaderText(text = "Tanggal", weight = 0.20f)
+                TableHeaderText(text = "No. SPB", weight = 0.35f)
+                TableHeaderText(text = "Total", weight = 0.20f)
                 TableHeaderText(text = "Edit", weight = 0.10f)
                 TableHeaderText(text = "Detail", weight = 0.15f)
             }
@@ -222,6 +217,13 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
             onDismiss = {
                 showDetailDialog = false
                 selectedPengirimanData = null
+            },
+            onSendPrintClick = { pengirimanDataToPrint ->
+                // Menggunakan string rute langsung, sesuai dengan AppNavigation.kt
+                // "send_print_data/{pengirimanId}" di AppNavigation.kt
+                navController.navigate("send_print_data/${pengirimanDataToPrint.id}")
+                showDetailDialog = false // Tutup dialog setelah navigasi
+                selectedPengirimanData = null // Reset data
             }
         )
     }

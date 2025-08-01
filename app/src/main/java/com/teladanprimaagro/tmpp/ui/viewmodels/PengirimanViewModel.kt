@@ -1,4 +1,3 @@
-// com.teladanprimaagro.tmpp.ui.viewmodels/PengirimanViewModel.kt
 package com.teladanprimaagro.tmpp.ui.viewmodels
 
 import android.app.Application
@@ -33,6 +32,14 @@ data class ScannedItem(
     val totalBuah: Int
 )
 
+// Definisikan sealed class untuk status scan
+sealed class ScanStatus {
+    object Idle : ScanStatus()
+    object Success : ScanStatus()
+    data class Duplicate(val uniqueNo: String) : ScanStatus()
+    object Finalized : ScanStatus()
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 class PengirimanViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -48,6 +55,10 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     private val _scannedItems = MutableStateFlow<List<ScannedItem>>(emptyList())
     val scannedItems: StateFlow<List<ScannedItem>> = _scannedItems.asStateFlow()
+
+    // State untuk memberikan umpan balik status scan ke UI
+    private val _scanStatus = MutableStateFlow<ScanStatus>(ScanStatus.Idle)
+    val scanStatus: StateFlow<ScanStatus> = _scanStatus.asStateFlow()
 
     val pengirimanList: StateFlow<List<PengirimanData>> = pengirimanDao.getAllPengiriman()
         .stateIn(
@@ -71,7 +82,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         )
 
     init {
-        generateSpbNumber(selectedMandorLoading = "A") // Default selection
+        generateSpbNumber(selectedMandorLoading = "A")
     }
 
     private fun getRomanMonth(month: Month): String {
@@ -89,6 +100,10 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             Month.NOVEMBER -> "XI"
             Month.DECEMBER -> "XII"
         }
+    }
+
+    suspend fun getPengirimanById(id: Int): PengirimanData? {
+        return pengirimanDao.getPengirimanById(id)
     }
 
     fun generateSpbNumber(selectedMandorLoading: String) {
@@ -118,14 +133,29 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun addScannedItem(item: ScannedItem) {
-        _scannedItems.value = _scannedItems.value + item
-        if (_scannedItems.value.size == 1) {
-            uniqueNoDisplay.value = item.uniqueNo
-        } else if (_scannedItems.value.size > 1) {
-            uniqueNoDisplay.value = "${_scannedItems.value.size} Item Discan"
+        // Cek apakah item dengan uniqueNo yang sama sudah ada di daftar
+        val isDuplicate = _scannedItems.value.any { it.uniqueNo == item.uniqueNo }
+
+        if (isDuplicate) {
+            // Jika duplikat, jangan tambahkan dan perbarui status
+            _scanStatus.value = ScanStatus.Duplicate(item.uniqueNo)
+            Log.d("PengirimanViewModel", "Scan item rejected: Duplicate uniqueNo -> ${item.uniqueNo}")
+        } else {
+            // Jika bukan duplikat, tambahkan item baru dan perbarui status
+            _scannedItems.value = _scannedItems.value + item
+            _scanStatus.value = ScanStatus.Success
+
+            // Perbarui tampilan di UI
+            if (_scannedItems.value.size == 1) {
+                uniqueNoDisplay.value = item.uniqueNo
+            } else if (_scannedItems.value.size > 1) {
+                uniqueNoDisplay.value = "${_scannedItems.value.size} Item Discan"
+            }
+            totalBuahCalculated.intValue = _scannedItems.value.sumOf { it.totalBuah }
+            dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
+
+            Log.d("PengirimanViewModel", "New item added: ${item.uniqueNo}")
         }
-        totalBuahCalculated.intValue = _scannedItems.value.sumOf { it.totalBuah }
-        dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
     }
 
     fun removeScannedItem(item: ScannedItem) {
@@ -169,7 +199,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
                 noPolisi = noPolisi,
                 spbNumber = spbNumber.value,
                 detailScannedItemsJson = detailScannedItemsJson,
-                mandorLoading = mandorLoading, // Menambahkan mandorLoading
+                mandorLoading = mandorLoading,
                 isUploaded = false
             )
             pengirimanDao.insertPengiriman(newPengiriman)
@@ -179,6 +209,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             uniqueNoDisplay.value = "Scan NFC"
             dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
             totalBuahCalculated.intValue = 0
+            _scanStatus.value = ScanStatus.Finalized // Set status finalisasi
 
             generateSpbNumber(selectedMandorLoading = "A")
             Log.d("PengirimanViewModel", "Item difinalisasi dan disimpan. Total Pengiriman: ${pengirimanList.value.size}")
@@ -199,6 +230,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             totalBuahCalculated.intValue = 0
             settingsViewModel.setSpbCounter(0)
             generateSpbNumber(selectedMandorLoading = "A")
+            _scanStatus.value = ScanStatus.Idle // Reset status
         }
     }
 

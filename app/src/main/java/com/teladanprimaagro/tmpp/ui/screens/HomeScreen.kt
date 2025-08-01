@@ -43,7 +43,7 @@ fun HomeScreen(navController: NavController, userRole: UserRole) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "BPBKS", // Atau nama aplikasi Anda
+                text = "TMMP", // Atau nama aplikasi Anda
                 color = MaterialTheme.colorScheme.onPrimary,
                 fontSize = MaterialTheme.typography.headlineMedium.fontSize,
                 fontWeight = FontWeight.Bold

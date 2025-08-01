@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.tv.material3.MaterialTheme
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.delay
@@ -46,14 +47,14 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black), // Latar belakang splash
+            .background(color = MaterialTheme.colorScheme.background), // Latar belakang splash
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Image(
             painter = painterResource(id = R.drawable.logo), // Ganti dengan logo aplikasi Anda
             contentDescription = "App Logo",
-            modifier = Modifier.size(150.dp)
+            modifier = Modifier.size(180.dp)
         )
     }
 }

@@ -27,6 +27,7 @@ import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
@@ -63,6 +64,14 @@ fun AppNavigation(
                 navController = navController,
                 userRole = userRole
             )
+        }
+
+        composable(
+            route = "send_print_data/{pengirimanId}",
+            arguments = listOf(navArgument("pengirimanId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val pengirimanId = backStackEntry.arguments?.getInt("pengirimanId") ?: -1
+            SendPrintDataScreen(navController, pengirimanId)
         }
 
         composable("panen_input_screen") {

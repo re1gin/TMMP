@@ -2,9 +2,12 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import android.content.Intent
 import android.nfc.NfcAdapter
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,12 +49,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.ui.viewmodels.ScanStatus
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.util.NfcReadDialog
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanInputScreen(
@@ -64,26 +71,50 @@ fun ScanInputScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val nfcState by sharedNfcViewModel.nfcState.collectAsState()
-    var showNfcReadDialog by remember { mutableStateOf(false) } // State untuk mengontrol dialog
+    var showNfcReadDialog by remember { mutableStateOf(false) }
 
-    // Amati state NFC untuk menampilkan Snackbar atau memicu dialog
+    // Ambil data dari PengirimanViewModel
+    val scannedItems by pengirimanViewModel.scannedItems.collectAsState()
+    val totalBuahCalculated by pengirimanViewModel.totalBuahCalculated
+
+    // Ambil status scan dari PengirimanViewModel
+    val scanStatus by pengirimanViewModel.scanStatus.collectAsState()
+
+    // State untuk mengontrol dialog
+    var showDuplicateDialog by remember { mutableStateOf<String?>(null) }
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(nfcState) {
         when (val state = nfcState) {
             is NfcOperationState.ReadSuccess -> {
-                snackbarHostState.showSnackbar(state.message)
-                // Jika sukses baca, kita bisa memilih untuk menutup dialog otomatis
-                showNfcReadDialog = false // Tutup dialog setelah sukses
+                showNfcReadDialog = false
             }
             is NfcOperationState.ReadError -> {
                 snackbarHostState.showSnackbar(state.message)
-                // Biarkan dialog tetap terbuka setelah error agar user bisa mencoba lagi
             }
             is NfcOperationState.GeneralStatus -> {
                 if (!state.isEnabled) {
                     snackbarHostState.showSnackbar(state.message ?: "NFC tidak tersedia atau dinonaktifkan.")
                 }
             }
-            else -> { /* Do nothing for other states (Idle, Write states, etc.) */ }
+            else -> { /* Do nothing */ }
+        }
+    }
+
+    // LaunchedEffect untuk memantau scanStatus dan mengontrol dialog
+    LaunchedEffect(scanStatus) {
+        when(val status = scanStatus) {
+            is ScanStatus.Success -> {
+                showSuccessDialog = true
+            }
+            is ScanStatus.Duplicate -> {
+                showDuplicateDialog = status.uniqueNo
+            }
+            is ScanStatus.Idle -> {
+                showSuccessDialog = false
+                showDuplicateDialog = null
+            }
+            is ScanStatus.Finalized -> { /* Do nothing */ }
         }
     }
 
@@ -111,11 +142,24 @@ fun ScanInputScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // Icon dan pesan status NFC di layar utama
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SummaryBox(label = "Item Scan", value = scannedItems.size.toString())
+                    SummaryBox(label = "Total Buah", value = totalBuahCalculated.toString())
+                }
+            }
+
+            Spacer(modifier = Modifier.height(100.dp))
+
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                // Tampilkan ikon dan pesan berdasarkan status umum NFC
                 val nfcStatusText = (nfcState as? NfcOperationState.GeneralStatus)?.message
                     ?: if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) "NFC tidak aktif." else "Siap untuk memindai."
                 val nfcIconColor = if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
@@ -158,13 +202,13 @@ fun ScanInputScreen(
                     } else if (!adapter.isEnabled) {
                         coroutineScope.launch { snackbarHostState.showSnackbar("NFC dinonaktifkan. Harap aktifkan di pengaturan.") }
                     } else {
-                        showNfcReadDialog = true // Buka dialog pemindaian
+                        showNfcReadDialog = true
                     }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary), // Warna berbeda untuk "Mulai Scan"
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
@@ -205,19 +249,76 @@ fun ScanInputScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Tampilkan NfcReadDialog
         NfcReadDialog(
             showDialog = showNfcReadDialog,
             onDismissRequest = {
                 showNfcReadDialog = false
-                sharedNfcViewModel.resetNfcState() // Reset state saat dialog ditutup
+                sharedNfcViewModel.resetNfcState()
             },
             onReadComplete = { scannedItem ->
-                pengirimanViewModel.addScannedItem(scannedItem) // Tambahkan item ke ViewModel
-                // Dialog akan otomatis menutup setelah sukses karena `showNfcReadDialog = false`
+                pengirimanViewModel.addScannedItem(scannedItem)
             },
             nfcIntentFromActivity = nfcIntentFromActivity,
             sharedNfcViewModel = sharedNfcViewModel
         )
     }
+
+    // Pop-up untuk duplikasi
+    showDuplicateDialog?.let { uniqueNo ->
+        DuplicateAlertDialog(
+            onDismissRequest = {
+                // Reset status di ViewModel agar dialog tidak muncul lagi
+                showDuplicateDialog = null
+            },
+            uniqueNo = uniqueNo
+        )
+    }
+
+    // Pop-up untuk sukses scan
+    if (showSuccessDialog) {
+        SuccessAlertDialog(
+            onDismissRequest = {
+                // Reset status di ViewModel agar dialog tidak muncul lagi
+                showSuccessDialog = false
+            }
+        )
+    }
+}
+
+
+@Composable
+private fun DuplicateAlertDialog(
+    onDismissRequest: () -> Unit,
+    uniqueNo: String
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = "Peringatan Duplikasi Data") },
+        text = {
+            Text(text = "Tag dengan ID '$uniqueNo' sudah pernah di-scan. Data tidak ditambahkan.")
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("OK")
+            }
+        }
+    )
+}
+
+@Composable
+private fun SuccessAlertDialog(
+    onDismissRequest: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(text = "Scan Berhasil!") },
+        text = {
+            Text(text = "Item baru berhasil ditambahkan ke daftar pengiriman.")
+        },
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text("Selesai")
+            }
+        }
+    )
 }

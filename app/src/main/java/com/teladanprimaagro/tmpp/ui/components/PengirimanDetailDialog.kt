@@ -1,6 +1,3 @@
-// com.teladanprimaagro.tmpp.ui.components/PengirimanDetailDialog.kt
-@file:Suppress("DEPRECATION")
-
 package com.teladanprimaagro.tmpp.ui.components
 
 import android.os.Build
@@ -12,11 +9,15 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Print
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -46,7 +47,11 @@ import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Unit) {
+fun PengirimanDetailDialog(
+    pengirimanEntry: PengirimanData,
+    onDismiss: () -> Unit,
+    onSendPrintClick: (PengirimanData) -> Unit // Parameter for the new button
+) {
     val gson = Gson()
     val scannedItemsType = object : TypeToken<List<ScannedItem>>() {}.type
     val rawDetailScannedItems: List<ScannedItem> = gson.fromJson(pengirimanEntry.detailScannedItemsJson, scannedItemsType) ?: emptyList()
@@ -57,8 +62,8 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
             .map { (blok, itemsInBlock) ->
                 val totalBuahAggregated = itemsInBlock.sumOf { it.totalBuah }
                 ScannedItem(
-                    uniqueNo = "",
-                    tanggal = "",
+                    uniqueNo = "", // Not relevant for aggregated view
+                    tanggal = "",  // Not relevant for aggregated view
                     blok = blok,
                     totalBuah = totalBuahAggregated
                 )
@@ -73,9 +78,7 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
             LocalDateTime.parse(pengirimanEntry.waktuPengiriman, inputFormatter).format(dialogDateFormatter)
         } catch (_: DateTimeParseException) {
             try {
-                // If waktuPengiriman fails, try to parse tanggalNfc (assuming it's just "dd/MM/yy")
                 DateTimeFormatter.ofPattern("dd/MM/yy", Locale("id", "ID"))
-                // Append " 00:00:00" to make it parsable by LocalDateTime
                 LocalDateTime.parse(pengirimanEntry.tanggalNfc + " 00:00:00", DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss")).format(dialogDateFormatter)
             } catch (_: DateTimeParseException) {
                 "Tanggal Tidak Valid"
@@ -89,7 +92,7 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                 .fillMaxWidth()
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF424242))
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF424242)) // Darker background for dialog
         ) {
             Column(
                 modifier = Modifier
@@ -100,20 +103,19 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                 // Header Dialog: Data Lengkap dan Tombol Tutup
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceBetween, // Pushes title to center, close button to right
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Spacer ini dihapus karena IconButton di kanan akan menarik judul ke tengah
-                    // Spacer(Modifier.width(24.dp))
+                    Spacer(modifier = Modifier.weight(0.15f)) // To roughly center the title
                     Text(
                         text = "Data Lengkap",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                         color = PrimaryOrange,
-                        modifier = Modifier.weight(1f), // Agar teks bisa di tengah
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center // Rata tengah
+                        modifier = Modifier.weight(0.7f), // Allow title to take most space
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
-                    IconButton(onClick = onDismiss) {
+                    IconButton(onClick = onDismiss, modifier = Modifier.weight(0.15f)) { // Adjusted weight for close button
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Tutup",
@@ -128,7 +130,7 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     DetailItem(label = "Nomor SPB", value = pengirimanEntry.spbNumber, labelColor = Color.White, valueColor = Color.White)
-                    HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp) // Garis pemisah
+                    HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp)
                     DetailItem(label = "Tanggal", value = formattedDate, labelColor = Color.White, valueColor = Color.White)
                     HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp)
                     DetailItem(label = "Nama Supir", value = pengirimanEntry.namaSupir, labelColor = Color.White, valueColor = Color.White)
@@ -144,8 +146,7 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        // .background(PrimaryOrange, RoundedCornerShape(8.dp)) // Hapus background, sesuaikan seperti gambar
-                        .padding(horizontal = 16.dp, vertical = 8.dp), // Beri padding saja
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -153,18 +154,18 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                         text = "BLOK",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = PrimaryOrange, // Ubah warna teks header menjadi PrimaryOrange
+                        color = PrimaryOrange,
                         modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = "Total Buah",
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = PrimaryOrange, // Ubah warna teks header menjadi PrimaryOrange
+                        color = PrimaryOrange,
                         modifier = Modifier.weight(1f)
                     )
                 }
-                HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp) // Garis pemisah setelah header detail
+                HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp)
 
                 // Daftar Item yang Discan (menggunakan aggregatedScannedItems)
                 LazyColumn(
@@ -207,16 +208,44 @@ fun PengirimanDetailDialog(pengirimanEntry: PengirimanData, onDismiss: () -> Uni
                                 )
                             }
                             if (index < aggregatedScannedItems.lastIndex) {
-                                HorizontalDivider(color = TextGray.copy(alpha = 0.1f), thickness = 0.5.dp) // Garis pemisah antar item
+                                HorizontalDivider(color = TextGray.copy(alpha = 0.1f), thickness = 0.5.dp)
                             }
                         }
                     }
                 }
-                HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp) // Garis pemisah setelah daftar detail
+                HorizontalDivider(color = TextGray.copy(alpha = 0.3f), thickness = 0.5.dp)
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Total Buah (di bagian bawah)
                 DetailItem(label = "Total Buah", value = "${pengirimanEntry.totalBuah} Janjang", labelColor = Color.White, valueColor = Color.White, isBoldValue = true)
+
+                Spacer(modifier = Modifier.height(24.dp)) // Space before the new button
+
+                Button(
+                    onClick = { onSendPrintClick(pengirimanEntry) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange) // Use PrimaryOrange for background
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Print, // Changed to Print icon
+                            contentDescription = "Kirim/Cetak Data",
+                            tint = Color.White // Icon color
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = "Kirim & Cetak Data",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White // Text color
+                        )
+                    }
+                }
             }
         }
     }
@@ -227,25 +256,23 @@ fun DetailItem(label: String, value: String, labelColor: Color = MaterialTheme.c
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp), // Tingkatkan padding vertikal dan horizontal
-        verticalAlignment = Alignment.CenterVertically // Rata tengah secara vertikal
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Kolom Label
         Text(
             text = label,
             fontWeight = FontWeight.Medium,
             color = labelColor,
             fontSize = 16.sp,
-            modifier = Modifier.weight(0.4f) // Beri bobot untuk label
+            modifier = Modifier.weight(0.4f)
         )
-        // Kolom Value
         Text(
             text = value,
             fontWeight = if (isBoldValue) FontWeight.Bold else FontWeight.Normal,
             color = valueColor,
             fontSize = 16.sp,
-            textAlign = androidx.compose.ui.text.style.TextAlign.End, // Rata kanan untuk value
-            modifier = Modifier.weight(0.6f) // Beri bobot untuk value
+            textAlign = androidx.compose.ui.text.style.TextAlign.End,
+            modifier = Modifier.weight(0.6f)
         )
     }
 }
