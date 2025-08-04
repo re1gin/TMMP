@@ -58,21 +58,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.components.PanenDetailDialog
 import com.teladanprimaagro.tmpp.data.PanenData
+import com.teladanprimaagro.tmpp.ui.components.PanenDetailDialog
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel // <--- Import SettingsViewModel
+import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RekapPanenScreen(
     navController: NavController,
     panenViewModel: PanenViewModel = viewModel(),
-    settingsViewModel: SettingsViewModel = viewModel() // <--- Inject SettingsViewModel
+    settingsViewModel: SettingsViewModel = viewModel()
 ) {
 
     val panenList by panenViewModel.panenList.collectAsState()
@@ -82,14 +82,11 @@ fun RekapPanenScreen(
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPanenData by remember { mutableStateOf<PanenData?>(null) }
 
-    // --- State untuk Sortir dari PanenViewModel ---
     val sortOptions = listOf("Nama", "Blok")
     val selectedSortBy by panenViewModel.sortBy.collectAsState()
     val sortOrderAscending by panenViewModel.sortOrderAscending.collectAsState()
     var sortDropdownExpanded by remember { mutableStateOf(false) }
-    // --- Akhir State Sortir ---
 
-    // --- State untuk Filter dari PanenViewModel (BARU) ---
     val pemanenFilterOptions = remember {
         mutableStateOf(listOf("Semua Pemanen") + settingsViewModel.pemanenList.toList())
     }
@@ -102,7 +99,6 @@ fun RekapPanenScreen(
 
     var pemanenDropdownExpanded by remember { mutableStateOf(false) }
     var blokDropdownExpanded by remember { mutableStateOf(false) }
-    // --- Akhir State Filter ---
 
     Scaffold(
         topBar = {
@@ -146,19 +142,17 @@ fun RekapPanenScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- Bagian Dropdown Sortir dan Filter ---
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp) // Spasi antar dropdown/tombol
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Dropdown Sortir Berdasarkan
                     ExposedDropdownMenuBox(
                         expanded = sortDropdownExpanded,
                         onExpandedChange = { sortDropdownExpanded = !sortDropdownExpanded },
@@ -193,7 +187,6 @@ fun RekapPanenScreen(
 
                     Spacer(modifier = Modifier.width(16.dp))
 
-                    // Tombol untuk mengubah arah sortir (Asc/Desc)
                     OutlinedButton(
                         onClick = { panenViewModel.toggleSortOrder() },
                         shape = RoundedCornerShape(8.dp),
@@ -214,7 +207,6 @@ fun RekapPanenScreen(
                     }
                 }
 
-                // Dropdown Filter Nama Pemanen (BARU)
                 ExposedDropdownMenuBox(
                     expanded = pemanenDropdownExpanded,
                     onExpandedChange = { pemanenDropdownExpanded = !pemanenDropdownExpanded },
@@ -247,7 +239,6 @@ fun RekapPanenScreen(
                     }
                 }
 
-                // Dropdown Filter Blok (BARU)
                 ExposedDropdownMenuBox(
                     expanded = blokDropdownExpanded,
                     onExpandedChange = { blokDropdownExpanded = !blokDropdownExpanded },
@@ -280,12 +271,11 @@ fun RekapPanenScreen(
                     }
                 }
 
-                // Tombol Clear Filter (BARU)
                 OutlinedButton(
                     onClick = { panenViewModel.clearFilters() },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error, // Warna merah untuk clear
+                        contentColor = MaterialTheme.colorScheme.error,
                         containerColor = Color.Transparent
                     ),
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
@@ -302,7 +292,6 @@ fun RekapPanenScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Header Tabel
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -319,7 +308,6 @@ fun RekapPanenScreen(
                 TableHeaderText(text = "Detail", weight = 0.1f)
             }
 
-            // Data Tabel (menggunakan LazyColumn untuk efisiensi scroll)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -353,7 +341,6 @@ fun RekapPanenScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Total Data Masuk dan Total Buah
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -366,7 +353,6 @@ fun RekapPanenScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Catatan Kaki
             Text(
                 text = "*Data akan di reset setiap pukul 00.00",
                 color = TextGray,
@@ -374,32 +360,6 @@ fun RekapPanenScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Versi Aplikasi dan Dekorasi Titik
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(DotGray, shape = RoundedCornerShape(50))
-                            .padding(horizontal = 4.dp)
-                    )
-                    if (it < 2) Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
-            Text(
-                text = "Version: V 1.0.0.0",
-                color = TextGray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
             )
         }
     }

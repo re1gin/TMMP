@@ -150,12 +150,7 @@ fun PengirimanInputScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .padding(16.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(16.dp)
-                )
                 .verticalScroll(scrollState)
-                .padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 

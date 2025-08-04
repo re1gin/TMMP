@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,8 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,20 +42,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
 import com.teladanprimaagro.tmpp.data.PengirimanData
-// Import all components from the common components file
-import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
+import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
 import com.teladanprimaagro.tmpp.ui.components.PengirimanTableRow
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
-
+import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
-
-// Hapus import com.teladanprimaagro.tmpp.navigation.Screen jika ada
+import kotlinx.coroutines.delay
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,6 +67,27 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
 
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPengirimanData by remember { mutableStateOf<PengirimanData?>(null) }
+
+    LaunchedEffect(key1 = Unit) {
+        while(true) {
+            val now = LocalTime.now()
+            val midnight = LocalTime.MIDNIGHT
+
+            val durationUntilMidnight = if (now.isBefore(midnight)) {
+                ChronoUnit.MILLIS.between(now, midnight)
+            } else {
+                ChronoUnit.MILLIS.between(now, midnight.plusHours(24))
+            }
+
+            Log.d("RekapPengirimanScreen", "Menunggu hingga tengah malam: $durationUntilMidnight ms")
+
+            delay(durationUntilMidnight)
+            pengirimanViewModel.clearAllPengirimanData()
+            Log.d("RekapPengirimanScreen", "Data berhasil di reset pada pukul 00.00.")
+
+            delay(1000)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -128,7 +146,6 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
                 TableHeaderText(text = "Detail", weight = 0.15f)
             }
 
-            // Data Tabel (menggunakan LazyColumn untuk efisiensi scroll)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -165,7 +182,6 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Total Data Masuk dan Total Buah
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -178,7 +194,6 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Catatan Kaki
             Text(
                 text = "*Data akan di reset setiap pukul 00.00",
                 color = TextGray,
@@ -187,30 +202,9 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Versi Aplikasi dan Dekorasi Titik
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(DotGray, shape = RoundedCornerShape(50))
-                            .padding(horizontal = 4.dp)
-                    )
-                    if (it < 2) Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
         }
     }
 
-    // --- DIALOG DETAIL PENGIRIMAN ---
     if (showDetailDialog && selectedPengirimanData != null) {
         PengirimanDetailDialog(
             pengirimanEntry = selectedPengirimanData!!,
@@ -219,11 +213,9 @@ fun RekapPengirimanScreen(navController: NavController, pengirimanViewModel: Pen
                 selectedPengirimanData = null
             },
             onSendPrintClick = { pengirimanDataToPrint ->
-                // Menggunakan string rute langsung, sesuai dengan AppNavigation.kt
-                // "send_print_data/{pengirimanId}" di AppNavigation.kt
                 navController.navigate("send_print_data/${pengirimanDataToPrint.id}")
-                showDetailDialog = false // Tutup dialog setelah navigasi
-                selectedPengirimanData = null // Reset data
+                showDetailDialog = false
+                selectedPengirimanData = null
             }
         )
     }

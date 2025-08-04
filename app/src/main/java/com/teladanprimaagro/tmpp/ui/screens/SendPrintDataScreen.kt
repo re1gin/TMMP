@@ -1,13 +1,20 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
+import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,6 +29,16 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.data.getDetailScannedItems
+import com.teladanprimaagro.tmpp.ui.viewmodels.ScannedItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.OutputStream
+import java.lang.StringBuilder
+import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,20 +49,29 @@ fun SendPrintDataScreen(
     pengirimanViewModel: PengirimanViewModel = viewModel()
 ) {
     val context = LocalContext.current
-
-    // Pastikan ini adalah deklarasi yang benar:
-    // `pengirimanData` adalah sebuah State yang akan menampung objek `PengirimanData?`
+    val coroutineScope = rememberCoroutineScope()
     var pengirimanData by remember { mutableStateOf<PengirimanData?>(null) }
+    var showDeviceListDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(pengirimanId) {
-        if (pengirimanId != -1) { // Pastikan ID valid
-            // Panggil suspend function dari ViewModel
+        if (pengirimanId != -1) {
             val fetchedData = pengirimanViewModel.getPengirimanById(pengirimanId)
-            // Tetapkan hasil langsung ke state `pengirimanData`
             pengirimanData = fetchedData
             Log.d("SendPrintDataScreen", "Data fetched for ID $pengirimanId: ${fetchedData?.spbNumber}")
         } else {
             Log.e("SendPrintDataScreen", "Invalid pengirimanId received: $pengirimanId")
+        }
+    }
+
+    // --- Permissions Launcher ---
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val allGranted = permissions.all { it.value }
+        if (allGranted) {
+            showDeviceListDialog = true
+        } else {
+            Toast.makeText(context, "Izin Bluetooth diperlukan untuk mencetak.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -89,7 +115,6 @@ fun SendPrintDataScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             } else {
-                // Di sini, `pengirimanData` adalah objek PengirimanData, sehingga `spbNumber` dapat diakses.
                 Text(
                     text = "Data Pengiriman SPB: ${pengirimanData!!.spbNumber}",
                     fontSize = 22.sp,
@@ -98,29 +123,30 @@ fun SendPrintDataScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "Fungsi Tulis ke NFC untuk SPB ${pengirimanData!!.spbNumber} (BELUM DIIMPLEMENTASI)", Toast.LENGTH_SHORT).show()
-                        Log.d("SendPrintScreen", "Tulis ke NFC untuk SPB: ${pengirimanData!!.spbNumber}")
-                    },
-                    modifier = Modifier.fillMaxWidth(0.8f).height(60.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Nfc, contentDescription = "Tulis NFC", modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Tulis ke NFC", fontSize = 18.sp)
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
                     onClick = {
-                        Toast.makeText(context, "Fungsi Cetak Data untuk SPB ${pengirimanData!!.spbNumber} (BELUM DIIMPLEMENTASI)", Toast.LENGTH_SHORT).show()
-                        Log.d("SendPrintScreen", "Cetak Data untuk SPB: ${pengirimanData!!.spbNumber}")
+                        // Cek dan minta izin sebelum mencoba mencetak
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                                permissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.BLUETOOTH_SCAN,
+                                        Manifest.permission.BLUETOOTH_CONNECT
+                                    )
+                                )
+                            } else {
+                                showDeviceListDialog = true
+                            }
+                        } else {
+                            // Untuk versi lama, cukup periksa izin BLUETOOTH
+                            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                                permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH))
+                            } else {
+                                showDeviceListDialog = true
+                            }
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(0.8f).height(60.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
@@ -131,15 +157,159 @@ fun SendPrintDataScreen(
                         Text("Cetak Data", fontSize = 18.sp)
                     }
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "Detail akan diambil dari PengirimanData ID: ${pengirimanId}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
             }
         }
     }
+
+    if (showDeviceListDialog && pengirimanData != null) {
+        val bluetoothManager: BluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
+
+        val pairedDevices = if (bluetoothAdapter?.isEnabled == true) {
+            if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED) {
+                bluetoothAdapter.bondedDevices.toList()
+            } else {
+                emptyList()
+            }
+        } else {
+            emptyList()
+        }
+
+        AlertDialog(
+            onDismissRequest = { showDeviceListDialog = false },
+            title = { Text("Pilih Perangkat Bluetooth") },
+            text = {
+                Column {
+                    if (pairedDevices.isEmpty()) {
+                        Text("Tidak ada perangkat yang terhubung.")
+                    } else {
+                        pairedDevices.forEach { device ->
+                            TextButton(onClick = {
+                                showDeviceListDialog = false
+                                coroutineScope.launch {
+                                    printData(context, device, pengirimanData!!)
+                                }
+                            }) {
+                                Text(device.name ?: "Unknown Device")
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showDeviceListDialog = false }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
+}
+
+private val SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
+
+@RequiresApi(Build.VERSION_CODES.O)
+private suspend fun printData(context: Context, device: BluetoothDevice, data: PengirimanData) {
+    withContext(Dispatchers.IO) {
+        if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.e("BluetoothPrint", "Izin BLUETOOTH_CONNECT tidak diberikan.")
+            return@withContext
+        }
+
+        try {
+            val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
+            socket.connect()
+            val outputStream: OutputStream = socket.outputStream
+
+            val formattedData = ThermalPrinter(data)
+            outputStream.write(formattedData.toByteArray())
+            outputStream.flush()
+            outputStream.close()
+            socket.close()
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Data berhasil dikirim ke printer.", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            Log.e("BluetoothPrint", "Gagal mengirim data ke printer: ${e.message}", e)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Gagal mencetak: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+private fun ThermalPrinter(data: PengirimanData): String {
+    val ESC = 0x1B.toChar() // Escape
+    val GS = 0x1D.toChar() // Group Separator
+    val LF = 0x0A.toChar() // Line Feed
+    val FF = 0x0C.toChar() // Form Feed
+
+    val output = StringBuilder()
+
+    // Header
+    output.append("${ESC}a\u0001") // Centered alignment
+    output.append("================================\n")
+    output.append("${GS}!\u0000") // Reset font size to normal
+    output.append("TELADAN PRIMA AGRO\n")
+    output.append("================================\n")
+
+    // Detail Pengiriman
+    output.append("${ESC}a\u0000") // Left alignment
+    output.append("SPB No: ${data.spbNumber}\n")
+    output.append("Tgl/Jam: ${data.waktuPengiriman}\n")
+    output.append("Mandor: ${data.mandorLoading}\n")
+    output.append("Supir: ${data.namaSupir}\n")
+    output.append("Plat No: ${data.noPolisi}\n")
+
+    // Ringkasan
+    output.append("--------------------------------\n")
+    output.append("${ESC}a\u0001") // Centered alignment
+    output.append("Total Buah: ${data.totalBuah}\n")
+    output.append("${ESC}a\u0000") // Left alignment
+    output.append("--------------------------------\n")
+
+    // --- Bagian Detail Scan dengan Agregasi ---
+    output.append("Detail Scan (Per Blok):\n")
+
+    // Mendapatkan list item yang discan
+    val rawScannedItems = data.getDetailScannedItems()
+
+    // Mengagregasi data berdasarkan blok
+    val aggregatedScannedItems = rawScannedItems
+        .groupBy { it.blok }
+        .map { (blok, itemsInBlock) ->
+            val totalBuahAggregated = itemsInBlock.sumOf { it.totalBuah }
+            ScannedItem(
+                uniqueNo = "",
+                tanggal = "",
+                blok = blok,
+                totalBuah = totalBuahAggregated
+            )
+        }
+        .sortedBy { it.blok }
+
+    aggregatedScannedItems.forEachIndexed { _, item ->
+        output.append("   Blok: ${item.blok}, Buah: ${item.totalBuah}\n")
+    }
+
+    output.append("--------------------------------\n")
+
+    // Footer
+    output.append("${ESC}a\u0001") // Centered alignment
+    output.append("================================\n")
+    output.append("TERIMA KASIH!\n")
+    output.append("&\n")
+    output.append("UTAMAKAN KESELAMATAN BANG!\n")
+    output.append("================================\n")
+
+    // Tambahkan baris kosong dan Form Feed untuk memastikan semua data tercetak
+    output.append(LF)
+    output.append(LF)
+    output.append(LF)
+    output.append(FF)
+    output.append(LF)
+
+    return output.toString()
 }

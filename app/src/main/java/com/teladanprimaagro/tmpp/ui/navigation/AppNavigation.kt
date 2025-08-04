@@ -28,6 +28,7 @@ import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
+import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
@@ -36,13 +37,13 @@ import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
-    nfcIntent: State<Intent?>, // Ini sekarang digunakan oleh kedua dialog
+    nfcIntent: State<Intent?>,
     pengirimanViewModel: PengirimanViewModel,
     sharedNfcViewModel: SharedNfcViewModel
 ) {
     val navController = rememberNavController()
     val panenViewModel: PanenViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel() // SettingsViewModel diinstansiasi di sini
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
@@ -58,7 +59,7 @@ fun AppNavigation(
         ) { backStackEntry ->
             val userRoleString = backStackEntry.arguments?.getString("userRole")
             val userRole = userRoleString?.let { UserRole.valueOf(it) }
-                ?: UserRole.HARVESTER // Default role jika tidak ada
+                ?: UserRole.HARVESTER
 
             HomeScreen(
                 navController = navController,
@@ -89,8 +90,16 @@ fun AppNavigation(
                 panenViewModel = panenViewModel
             )
         }
+
+        composable("statistik_panen_screen") {
+            StatistikPanenScreen(
+                navController = navController,
+                panenViewModel = panenViewModel
+            )
+        }
+
         composable("pengaturan_screen") {
-            val currentUserRole = settingsViewModel.getUserRole() ?: UserRole.HARVESTER // Default jika null
+            val currentUserRole = settingsViewModel.getUserRole() ?: UserRole.HARVESTER
             PengaturanScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel,

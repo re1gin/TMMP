@@ -18,23 +18,18 @@ import kotlinx.coroutines.launch
 class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
-    // HAPUS: private val gson = Gson() // TIDAK DIPERLUKAN
 
-    // --- Sortir States ---
-    private val _sortBy = MutableStateFlow("Nama") // Default sort by Nama
+    private val _sortBy = MutableStateFlow("Nama")
     val sortBy: StateFlow<String> = _sortBy.asStateFlow()
 
-    private val _sortOrderAscending = MutableStateFlow(true) // Default Ascending (true for Asc, false for Desc)
+    private val _sortOrderAscending = MutableStateFlow(true)
     val sortOrderAscending: StateFlow<Boolean> = _sortOrderAscending.asStateFlow()
-    // --- End Sortir States ---
 
-    // --- Filtering States ---
-    private val _selectedPemanenFilter = MutableStateFlow("Semua Pemanen") // Default: tampilkan semua
+    private val _selectedPemanenFilter = MutableStateFlow("Semua Pemanen")
     val selectedPemanenFilter: StateFlow<String> = _selectedPemanenFilter.asStateFlow()
 
-    private val _selectedBlokFilter = MutableStateFlow("Semua Blok") // Default: tampilkan semua
+    private val _selectedBlokFilter = MutableStateFlow("Semua Blok")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
-    // --- End Filtering States ---
 
     val panenList: StateFlow<List<PanenData>> =
         panenDao.getAllPanen()
@@ -61,7 +56,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 sortedList
             }
-            // --- TERAPKAN FILTER SETELAH SORTIR ---
             .combine(_selectedPemanenFilter) { list, pemanenFilter ->
                 if (pemanenFilter == "Semua Pemanen") {
                     list
@@ -76,12 +70,35 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     list.filter { it.blok == blokFilter }
                 }
             }
-            // --- AKHIR FILTER ---
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = emptyList()
             )
+
+    // --- State untuk Statistik (BARU) ---
+    val statistikPerPemanen: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+        .map { list ->
+            list.groupBy { it.namaPemanen }
+                .mapValues { (_, panenList) -> panenList.sumOf { it.totalBuah } }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
+
+    val statistikPerBlok: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+        .map { list ->
+            list.groupBy { it.blok }
+                .mapValues { (_, panenList) -> panenList.sumOf { it.totalBuah } }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
+    // --- Akhir State Statistik ---
 
     val totalDataMasuk: StateFlow<Int> = panenList.map { it.size }
         .stateIn(
@@ -146,7 +163,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _sortOrderAscending.value = !_sortOrderAscending.value
     }
 
-    // --- Fungsi untuk mengatur filter ---
     fun setPemanenFilter(pemanen: String) {
         _selectedPemanenFilter.value = pemanen
     }
@@ -159,7 +175,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _selectedPemanenFilter.value = "Semua Pemanen"
         _selectedBlokFilter.value = "Semua Blok"
     }
-    // --- Akhir Fungsi Filter ---
 
     fun clearAllPanenData() {
         viewModelScope.launch {

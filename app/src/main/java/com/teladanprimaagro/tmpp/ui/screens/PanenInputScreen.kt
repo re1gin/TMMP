@@ -711,7 +711,7 @@ fun PanenInputScreen(
             onDismissRequest = {
                 showNfcWriteDialog = false
                 nfcDataToPass = null
-                dataToSaveToRoom = null // Reset dataToSaveToRoom jika NFC dibatalkan/ditutup tanpa disimpan
+                dataToSaveToRoom = null
             },
             dataToWrite = nfcDataToPass,
             onWriteComplete = { success, message ->
