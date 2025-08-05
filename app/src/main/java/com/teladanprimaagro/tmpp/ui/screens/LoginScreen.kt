@@ -25,7 +25,7 @@ import com.teladanprimaagro.tmpp.ui.theme.IconOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
-import com.teladanprimaagro.tmpp.data.UserRole // <-- IMPORT BARU INI
+import com.teladanprimaagro.tmpp.data.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +45,7 @@ fun LoginScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Top Orange Section
+        // Bagian Atas Oranye
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -68,7 +68,7 @@ fun LoginScreen(
             )
         }
 
-        // Bottom Black Section
+        // Bagian Bawah Hitam
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -82,32 +82,20 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Logo Placeholder
+            // Placeholder Logo yang Disesuaikan (Lebih Sederhana)
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .background(DotGray, shape = RoundedCornerShape(50))
-                    .padding(8.dp)
+                    .background(color = BackgroundLightGray, shape = RoundedCornerShape(50))
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(DotGray, shape = RoundedCornerShape(50))
-                        .padding(2.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(50))
-                            .padding(2.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(DotGray, shape = RoundedCornerShape(50))
-                        )
-                    }
-                }
+                Icon(
+                    imageVector = Icons.Filled.Person,
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(48.dp),
+                    tint = IconOrange
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -138,7 +126,7 @@ fun LoginScreen(
                 trailingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Person,
-                        contentDescription = "Username Icon",
+                        contentDescription = "Ikon Username",
                         tint = IconOrange
                     )
                 },
@@ -244,7 +232,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Login Button
+            // Tombol Login
             Button(
                 onClick = {
                     usernameError = false
@@ -271,11 +259,9 @@ fun LoginScreen(
                     }
 
                     if (authenticatedUserRole != null) {
-                        // Panggil fungsi loginSuccess dengan objek UserRole
                         settingsViewModel.loginSuccess(authenticatedUserRole)
 
-                        // Navigasi ke home_screen dengan peran pengguna
-                        navController.navigate("home_screen/${authenticatedUserRole.name}") {
+                        navController.navigate("main_screen/${authenticatedUserRole.name}") {
                             popUpTo("login_screen") { inclusive = true }
                         }
                     } else {
@@ -302,33 +288,6 @@ fun LoginScreen(
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Version and Dots
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(DotGray, shape = RoundedCornerShape(50))
-                            .padding(horizontal = 4.dp)
-                    )
-                    if (it < 2) Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
-            Text(
-                text = "Version: V 1.0.0.0",
-                color = TextGray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
         }
     }
 }

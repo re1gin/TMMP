@@ -10,11 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.tv.material3.MaterialTheme
+import androidx.compose.material3.*
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import kotlinx.coroutines.delay
@@ -22,18 +21,16 @@ import kotlinx.coroutines.delay
 @Composable
 fun SplashScreen(
     navController: NavController,
-    settingsViewModel: SettingsViewModel // Menerima SettingsViewModel
+    settingsViewModel: SettingsViewModel
 ) {
     LaunchedEffect(Unit) {
-        delay(3000) // Tunda selama 2 detik untuk efek splash
+        delay(3000)
 
-        // TODO: Implementasi logika untuk memeriksa status login dan peran pengguna
-        val isLoggedIn = settingsViewModel.isUserLoggedIn() // Misal ada fungsi ini di SettingsViewModel
-        val userRole = settingsViewModel.getUserRole() // Misal ada fungsi ini di SettingsViewModel
+        val isLoggedIn = settingsViewModel.isUserLoggedIn()
+        val userRole = settingsViewModel.getUserRole()
 
         if (isLoggedIn && userRole != null) {
-            // Jika sudah login dan peran diketahui, navigasi ke HomeScreen dengan peran yang benar
-            navController.navigate("home_screen/${userRole.name}") {
+            navController.navigate("main_screen/${userRole.name}") {
                 popUpTo("splash_screen") { inclusive = true }
             }
         } else {
@@ -47,12 +44,12 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background), // Latar belakang splash
+            .background(color = MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo), // Ganti dengan logo aplikasi Anda
+            painter = painterResource(id = R.drawable.logo),
             contentDescription = "App Logo",
             modifier = Modifier.size(180.dp)
         )

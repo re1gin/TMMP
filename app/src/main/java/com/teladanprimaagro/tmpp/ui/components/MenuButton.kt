@@ -2,9 +2,11 @@ package com.teladanprimaagro.tmpp.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,32 +28,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-
-@OptIn(ExperimentalMaterial3Api::class) // Untuk Card onClick
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f, // Sedikit mengecil saat ditekan
+        targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = tween(durationMillis = 100)
     )
 
     Card(
+        // Perubahan: Mengatur lebar dan tinggi secara terpisah untuk membuat tombol lebih tinggi
         modifier = Modifier
-            .size(140.dp, 160.dp) // Ukuran tombol kartu
+            .size(width = 150.dp, height = 180.dp)
             .graphicsLayer {
-                scaleX = scale // Terapkan animasi skala
-                scaleY = scale // Terapkan animasi skala
+                scaleX = scale
+                scaleY = scale
             },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary), // Warna oranye untuk tombol
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
+        ),
         onClick = onClick,
-        interactionSource = interactionSource // Kaitkan interactionSource dengan Card
+        interactionSource = interactionSource
     ) {
         Column(
             modifier = Modifier
@@ -60,18 +65,28 @@ fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                tint = MaterialTheme.colorScheme.onPrimary, // Warna ikon putih
-                modifier = Modifier.size(48.dp) // Ukuran ikon
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = text,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(48.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = text,
-                color = MaterialTheme.colorScheme.onPrimary, // Warna teks putih
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
             )
         }
     }

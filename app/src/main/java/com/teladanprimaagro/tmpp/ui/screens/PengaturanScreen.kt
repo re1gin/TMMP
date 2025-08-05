@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Visibility
@@ -26,29 +25,27 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
-import com.teladanprimaagro.tmpp.data.UserRole // Asumsi Anda punya enum atau sealed class ini
+import com.teladanprimaagro.tmpp.data.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PengaturanScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel,
-    userRole: UserRole // Tambahkan parameter userRole
+    userRole: UserRole,
+    paddingValues: PaddingValues
 ) {
-    // State untuk mengontrol dialog konfirmasi sandi
     var showPasswordDialog by remember { mutableStateOf(false) }
-    // State untuk menyimpan rute navigasi tujuan setelah konfirmasi sandi
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
 
-    // Sandi yang akan digunakan untuk konfirmasi (GANTI DENGAN MEKANISME KEAMANAN SESUNGGUHNYA!)
-    val adminPassword = "supersawit2025" // Contoh sandi admin
+    val adminPassword = "supersawit2025"
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .padding(paddingValues)
     ) {
-        // Top Header Section (Back, Title, Settings)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -56,15 +53,8 @@ fun PengaturanScreen(
                 .background(MaterialTheme.colorScheme.primary)
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Center
         ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
             Text(
                 text = "Pengaturan",
                 color = MaterialTheme.colorScheme.onPrimary,
@@ -73,7 +63,6 @@ fun PengaturanScreen(
             )
         }
 
-        // Main Content Area (Rounded Black Section)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -86,16 +75,12 @@ fun PengaturanScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Menu Item: Tema (bisa jadi tidak perlu sandi, tersedia untuk semua peran)
             SettingMenuItem(text = "Tema") {
-                // TODO: Aksi untuk mengubah tema (misalnya, menampilkan dialog pilihan tema)
             }
             HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            // Menu Item berdasarkan Peran Pengguna
             when (userRole) {
                 UserRole.HARVESTER -> {
-                    // Menu untuk Pemanen
                     SettingMenuItem(text = "Kemandoran") {
                         pendingNavigationRoute = "kelola_kemandoran_screen"
                         showPasswordDialog = true
@@ -121,34 +106,22 @@ fun PengaturanScreen(
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
                 }
                 UserRole.DRIVER -> {
-                    // Menu untuk Driver
                     SettingMenuItem(text = "Nama Supir") {
-                        pendingNavigationRoute = "kelola_supir_screen" // Rute baru
+                        pendingNavigationRoute = "kelola_supir_screen"
                         showPasswordDialog = true
                     }
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
                     SettingMenuItem(text = "Nomor Polisi") {
-                        pendingNavigationRoute = "kelola_kendaraan_screen" // Rute baru
+                        pendingNavigationRoute = "kelola_kendaraan_screen"
                         showPasswordDialog = true
                     }
                     HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
                 }
-                // Jika ada peran lain yang tidak spesifik, Anda bisa menambahkan 'else' atau case lain
-                else -> {
-                    // Mungkin tidak ada menu khusus atau pesan "Tidak ada pengaturan spesifik"
-                    Text(
-                        text = "Tidak ada pengaturan spesifik untuk peran ini.",
-                        color = TextGray,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
             }
 
+            Spacer(modifier = Modifier.weight(1f))
 
-            Spacer(modifier = Modifier.weight(1f)) // Dorong footer ke bawah
-
-            // Menu Item: Logout (tidak perlu sandi karena ini tindakan keluar)
             SettingMenuItem(
                 text = "Logout",
                 icon = Icons.AutoMirrored.Filled.ExitToApp,
@@ -161,32 +134,6 @@ fun PengaturanScreen(
                     }
                 }
             }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-            // Version and Dots (Footer)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp, top = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(DotGray, shape = RoundedCornerShape(50))
-                            .padding(horizontal = 4.dp)
-                    )
-                    if (it < 2) Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
-            Text(
-                text = "Version: V 1.0.0.0",
-                color = TextGray,
-                fontSize = 12.sp,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
         }
     }
 
@@ -238,16 +185,15 @@ fun SettingMenuItem(
     }
 }
 
-// Composable untuk Dialog Konfirmasi Sandi
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasswordConfirmationDialog(
-    onConfirm: (String) -> Unit, // Mengirim sandi yang dimasukkan
+    onConfirm: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     var passwordInput by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var showError by remember { mutableStateOf(false) } // State untuk menampilkan error
+    var showError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -258,7 +204,7 @@ fun PasswordConfirmationDialog(
                     value = passwordInput,
                     onValueChange = {
                         passwordInput = it
-                        showError = false // Reset error saat input berubah
+                        showError = false
                     },
                     label = { Text("Sandi Admin") },
                     singleLine = true,
@@ -275,7 +221,7 @@ fun PasswordConfirmationDialog(
                             Icon(imageVector = image, contentDescription = description)
                         }
                     },
-                    isError = showError, // Terapkan error state ke TextField
+                    isError = showError,
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (showError) {

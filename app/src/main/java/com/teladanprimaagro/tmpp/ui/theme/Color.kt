@@ -3,6 +3,7 @@ package com.teladanprimaagro.tmpp.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val PrimaryOrange = Color(0xFFFF8C00)
+val Ochore = Color(0xFFFF5500)
 val PrimaryDarkOrange = Color(0xFFE07B00)
 
 val SecondaryGray = Color(0xFF6C757D)
@@ -18,3 +19,4 @@ val TextBlack = Color(0xFF000000)
 
 val IconOrange = Color(0xFFFF8C00)
 val DotGray = Color(0xFF696969)
+

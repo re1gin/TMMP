@@ -4,35 +4,36 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.compose.runtime.State
-import androidx.navigation.NavType
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
-import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
-import com.teladanprimaagro.tmpp.ui.screens.HomeScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
+import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
+import com.teladanprimaagro.tmpp.ui.screens.MainScreen
 import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
-import com.teladanprimaagro.tmpp.ui.screens.PengaturanScreen
-import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
+import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
+import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -42,30 +43,39 @@ fun AppNavigation(
     sharedNfcViewModel: SharedNfcViewModel
 ) {
     val navController = rememberNavController()
+
     val panenViewModel: PanenViewModel = viewModel()
     val settingsViewModel: SettingsViewModel = viewModel()
+    val mapViewModel: MapViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
-            SplashScreen(navController = navController, settingsViewModel = settingsViewModel)
+            SplashScreen(
+                navController = navController,
+                settingsViewModel = settingsViewModel,
+            )
         }
         composable("login_screen") {
             LoginScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
 
+        // Rute utama yang menampung MainScreen dan navigasi BottomBar-nya
         composable(
-            route = "home_screen/{userRole}",
+            route = "main_screen/{userRole}",
             arguments = listOf(navArgument("userRole") { type = NavType.StringType })
         ) { backStackEntry ->
             val userRoleString = backStackEntry.arguments?.getString("userRole")
-            val userRole = userRoleString?.let { UserRole.valueOf(it) }
-                ?: UserRole.HARVESTER
+            val userRole = userRoleString?.let { UserRole.valueOf(it) } ?: UserRole.HARVESTER
 
-            HomeScreen(
-                navController = navController,
-                userRole = userRole
+            MainScreen(
+                mainNavController = navController,
+                userRole = userRole,
+                settingsViewModel = settingsViewModel,
+                mapViewModel = mapViewModel
             )
         }
+
+        // Rute untuk layar-layar yang tidak memiliki BottomBar
 
         composable(
             route = "send_print_data/{pengirimanId}",
@@ -80,7 +90,7 @@ fun AppNavigation(
                 navController = navController,
                 panenViewModel = panenViewModel,
                 settingsViewModel = settingsViewModel,
-                nfcIntentFromActivity = nfcIntent,
+                nfcIntentFromActivity = nfcIntent
             )
         }
 
@@ -98,14 +108,6 @@ fun AppNavigation(
             )
         }
 
-        composable("pengaturan_screen") {
-            val currentUserRole = settingsViewModel.getUserRole() ?: UserRole.HARVESTER
-            PengaturanScreen(
-                navController = navController,
-                settingsViewModel = settingsViewModel,
-                userRole = currentUserRole
-            )
-        }
         composable("kelola_kemandoran_screen") {
             KelolaKemandoranScreen(
                 navController, settingsViewModel

@@ -25,10 +25,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _sortOrderAscending = MutableStateFlow(true)
     val sortOrderAscending: StateFlow<Boolean> = _sortOrderAscending.asStateFlow()
 
-    private val _selectedPemanenFilter = MutableStateFlow("Semua Pemanen")
+    private val _selectedPemanenFilter = MutableStateFlow("Semua")
     val selectedPemanenFilter: StateFlow<String> = _selectedPemanenFilter.asStateFlow()
 
-    private val _selectedBlokFilter = MutableStateFlow("Semua Blok")
+    private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
     val panenList: StateFlow<List<PanenData>> =
@@ -57,14 +57,14 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 sortedList
             }
             .combine(_selectedPemanenFilter) { list, pemanenFilter ->
-                if (pemanenFilter == "Semua Pemanen") {
+                if (pemanenFilter == "Semua") {
                     list
                 } else {
                     list.filter { it.namaPemanen == pemanenFilter }
                 }
             }
             .combine(_selectedBlokFilter) { list, blokFilter ->
-                if (blokFilter == "Semua Blok") {
+                if (blokFilter == "Semua") {
                     list
                 } else {
                     list.filter { it.blok == blokFilter }
@@ -76,7 +76,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 initialValue = emptyList()
             )
 
-    // --- State untuk Statistik (BARU) ---
     val statistikPerPemanen: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
         .map { list ->
             list.groupBy { it.namaPemanen }
@@ -98,7 +97,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = emptyMap()
         )
-    // --- Akhir State Statistik ---
 
     val totalDataMasuk: StateFlow<Int> = panenList.map { it.size }
         .stateIn(

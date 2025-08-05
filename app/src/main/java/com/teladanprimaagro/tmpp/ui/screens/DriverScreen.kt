@@ -1,6 +1,15 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import androidx.compose.foundation.layout.*
+
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CarRental
 import androidx.compose.material.icons.filled.Description
@@ -11,17 +20,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.components.FullDateCard
 import com.teladanprimaagro.tmpp.ui.components.MenuButton
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun DriverContent(navController: NavController, modifier: Modifier = Modifier) {
+fun DriverContent(
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        FullDateCard(title = "Hai, Driver!")
+        Spacer(modifier = Modifier.height(24.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -37,7 +51,7 @@ fun DriverContent(navController: NavController, modifier: Modifier = Modifier) {
                 MenuButton(
                     text = "Scan",
                     icon = Icons.Default.Nfc,
-                    onClick = { navController.navigate("scan_input_screen") } // Rute baru untuk scan
+                    onClick = { navController.navigate("scan_input_screen") }
                 )
 
                 // Tombol Pengiriman
@@ -61,9 +75,9 @@ fun DriverContent(navController: NavController, modifier: Modifier = Modifier) {
 
                 // Tombol Pengaturan
                 MenuButton(
-                    text = "Pengaturan",
+                    text = "Unggah Data",
                     icon = Icons.Default.Settings, // Ikon pengaturan
-                    onClick = { navController.navigate("pengaturan_screen") }
+                    onClick = { TODO("Belum di tambahkan") }
                 )
             }
         }

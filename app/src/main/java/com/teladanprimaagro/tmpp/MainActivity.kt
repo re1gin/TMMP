@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import com.teladanprimaagro.tmpp.ui.navigation.AppNavigation
 import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
+import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
 
@@ -26,6 +27,7 @@ class MainActivity : ComponentActivity() {
     internal var _nfcIntent: MutableState<Intent?> = mutableStateOf(null)
     val nfcIntent: State<Intent?> = _nfcIntent
 
+    private val panenViewModel: PanenViewModel by viewModels()
     private val pengirimanViewModel: PengirimanViewModel by viewModels()
     private val sharedNfcViewModel: SharedNfcViewModel by viewModels()
 
@@ -87,9 +89,7 @@ class MainActivity : ComponentActivity() {
         if (intent != null && (intent.action == NfcAdapter.ACTION_NDEF_DISCOVERED || intent.action == NfcAdapter.ACTION_TAG_DISCOVERED)) {
             Log.d("MainActivity", "Initial NFC Intent detected in onCreate: ${intent.action}")
             _nfcIntent.value = intent
-            // Jika aplikasi diluncurkan oleh intent NFC, asumsikan itu untuk penulisan
-            // (karena PanenInputScreen adalah satu-satunya yang memicu dialog dengan intent awal ini)
-            sharedNfcViewModel.setWriting() // Atau bisa lebih spesifik jika ada skenario lain
+            sharedNfcViewModel.setWriting()
         }
     }
 }

@@ -745,7 +745,7 @@ fun PanenInputScreen(
                 }
                 showNfcWriteDialog = false
                 nfcDataToPass = null
-                dataToSaveToRoom = null // Reset setelah selesai, baik berhasil maupun gagal NFC
+                dataToSaveToRoom = null
             },
             nfcIntentFromActivity = nfcIntentFromActivity
         )

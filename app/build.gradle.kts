@@ -43,7 +43,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -59,8 +58,10 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.play.services.location)
     implementation(libs.androidx.tv.material)
+    implementation(libs.androidx.work.runtime.ktx)
     testImplementation(libs.junit)
     implementation (libs.room.runtime)
+    implementation(libs.osmdroid.android)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     androidTestImplementation(libs.androidx.junit)

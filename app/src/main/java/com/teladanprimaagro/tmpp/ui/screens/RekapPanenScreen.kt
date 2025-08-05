@@ -88,10 +88,10 @@ fun RekapPanenScreen(
     var sortDropdownExpanded by remember { mutableStateOf(false) }
 
     val pemanenFilterOptions = remember {
-        mutableStateOf(listOf("Semua Pemanen") + settingsViewModel.pemanenList.toList())
+        mutableStateOf(listOf("Semua") + settingsViewModel.pemanenList.toList())
     }
     val blokFilterOptions = remember {
-        mutableStateOf(listOf("Semua Blok") + settingsViewModel.blokList.toList())
+        mutableStateOf(listOf("Semua") + settingsViewModel.blokList.toList())
     }
 
     val selectedPemanenFilter by panenViewModel.selectedPemanenFilter.collectAsState()
@@ -207,66 +207,73 @@ fun RekapPanenScreen(
                     }
                 }
 
-                ExposedDropdownMenuBox(
-                    expanded = pemanenDropdownExpanded,
-                    onExpandedChange = { pemanenDropdownExpanded = !pemanenDropdownExpanded },
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround // Atau Arrangement.spacedBy(8.dp) jika Anda ingin jarak di antara keduanya
                 ) {
-                    TextField(
-                        value = selectedPemanenFilter,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Filter Pemanen") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pemanenDropdownExpanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-
-                    ExposedDropdownMenu(
+                    ExposedDropdownMenuBox(
                         expanded = pemanenDropdownExpanded,
-                        onDismissRequest = { pemanenDropdownExpanded = false }
+                        onExpandedChange = { pemanenDropdownExpanded = !pemanenDropdownExpanded },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        pemanenFilterOptions.value.forEach { pemanen ->
-                            DropdownMenuItem(
-                                text = { Text(pemanen) },
-                                onClick = {
-                                    panenViewModel.setPemanenFilter(pemanen)
-                                    pemanenDropdownExpanded = false
-                                }
-                            )
+                        TextField(
+                            value = selectedPemanenFilter,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Filter Pemanen") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pemanenDropdownExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = pemanenDropdownExpanded,
+                            onDismissRequest = { pemanenDropdownExpanded = false }
+                        ) {
+                            pemanenFilterOptions.value.forEach { pemanen ->
+                                DropdownMenuItem(
+                                    text = { Text(pemanen) },
+                                    onClick = {
+                                        panenViewModel.setPemanenFilter(pemanen)
+                                        pemanenDropdownExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
-                }
 
-                ExposedDropdownMenuBox(
-                    expanded = blokDropdownExpanded,
-                    onExpandedChange = { blokDropdownExpanded = !blokDropdownExpanded },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextField(
-                        value = selectedBlokFilter,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Filter Blok") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = blokDropdownExpanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
+                    Spacer(modifier = Modifier.width(16.dp)) // Opsional: Berikan jarak di antara kedua dropdown
 
-                    ExposedDropdownMenu(
+                    ExposedDropdownMenuBox(
                         expanded = blokDropdownExpanded,
-                        onDismissRequest = { blokDropdownExpanded = false }
+                        onExpandedChange = { blokDropdownExpanded = !blokDropdownExpanded },
+                        modifier = Modifier.weight(1f)
                     ) {
-                        blokFilterOptions.value.forEach { blok ->
-                            DropdownMenuItem(
-                                text = { Text(blok) },
-                                onClick = {
-                                    panenViewModel.setBlokFilter(blok)
-                                    blokDropdownExpanded = false
-                                }
-                            )
+                        TextField(
+                            value = selectedBlokFilter,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Filter Blok") },
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = blokDropdownExpanded) },
+                            modifier = Modifier
+                                .menuAnchor()
+                                .fillMaxWidth()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = blokDropdownExpanded,
+                            onDismissRequest = { blokDropdownExpanded = false }
+                        ) {
+                            blokFilterOptions.value.forEach { blok ->
+                                DropdownMenuItem(
+                                    text = { Text(blok) },
+                                    onClick = {
+                                        panenViewModel.setBlokFilter(blok)
+                                        blokDropdownExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -359,7 +366,7 @@ fun RekapPanenScreen(
                 fontSize = 12.sp,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
+                    .padding(20.dp)
             )
         }
     }
@@ -379,7 +386,7 @@ fun RekapPanenScreen(
 fun RowScope.TableHeaderText(text: String, weight: Float) {
     Text(
         text = text,
-        color = MaterialTheme.colorScheme.onPrimary,
+        color = Color.Black,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
         textAlign = TextAlign.Center,
@@ -441,9 +448,9 @@ fun SummaryBox(label: String, value: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(160.dp)
+            .width(130.dp)
             .background(PrimaryOrange, RoundedCornerShape(8.dp))
-            .padding(vertical = 8.dp, horizontal = 12.dp)
+            .padding(vertical = 8.dp, horizontal = 16.dp)
     ) {
         Text(
             text = label,
@@ -454,7 +461,7 @@ fun SummaryBox(label: String, value: String) {
         Text(
             text = value,
             color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
     }

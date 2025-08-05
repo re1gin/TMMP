@@ -105,8 +105,8 @@ fun KelolaPemanenScreen(
             Button(
                 onClick = {
                     if (newPemanenName.isNotBlank()) {
-                        settingsViewModel.addPemanen(newPemanenName.trim()) // Gunakan trim() untuk membersihkan spasi
-                        newPemanenName = "" // Bersihkan input setelah ditambahkan
+                        settingsViewModel.addPemanen(newPemanenName.trim())
+                        newPemanenName = ""
                     }
                 },
                 modifier = Modifier
@@ -135,11 +135,9 @@ fun KelolaPemanenScreen(
             HorizontalDivider(thickness = 1.dp, color = DotGray)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Daftar pemanen yang sudah ada
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Gunakan key untuk performa dan stabilitas UI saat daftar berubah
                 items(settingsViewModel.pemanenList, key = { it }) { pemanen ->
                     Row(
                         modifier = Modifier
@@ -148,7 +146,6 @@ fun KelolaPemanenScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         if (editingPemanen == pemanen) {
-                            // Tampilan saat mode edit
                             OutlinedTextField(
                                 value = editedPemanenName,
                                 onValueChange = { editedPemanenName = it },
@@ -166,21 +163,17 @@ fun KelolaPemanenScreen(
                                 modifier = Modifier.weight(1f)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            // Tombol Simpan
                             IconButton(
                                 onClick = {
-                                    // Validasi: Pastikan nama baru tidak kosong dan tidak sama dengan nama lama (setelah trim)
                                     if (editedPemanenName.isNotBlank() && editedPemanenName.trim() != pemanen) {
                                         settingsViewModel.updatePemanen(pemanen, editedPemanenName.trim())
                                     }
                                     editingPemanen = null // Keluar dari mode edit setelah simpan
                                 },
-                                // Tombol aktif hanya jika ada teks dan teksnya berbeda dari yang lama
                                 enabled = editedPemanenName.isNotBlank() && editedPemanenName.trim() != pemanen
                             ) {
                                 Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
                             }
-                            // Tombol Batal
                             IconButton(onClick = { editingPemanen = null }) {
                                 Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
                             }
@@ -195,8 +188,8 @@ fun KelolaPemanenScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             // Tombol Edit
                             IconButton(onClick = {
-                                editingPemanen = pemanen // Masuk mode edit untuk item ini
-                                editedPemanenName = pemanen // Inisialisasi teks edit dengan nama pemanen saat ini
+                                editingPemanen = pemanen
+                                editedPemanenName = pemanen
                             }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
                             }
