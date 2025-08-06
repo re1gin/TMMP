@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.teladanprimaagro.tmpp.ui.components
 
 import android.os.Build

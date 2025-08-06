@@ -96,9 +96,9 @@ fun SummaryBox(label: String, value: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(160.dp)
+            .width(110.dp)
             .background(PrimaryOrange, RoundedCornerShape(8.dp))
-            .padding(vertical = 8.dp, horizontal = 12.dp)
+            .padding(vertical = 8.dp, horizontal = 10.dp)
     ) {
         Text(
             text = label,
@@ -109,7 +109,7 @@ fun SummaryBox(label: String, value: String) {
         Text(
             text = value,
             color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 20.sp,
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
     }

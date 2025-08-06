@@ -8,14 +8,16 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         PanenData::class,
-        PengirimanData::class
+        PengirimanData::class,
+        ScannedItemEntity::class
     ],
-    version = 6,
+    version = 7, // Versi harus dinaikkan jika ada perubahan skema
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun panenDao(): PanenDao
     abstract fun pengirimanDao(): PengirimanDao
+    abstract fun scannedItemDao(): ScannedItemDao // Ini sudah benar
 
     companion object {
         @Volatile
@@ -26,9 +28,9 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "app_database" // Pastikan nama database ini konsisten di seluruh aplikasi Anda
+                    "app_database"
                 )
-                    .fallbackToDestructiveMigration() // <--- Hapus '(false)' di sini
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance

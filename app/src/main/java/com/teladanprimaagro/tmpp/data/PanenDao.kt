@@ -13,6 +13,9 @@ interface PanenDao {
     @Query("SELECT * FROM panen_entries ORDER BY id DESC")
     fun getAllPanen(): Flow<List<PanenData>>
 
+    @Query("SELECT * FROM panen_entries WHERE id = :panenId")
+    suspend fun getPanenById(panenId: String): PanenData?
+
     @Insert
     suspend fun insertPanen(panen: PanenData)
 

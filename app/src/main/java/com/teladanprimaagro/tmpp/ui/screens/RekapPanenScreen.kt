@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -120,7 +121,7 @@ fun RekapPanenScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Aksi pengaturan */ }) {
+                    IconButton(onClick = { /* TODO: Masih Belum Siap */ }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = "Pengaturan",
@@ -209,7 +210,7 @@ fun RekapPanenScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround // Atau Arrangement.spacedBy(8.dp) jika Anda ingin jarak di antara keduanya
+                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     ExposedDropdownMenuBox(
                         expanded = pemanenDropdownExpanded,
@@ -243,7 +244,7 @@ fun RekapPanenScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp)) // Opsional: Berikan jarak di antara kedua dropdown
+                    Spacer(modifier = Modifier.width(16.dp))
 
                     ExposedDropdownMenuBox(
                         expanded = blokDropdownExpanded,
@@ -340,6 +341,9 @@ fun RekapPanenScreen(
                             onDetailClick = { clickedData ->
                                 selectedPanenData = clickedData
                                 showDetailDialog = true
+                            },
+                            onEditClick = { editedData ->
+                                navController.navigate("panenInputScreen/${editedData.id}")
                             }
                         )
                         HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
@@ -356,9 +360,36 @@ fun RekapPanenScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SummaryBox(label = "Data Masuk", value = totalDataMasuk.toString())
+
+                OutlinedButton(
+                    onClick = { panenViewModel.clearAllPanenData() }, // Panggil fungsi penghapusan
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                        containerColor = Color.Transparent
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .height(60.dp)
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteForever,
+                            contentDescription = "Hapus Semua Data",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            "Hapus Semua",
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
                 SummaryBox(label = "Total Buah", value = totalSemuaBuah.toString())
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Text(
                 text = "*Data akan di reset setiap pukul 00.00",
@@ -395,7 +426,7 @@ fun RowScope.TableHeaderText(text: String, weight: Float) {
 }
 
 @Composable
-fun TableRow(data: PanenData, onDetailClick: (PanenData) -> Unit) {
+fun TableRow(data: PanenData, onDetailClick: (PanenData) -> Unit, onEditClick: (PanenData) -> Unit) {
     Log.d("RekapPanenDebug", "Nama Pemanen: ${data.namaPemanen}, Blok: ${data.blok}")
 
     Row(
@@ -416,7 +447,7 @@ fun TableRow(data: PanenData, onDetailClick: (PanenData) -> Unit) {
                 tint = PrimaryOrange,
                 modifier = Modifier
                     .size(20.dp)
-                    .clickable { /* TODO: Aksi edit. Anda bisa melewati data.id ke fungsi edit */ }
+                    .clickable { onEditClick(data) }
             )
         }
         Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
@@ -448,9 +479,9 @@ fun SummaryBox(label: String, value: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(130.dp)
+            .width(110.dp)
             .background(PrimaryOrange, RoundedCornerShape(8.dp))
-            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 8.dp, horizontal = 10.dp)
     ) {
         Text(
             text = label,

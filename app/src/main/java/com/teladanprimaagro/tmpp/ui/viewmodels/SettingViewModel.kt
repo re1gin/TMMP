@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.UserRole
+import androidx.core.content.edit
 
 private const val PREFS_NAME = "app_settings_prefs"
 private const val KEY_MANDOR_LIST = "mandor_list"
@@ -94,19 +95,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         if (tphList.isEmpty()) {
             tphList.addAll(listOf("TPH 001 Default", "TPH 002 Default"))
         }
-        // Pastikan default Supir dan Kendaraan, dengan opsi "Pilih..." di awal jika kosong
         if (supirList.isEmpty()) {
             supirList.addAll(listOf("Pilih Supir", "Supir A Default", "Supir B Default"))
-        } else if (!supirList.contains("Pilih Supir") && supirList.first() != "Pilih Supir") {
-            // Jika ada data tapi "Pilih Supir" tidak ada di awal, tambahkan
-            supirList.add(0, "Pilih Supir")
         }
-
         if (kendaraanList.isEmpty()) {
             kendaraanList.addAll(listOf("Pilih No Polisi", "B 1234 ABC Default", "B 5678 DEF Default"))
-        } else if (!kendaraanList.contains("Pilih No Polisi") && kendaraanList.first() != "Pilih No Polisi") {
-            // Jika ada data tapi "Pilih No Polisi" tidak ada di awal, tambahkan
-            kendaraanList.add(0, "Pilih No Polisi")
         }
 
 
@@ -151,13 +144,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         return roleString?.let {
             try {
                 UserRole.valueOf(it)
-            } catch (e: IllegalArgumentException) {
+            } catch (_: IllegalArgumentException) {
                 null
             }
         }
     }
 
-    // --- Fungsi CRUD untuk daftar yang sudah ada ---
 
     fun addMandor(name: String) {
         val trimmedName = name.trim()
@@ -301,15 +293,15 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun setSpbCounter(counter: Int) {
-        sharedPreferences.edit().putInt(KEY_SPB_COUNTER, counter).apply()
+        sharedPreferences.edit { putInt(KEY_SPB_COUNTER, counter) }
     }
 
     fun getSpbLastMonth(): Int {
-        return sharedPreferences.getInt(KEY_SPB_LAST_MONTH, -1) // -1 sebagai indikator belum diset
+        return sharedPreferences.getInt(KEY_SPB_LAST_MONTH, -1)
     }
 
     fun setSpbLastMonth(month: Int) {
-        sharedPreferences.edit().putInt(KEY_SPB_LAST_MONTH, month).apply()
+        sharedPreferences.edit { putInt(KEY_SPB_LAST_MONTH, month) }
     }
 
     fun getSpbLastYear(): Int {
@@ -317,6 +309,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun setSpbLastYear(year: Int) {
-        sharedPreferences.edit().putInt(KEY_SPB_LAST_YEAR, year).apply()
+        sharedPreferences.edit { putInt(KEY_SPB_LAST_YEAR, year) }
     }
 }

@@ -47,7 +47,9 @@ fun HarvesterContent(
                 MenuButton(
                     text = "Panen",
                     icon = Icons.Default.Add,
-                    onClick = { navController.navigate("panen_input_screen") }
+                    // --- Perubahan di sini ---
+                    onClick = { navController.navigate("panenInputScreen/-1") } // Mengirim -1 untuk mode input baru
+                    // --- Akhir perubahan ---
                 )
 
                 MenuButton(

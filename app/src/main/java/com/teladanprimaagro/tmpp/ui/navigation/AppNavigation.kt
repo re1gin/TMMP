@@ -5,6 +5,9 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,7 +36,7 @@ import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
-
+import com.teladanprimaagro.tmpp.ui.screens.PengaturanScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -45,7 +48,7 @@ fun AppNavigation(
     val navController = rememberNavController()
 
     val panenViewModel: PanenViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel()
+    val settingsViewModel: SettingsViewModel = viewModel() // This is the instance you need to pass
     val mapViewModel: MapViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash_screen") {
@@ -59,7 +62,6 @@ fun AppNavigation(
             LoginScreen(navController = navController, settingsViewModel = settingsViewModel)
         }
 
-        // Rute utama yang menampung MainScreen dan navigasi BottomBar-nya
         composable(
             route = "main_screen/{userRole}",
             arguments = listOf(navArgument("userRole") { type = NavType.StringType })
@@ -75,8 +77,6 @@ fun AppNavigation(
             )
         }
 
-        // Rute untuk layar-layar yang tidak memiliki BottomBar
-
         composable(
             route = "send_print_data/{pengirimanId}",
             arguments = listOf(navArgument("pengirimanId") { type = NavType.IntType })
@@ -85,12 +85,33 @@ fun AppNavigation(
             SendPrintDataScreen(navController, pengirimanId)
         }
 
-        composable("panen_input_screen") {
+        composable(
+            route = "panenInputScreen/{panenId}",
+            arguments = listOf(
+                navArgument("panenId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val panenId = backStackEntry.arguments?.getInt("panenId") ?: -1
+
+            val panenDataToEdit by panenViewModel.panenDataToEdit.collectAsState()
+
+            LaunchedEffect(panenId) {
+                if (panenId != -1) {
+                    panenViewModel.loadPanenDataById(panenId)
+                } else {
+                    panenViewModel.clearPanenDataToEdit()
+                }
+            }
+
             PanenInputScreen(
                 navController = navController,
                 panenViewModel = panenViewModel,
                 settingsViewModel = settingsViewModel,
-                nfcIntentFromActivity = nfcIntent
+                nfcIntentFromActivity = nfcIntent,
+                panenDataToEdit = if (panenId != -1) panenDataToEdit else null
             )
         }
 

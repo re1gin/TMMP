@@ -32,7 +32,7 @@ import com.teladanprimaagro.tmpp.data.UserRole
 fun PengaturanScreen(
     navController: NavController,
     settingsViewModel: SettingsViewModel,
-    userRole: UserRole,
+    userRole: UserRole?,
     paddingValues: PaddingValues
 ) {
     var showPasswordDialog by remember { mutableStateOf(false) }
@@ -71,54 +71,66 @@ fun PengaturanScreen(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                 )
-                .padding(16.dp)
+                .padding(16.dp) // Tambahkan padding di sini untuk konten utama
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
             SettingMenuItem(text = "Tema") {
+                // Aksi untuk Tema
             }
             HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-            when (userRole) {
-                UserRole.HARVESTER -> {
-                    SettingMenuItem(text = "Kemandoran") {
-                        pendingNavigationRoute = "kelola_kemandoran_screen"
-                        showPasswordDialog = true
-                    }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+            // Gunakan `userRole?.let` untuk menangani kasus null
+            userRole?.let { role ->
+                when (role) {
+                    UserRole.HARVESTER -> {
+                        SettingMenuItem(text = "Kemandoran") {
+                            pendingNavigationRoute = "kelola_kemandoran_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-                    SettingMenuItem(text = "Pemanen") {
-                        pendingNavigationRoute = "kelola_pemanen_screen"
-                        showPasswordDialog = true
-                    }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                        SettingMenuItem(text = "Pemanen") {
+                            pendingNavigationRoute = "kelola_pemanen_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-                    SettingMenuItem(text = "Blok") {
-                        pendingNavigationRoute = "kelola_blok_screen"
-                        showPasswordDialog = true
-                    }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                        SettingMenuItem(text = "Blok") {
+                            pendingNavigationRoute = "kelola_blok_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
 
-                    SettingMenuItem(text = "No. TPH") {
-                        pendingNavigationRoute = "kelola_tph_screen"
-                        showPasswordDialog = true
+                        SettingMenuItem(text = "No. TPH") {
+                            pendingNavigationRoute = "kelola_tph_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
                     }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                    UserRole.DRIVER -> {
+                        SettingMenuItem(text = "Nama Supir") {
+                            pendingNavigationRoute = "kelola_supir_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+
+                        SettingMenuItem(text = "Nomor Polisi") {
+                            pendingNavigationRoute = "kelola_kendaraan_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+                    }
                 }
-                UserRole.DRIVER -> {
-                    SettingMenuItem(text = "Nama Supir") {
-                        pendingNavigationRoute = "kelola_supir_screen"
-                        showPasswordDialog = true
-                    }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                    SettingMenuItem(text = "Nomor Polisi") {
-                        pendingNavigationRoute = "kelola_kendaraan_screen"
-                        showPasswordDialog = true
-                    }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-                }
+            } ?: run {
+                // Opsional: Tampilkan pesan atau nonaktifkan item jika userRole null
+                Text(
+                    text = "Peran pengguna tidak ditemukan.",
+                    modifier = Modifier.padding(16.dp),
+                    color = TextGray
+                )
             }
+
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -204,7 +216,7 @@ fun PasswordConfirmationDialog(
                     value = passwordInput,
                     onValueChange = {
                         passwordInput = it
-                        showError = false
+                        showError = false // Reset error saat input berubah
                     },
                     label = { Text("Sandi Admin") },
                     singleLine = true,
@@ -240,7 +252,7 @@ fun PasswordConfirmationDialog(
                     if (passwordInput == "supersawit2025") {
                         onConfirm(passwordInput)
                     } else {
-                        showError = true
+                        showError = true // Set error jika sandi salah
                     }
                 }
             ) {

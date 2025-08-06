@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CarRental
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Nfc
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,8 +76,8 @@ fun DriverContent(
                 // Tombol Pengaturan
                 MenuButton(
                     text = "Unggah Data",
-                    icon = Icons.Default.Settings, // Ikon pengaturan
-                    onClick = { TODO("Belum di tambahkan") }
+                    icon = Icons.Default.CloudDone, // Ikon pengaturan
+                    onClick = { /* TODO: Ini Masih Perbaikan */ }
                 )
             }
         }

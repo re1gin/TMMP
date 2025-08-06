@@ -101,7 +101,6 @@ fun ScanInputScreen(
         }
     }
 
-    // LaunchedEffect untuk memantau scanStatus dan mengontrol dialog
     LaunchedEffect(scanStatus) {
         when(val status = scanStatus) {
             is ScanStatus.Success -> {

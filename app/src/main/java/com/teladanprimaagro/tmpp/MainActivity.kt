@@ -1,5 +1,6 @@
 package com.teladanprimaagro.tmpp
 
+import android.app.Application
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
@@ -16,14 +17,20 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.ui.navigation.AppNavigation
 import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+import com.teladanprimaagro.tmpp.workers.PanenCleanupWorker
+import com.teladanprimaagro.tmpp.workers.PengirimanCleanupWorker
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
-    // Properti untuk NFC Intent, akan digunakan oleh NfcWriteDialog DAN NfcReadDialog
     internal var _nfcIntent: MutableState<Intent?> = mutableStateOf(null)
     val nfcIntent: State<Intent?> = _nfcIntent
 
@@ -34,6 +41,8 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        scheduleDailyCleanupWorkers(application)
 
         setContent {
             TeladanPrimaAgroTheme {
@@ -49,13 +58,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        // Handle intent awal jika aplikasi diluncurkan oleh NFC
         handleInitialIntent(intent)
     }
 
     override fun onResume() {
         super.onResume()
-        // Saat resume, perbarui status umum NFC
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
             sharedNfcViewModel.updateGeneralNfcStatus(false, "NFC tidak tersedia di perangkat ini.")
@@ -63,17 +70,13 @@ class MainActivity : ComponentActivity() {
             sharedNfcViewModel.updateGeneralNfcStatus(false, "NFC dinonaktifkan. Harap aktifkan di pengaturan.")
         } else {
             sharedNfcViewModel.updateGeneralNfcStatus(true, null)
-            // Jangan langsung set WaitingForRead/Write di onResume, biarkan dialog yang memintanya
-            sharedNfcViewModel.resetNfcState() // Reset state saat resume agar dialog bisa memulainya
+            sharedNfcViewModel.resetNfcState()
         }
         Log.d("MainActivity", "NFC general status updated onResume")
     }
 
     override fun onPause() {
         super.onPause()
-        // Penting: Pastikan tidak ada foreground dispatch yang aktif di sini,
-        // karena itu adalah tanggung jawab dialog.
-        // Cukup reset state NFC secara umum.
         sharedNfcViewModel.resetNfcState()
         Log.d("MainActivity", "NFC state reset onPause")
     }
@@ -81,7 +84,6 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
-        // Set intent baru ke state mutable. Dialog-dialog akan mengamatinya.
         _nfcIntent.value = intent
     }
 
@@ -91,5 +93,48 @@ class MainActivity : ComponentActivity() {
             _nfcIntent.value = intent
             sharedNfcViewModel.setWriting()
         }
+    }
+
+    private fun scheduleDailyCleanupWorkers(application: Application) {
+        val workManager = WorkManager.getInstance(application)
+
+        val calendar = Calendar.getInstance()
+        calendar.timeInMillis = System.currentTimeMillis()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+
+        if (calendar.timeInMillis <= System.currentTimeMillis()) {
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
+
+        val panenCleanupRequest = PeriodicWorkRequestBuilder<PanenCleanupWorker>(
+            1, TimeUnit.DAYS
+        )
+            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            .addTag("PanenCleanupWork")
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "PanenCleanupWork",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            panenCleanupRequest
+        )
+
+        val pengirimanCleanupRequest = PeriodicWorkRequestBuilder<PengirimanCleanupWorker>(
+            1, TimeUnit.DAYS
+        )
+            .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
+            .addTag("PengirimanCleanupWork")
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "PengirimanCleanupWork",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            pengirimanCleanupRequest
+        )
     }
 }

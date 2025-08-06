@@ -19,6 +19,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
 
+    // StateFlow untuk menyimpan data panen yang sedang diedit
+    private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
+    val panenDataToEdit: StateFlow<PanenData?> = _panenDataToEdit.asStateFlow()
+
     private val _sortBy = MutableStateFlow("Nama")
     val sortBy: StateFlow<String> = _sortBy.asStateFlow()
 
@@ -112,44 +116,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = 0
         )
 
-    fun addPanenData(
-        tanggalWaktu: String,
-        uniqueNo: String,
-        locationPart1: String,
-        locationPart2: String,
-        kemandoran: String,
-        namaPemanen: String,
-        blok: String,
-        noTph: String,
-        totalBuah: Int,
-        buahN: Int,
-        buahA: Int,
-        buahOR: Int,
-        buahE: Int,
-        buahAB: Int,
-        buahBL: Int,
-        imageUri: String?
-    ) {
+
+    fun addPanenData(panen: PanenData) {
         viewModelScope.launch {
-            val newPanen = PanenData(
-                tanggalWaktu = tanggalWaktu,
-                uniqueNo = uniqueNo,
-                locationPart1 = locationPart1,
-                locationPart2 = locationPart2,
-                kemandoran = kemandoran,
-                namaPemanen = namaPemanen,
-                blok = blok,
-                noTph = noTph,
-                totalBuah = totalBuah,
-                buahN = buahN,
-                buahA = buahA,
-                buahOR = buahOR,
-                buahE = buahE,
-                buahAB = buahAB,
-                buahBL = buahBL,
-                imageUri = imageUri
-            )
-            panenDao.insertPanen(newPanen)
+            panenDao.insertPanen(panen)
         }
     }
 
@@ -174,15 +144,25 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _selectedBlokFilter.value = "Semua Blok"
     }
 
-    fun clearAllPanenData() {
-        viewModelScope.launch {
-            panenDao.clearAllPanen()
-        }
-    }
-
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
             panenDao.updatePanen(panen)
+        }
+    }
+
+    fun loadPanenDataById(id: Int) {
+        viewModelScope.launch {
+            _panenDataToEdit.value = panenDao.getPanenById(id.toString())
+        }
+    }
+
+    fun clearPanenDataToEdit() {
+        _panenDataToEdit.value = null
+    }
+
+    fun clearAllPanenData() {
+        viewModelScope.launch {
+            panenDao.clearAllPanen()
         }
     }
 

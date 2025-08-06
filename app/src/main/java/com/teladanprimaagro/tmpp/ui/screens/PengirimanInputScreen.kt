@@ -95,7 +95,7 @@ fun PengirimanInputScreen(
     var selectedMandorLoading by remember(mandorLoadingOptions) { mutableStateOf(mandorLoadingOptions.firstOrNull() ?: "") }
     var mandorLoadingExpanded by remember { mutableStateOf(false) }
 
-    // Memastikan SPB digenerate ulang saat selectedMandorLoading berubah
+
     LaunchedEffect(selectedMandorLoading) {
         if (selectedMandorLoading.isNotBlank()) {
             pengirimanViewModel.generateSpbNumber(selectedMandorLoading = selectedMandorLoading)
@@ -136,7 +136,7 @@ fun PengirimanInputScreen(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { navController.navigate("pengaturan_screen?userRole=${currentUserRole.name}") }) {
+            IconButton(onClick = { /* TODO: Masih Belum Siap */ }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Pengaturan",
@@ -221,7 +221,7 @@ fun PengirimanInputScreen(
                     fontWeight = FontWeight.Bold
                 )
                 OutlinedTextField(
-                    value = totalBuahCalculated.value.toString(),
+                    value = totalBuahCalculated.intValue.toString(),
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
