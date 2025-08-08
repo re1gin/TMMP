@@ -1,5 +1,3 @@
-// com.teladanprimaagro.tmpp.ui.data/PanenDao.kt
-
 package com.teladanprimaagro.tmpp.data
 
 import androidx.room.Dao
@@ -14,7 +12,7 @@ interface PanenDao {
     fun getAllPanen(): Flow<List<PanenData>>
 
     @Query("SELECT * FROM panen_entries WHERE id = :panenId")
-    suspend fun getPanenById(panenId: String): PanenData?
+    suspend fun getPanenById(panenId: Int): PanenData?
 
     @Insert
     suspend fun insertPanen(panen: PanenData)
@@ -27,4 +25,7 @@ interface PanenDao {
 
     @Query("DELETE FROM panen_entries WHERE id = :panenId")
     suspend fun deletePanenById(panenId: Int)
+
+    @Query("DELETE FROM panen_entries WHERE id IN (:ids)")
+    suspend fun deleteMultiplePanen(ids: List<Int>)
 }

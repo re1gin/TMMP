@@ -8,6 +8,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -76,6 +78,8 @@ import com.google.android.gms.location.LocationServices
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.components.BuahCounter
 import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
+import com.teladanprimaagro.tmpp.ui.components.FailureDialog
+import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
@@ -129,6 +133,8 @@ fun PanenInputScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val isEditing = panenDataToEdit != null
+    val vibrator = ContextCompat.getSystemService(context, Vibrator::class.java)
+
     val currentDateTime = remember { LocalDateTime.now() }
     val formatter = remember { DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") }
     val dateTimeDisplay =
@@ -224,6 +230,10 @@ fun PanenInputScreen(
     val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     var dataToSaveToRoom by remember { mutableStateOf<PanenData?>(null) }
 
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showFailureDialog by remember { mutableStateOf(false) }
+    var failureMessage by remember { mutableStateOf("") }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
@@ -255,18 +265,22 @@ fun PanenInputScreen(
         }
     )
 
+
     fun generateUniqueCode(
         dateTime: LocalDateTime,
         block: String,
         totalBuah: Int
     ): String {
+
+        val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
         val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
         val formattedDate = dateTime.format(dateFormatter)
         val formattedTime = dateTime.format(timeFormatter)
         val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
         val formattedBuah = totalBuah.toString().padStart(3, '0')
-        return "AME1$formattedDate$formattedTime$cleanBlock$formattedBuah"
+
+        return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
     }
 
     val initialUniqueNo = remember {
@@ -744,8 +758,16 @@ fun PanenInputScreen(
                 },
                 dataToWrite = nfcDataToPass,
                 onWriteComplete = { success, message ->
+                    showNfcWriteDialog = false // Tutup dialog NFC setelah selesai menulis
+                    nfcDataToPass = null
+                    dataToSaveToRoom = null
+
                     if (success) {
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        showSuccessDialog = true // Tampilkan dialog berhasil
+
+                        // Logika untuk getar berhasil (ringan dan pendek)
+                        vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+
                         dataToSaveToRoom?.let { originalData ->
                             if (isEditing) {
                                 panenViewModel.updatePanenData(originalData)
@@ -753,19 +775,38 @@ fun PanenInputScreen(
                                 panenViewModel.addPanenData(originalData)
                             }
                         }
+                        // Navigasi tidak langsung dilakukan di sini
+                    } else {
+                        failureMessage = message // Simpan pesan gagal
+                        showFailureDialog = true // Tampilkan dialog gagal
+
+                        // Logika untuk getar gagal (lebih kuat dan berulang)
+                        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
+                    }
+                },
+                nfcIntentFromActivity = nfcIntentFromActivity
+            )
+
+            if (showSuccessDialog) {
+                SuccessDialog(
+                    onDismiss = {
+                        showSuccessDialog = false
                         navController.popBackStack()
                         if (!isEditing) {
                             resetForm()
                         }
-                    } else {
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                     }
-                    showNfcWriteDialog = false
-                    nfcDataToPass = null
-                    dataToSaveToRoom = null
-                },
-                nfcIntentFromActivity = nfcIntentFromActivity
-            )
+                )
+            }
+
+            if (showFailureDialog) {
+                FailureDialog(
+                    message = failureMessage,
+                    onDismiss = {
+                        showFailureDialog = false
+                    }
+                )
+            }
         }
     }
 }

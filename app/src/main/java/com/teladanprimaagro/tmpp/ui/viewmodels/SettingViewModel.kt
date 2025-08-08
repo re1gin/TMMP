@@ -12,6 +12,8 @@ import com.teladanprimaagro.tmpp.data.UserRole
 import androidx.core.content.edit
 
 private const val PREFS_NAME = "app_settings_prefs"
+private const val KEY_UNIQUE_NO_FORMAT = "unique_no_format"
+private const val DEFAULT_UNIQUE_NO_FORMAT = "AME1"
 private const val KEY_MANDOR_LIST = "mandor_list"
 private const val KEY_PEMANEN_LIST = "pemanen_list"
 private const val KEY_BLOK_LIST = "blok_list"
@@ -20,11 +22,13 @@ private const val KEY_SUPIR_LIST = "supir_list"
 private const val KEY_KENDARAAN_LIST = "kendaraan_list"
 private const val KEY_IS_LOGGED_IN = "is_logged_in"
 private const val KEY_USER_ROLE = "user_role"
-
-// --- BARU: Keys untuk SPB Counter ---
 private const val KEY_SPB_COUNTER = "spb_counter"
 private const val KEY_SPB_LAST_MONTH = "spb_last_month"
 private const val KEY_SPB_LAST_YEAR = "spb_last_year"
+private const val KEY_SPB_FORMAT = "spb_format"
+private const val DEFAULT_SPB_FORMAT = "AME/TPE"
+private const val KEY_AFD_CODE = "afd_code"
+private const val DEFAULT_AFD_CODE = "AFD1"
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -102,8 +106,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             kendaraanList.addAll(listOf("Pilih No Polisi", "B 1234 ABC Default", "B 5678 DEF Default"))
         }
 
-
-        // Pastikan default ini disimpan jika baru pertama kali dijalankan
         saveDataLists()
     }
 
@@ -149,7 +151,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             }
         }
     }
-
 
     fun addMandor(name: String) {
         val trimmedName = name.trim()
@@ -248,7 +249,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun removeSupir(name: String) {
-        if (name != "Pilih Supir") { // Jangan hapus opsi default
+        if (name != "Pilih Supir") {
             supirList.remove(name)
             saveDataLists()
         }
@@ -272,7 +273,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun removeKendaraan(name: String) {
-        if (name != "Pilih No Polisi") { // Jangan hapus opsi default
+        if (name != "Pilih No Polisi") {
             kendaraanList.remove(name)
             saveDataLists()
         }
@@ -287,7 +288,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // --- BARU: Fungsi untuk mengelola SPB Counter ---
+    // --- Fungsi untuk mengelola SPB Counter ---
     fun getSpbCounter(): Int {
         return sharedPreferences.getInt(KEY_SPB_COUNTER, 0)
     }
@@ -305,10 +306,34 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun getSpbLastYear(): Int {
-        return sharedPreferences.getInt(KEY_SPB_LAST_YEAR, -1) // -1 sebagai indikator belum diset
+        return sharedPreferences.getInt(KEY_SPB_LAST_YEAR, -1)
     }
 
     fun setSpbLastYear(year: Int) {
         sharedPreferences.edit { putInt(KEY_SPB_LAST_YEAR, year) }
+    }
+
+    fun getUniqueNoFormat(): String {
+        return sharedPreferences.getString(KEY_UNIQUE_NO_FORMAT, DEFAULT_UNIQUE_NO_FORMAT) ?: DEFAULT_UNIQUE_NO_FORMAT
+    }
+
+    fun setUniqueNoFormat(format: String) {
+        sharedPreferences.edit { putString(KEY_UNIQUE_NO_FORMAT, format) }
+    }
+
+    fun getSpbFormat(): String {
+        return sharedPreferences.getString(KEY_SPB_FORMAT, DEFAULT_SPB_FORMAT) ?: DEFAULT_SPB_FORMAT
+    }
+
+    fun setSpbFormat(format: String) {
+        sharedPreferences.edit { putString(KEY_SPB_FORMAT, format) }
+    }
+
+    fun getAfdCode(): String {
+        return sharedPreferences.getString(KEY_AFD_CODE, DEFAULT_AFD_CODE) ?: DEFAULT_AFD_CODE
+    }
+
+    fun setAfdCode(code: String) {
+        sharedPreferences.edit { putString(KEY_AFD_CODE, code) }
     }
 }

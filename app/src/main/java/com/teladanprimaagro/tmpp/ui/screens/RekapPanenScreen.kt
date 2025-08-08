@@ -1,9 +1,10 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,12 +26,16 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -57,6 +62,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
@@ -68,7 +74,7 @@ import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RekapPanenScreen(
     navController: NavController,
@@ -82,6 +88,11 @@ fun RekapPanenScreen(
 
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPanenData by remember { mutableStateOf<PanenData?>(null) }
+    var showDeleteAllDialog by remember { mutableStateOf(false) }
+
+    // State untuk multi-selection
+    var isSelectionMode by remember { mutableStateOf(false) }
+    var selectedItems by remember { mutableStateOf(setOf<Int>()) }
 
     val sortOptions = listOf("Nama", "Blok")
     val selectedSortBy by panenViewModel.sortBy.collectAsState()
@@ -106,27 +117,36 @@ fun RekapPanenScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Rekap Panen",
+                        text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Panen",
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = {
+                        if (isSelectionMode) {
+                            isSelectionMode = false
+                            selectedItems = emptySet()
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali",
+                            imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = if (isSelectionMode) "Batal" else "Kembali",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO: Masih Belum Siap */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Pengaturan",
-                            tint = MaterialTheme.colorScheme.onPrimary
-                        )
+                    if (!isSelectionMode) {
+                        IconButton(onClick = { showDeleteAllDialog = true }) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteForever,
+                                contentDescription = "Hapus Semua",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -166,7 +186,6 @@ fun RekapPanenScreen(
                             label = { Text("Sortir Berdasarkan") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortDropdownExpanded) },
                             modifier = Modifier
-                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 
@@ -224,7 +243,6 @@ fun RekapPanenScreen(
                             label = { Text("Filter Pemanen") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pemanenDropdownExpanded) },
                             modifier = Modifier
-                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 
@@ -258,7 +276,6 @@ fun RekapPanenScreen(
                             label = { Text("Filter Blok") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = blokDropdownExpanded) },
                             modifier = Modifier
-                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 
@@ -308,12 +325,28 @@ fun RekapPanenScreen(
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                if (isSelectionMode) {
+                    Checkbox(
+                        checked = panenList.isNotEmpty() && selectedItems.size == panenList.size,
+                        onCheckedChange = { isChecked ->
+                            selectedItems = if (isChecked) {
+                                panenList.map { it.id }.toSet()
+                            } else {
+                                emptySet()
+                            }
+                        }
+                    )
+                } else {
+                    Spacer(modifier = Modifier.size(24.dp))
+                }
                 TableHeaderText(text = "Tanggal", weight = 0.20f)
                 TableHeaderText(text = "Nama", weight = 0.25f)
                 TableHeaderText(text = "Blok", weight = 0.10f)
                 TableHeaderText(text = "Total", weight = 0.10f)
-                TableHeaderText(text = "Edit", weight = 0.1f)
-                TableHeaderText(text = "Detail", weight = 0.1f)
+                if (!isSelectionMode) {
+                    TableHeaderText(text = "Edit", weight = 0.1f)
+                    TableHeaderText(text = "Detail", weight = 0.1f)
+                }
             }
 
             LazyColumn(
@@ -336,8 +369,22 @@ fun RekapPanenScreen(
                     }
                 } else {
                     items(panenList, key = { it.id }) { data ->
+                        val isSelected = selectedItems.contains(data.id)
                         TableRow(
                             data = data,
+                            isSelectionMode = isSelectionMode,
+                            isSelected = isSelected,
+                            onToggleSelection = { itemId ->
+                                selectedItems = if (selectedItems.contains(itemId)) {
+                                    selectedItems - itemId
+                                } else {
+                                    selectedItems + itemId
+                                }
+                            },
+                            onLongPress = {
+                                isSelectionMode = true
+                                selectedItems = selectedItems + it.id
+                            },
                             onDetailClick = { clickedData ->
                                 selectedPanenData = clickedData
                                 showDetailDialog = true
@@ -352,43 +399,64 @@ fun RekapPanenScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SummaryBox(label = "Data Masuk", value = totalDataMasuk.toString())
-
-                OutlinedButton(
-                    onClick = { panenViewModel.clearAllPanenData() }, // Panggil fungsi penghapusan
-                    shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        containerColor = Color.Transparent
-                    ),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+            if (!isSelectionMode) {
+                Row(
                     modifier = Modifier
-                        .wrapContentWidth()
-                        .height(60.dp)
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteForever,
-                            contentDescription = "Hapus Semua Data",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            "Hapus Semua",
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium,
-                            textAlign = TextAlign.Center
-                        )
+                    SummaryBox(label = "Data Masuk", value = totalDataMasuk.toString())
+                    SummaryBox(label = "Total Buah", value = totalSemuaBuah.toString())
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    Button(
+                        onClick = {
+                            isSelectionMode = false
+                            selectedItems = emptySet()
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Batal", fontWeight = FontWeight.Bold)
+                    }
+
+                    Button(
+                        onClick = {
+                            panenViewModel.deleteSelectedPanenData(selectedItems.toList())
+                            isSelectionMode = false
+                            selectedItems = emptySet()
+                        },
+                        enabled = selectedItems.isNotEmpty(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.error,
+                            contentColor = MaterialTheme.colorScheme.onError
+                        ),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Hapus (${selectedItems.size})", fontWeight = FontWeight.Bold)
                     }
                 }
-                SummaryBox(label = "Total Buah", value = totalSemuaBuah.toString())
             }
+
             Spacer(modifier = Modifier.height(10.dp))
 
             Text(
@@ -411,6 +479,147 @@ fun RekapPanenScreen(
             }
         )
     }
+
+    if (showDeleteAllDialog) {
+        Dialog(onDismissRequest = { showDeleteAllDialog = false }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Hapus Semua Data?",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 10.dp)
+                    )
+                    Text(
+                        text = "Yakin hapus semua data? Aksi ini tidak dapat di batalkan!",
+                        color = Color.White.copy(alpha = 0.7f),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(bottom = 20.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                    ) {
+                        Button(
+                            onClick = { showDeleteAllDialog = false },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFFFF0600),
+                                contentColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Tidak", fontWeight = FontWeight.Bold)
+                        }
+
+                        Button(
+                            onClick = {
+                                panenViewModel.clearAllPanenData()
+                                showDeleteAllDialog = false
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 10.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF89FF00),
+                                contentColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Ya", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun TableRow(
+    data: PanenData,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onToggleSelection: (Int) -> Unit,
+    onLongPress: (PanenData) -> Unit,
+    onDetailClick: (PanenData) -> Unit,
+    onEditClick: (PanenData) -> Unit
+) {
+    val backgroundColor = if (isSelected) BackgroundLightGray.copy(alpha = 0.5f) else Color.Transparent
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) {
+                        onToggleSelection(data.id)
+                    } else {
+                        onDetailClick(data)
+                    }
+                },
+                onLongClick = { onLongPress(data) }
+            )
+            .background(backgroundColor)
+            .padding(vertical = 8.dp, horizontal = 1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isSelectionMode) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onToggleSelection(data.id) },
+                modifier = Modifier.padding(end = 1.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+
+        TableCellText(text = data.tanggalWaktu, weight = 0.25f)
+        TableCellText(text = data.namaPemanen, weight = 0.25f)
+        TableCellText(text = data.blok, weight = 0.10f)
+        TableCellText(text = data.totalBuah.toString(), weight = 0.10f)
+
+        if (!isSelectionMode) {
+            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = PrimaryOrange,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onEditClick(data) }
+                )
+            }
+            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Detail",
+                    tint = PrimaryOrange,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onDetailClick(data) }
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -423,44 +632,6 @@ fun RowScope.TableHeaderText(text: String, weight: Float) {
         textAlign = TextAlign.Center,
         modifier = Modifier.weight(weight)
     )
-}
-
-@Composable
-fun TableRow(data: PanenData, onDetailClick: (PanenData) -> Unit, onEditClick: (PanenData) -> Unit) {
-    Log.d("RekapPanenDebug", "Nama Pemanen: ${data.namaPemanen}, Blok: ${data.blok}")
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TableCellText(text = data.tanggalWaktu, weight = 0.20f)
-        TableCellText(text = data.namaPemanen, weight = 0.25f)
-        TableCellText(text = data.blok, weight = 0.10f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.10f)
-
-        Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = "Edit",
-                tint = PrimaryOrange,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { onEditClick(data) }
-            )
-        }
-        Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = Icons.Default.Info,
-                contentDescription = "Detail",
-                tint = PrimaryOrange,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { onDetailClick(data) }
-            )
-        }
-    }
 }
 
 @Composable

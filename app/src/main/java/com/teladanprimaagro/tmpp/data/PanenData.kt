@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "panen_entries")
 data class PanenData(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0, // Tambahkan ID unik sebagai Primary Key
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val tanggalWaktu: String,
     val uniqueNo: String,
     val locationPart1: String,

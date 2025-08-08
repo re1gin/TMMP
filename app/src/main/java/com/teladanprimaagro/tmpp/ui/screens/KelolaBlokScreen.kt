@@ -43,7 +43,6 @@ fun KelolaBlokScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Top Header
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,7 +80,6 @@ fun KelolaBlokScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Input untuk nama blok baru
             OutlinedTextField(
                 value = newBlokName,
                 onValueChange = { newBlokName = it },
@@ -101,12 +99,11 @@ fun KelolaBlokScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Tombol Tambah
             Button(
                 onClick = {
                     if (newBlokName.isNotBlank()) {
-                        settingsViewModel.addBlok(newBlokName.trim()) // Gunakan trim() untuk membersihkan spasi
-                        newBlokName = "" // Bersihkan input setelah ditambahkan
+                        settingsViewModel.addBlok(newBlokName.trim())
+                        newBlokName = ""
                     }
                 },
                 modifier = Modifier
@@ -135,7 +132,6 @@ fun KelolaBlokScreen(
             HorizontalDivider(thickness = 1.dp, color = DotGray)
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Daftar blok yang sudah ada
             LazyColumn(
                 modifier = Modifier.fillMaxWidth()
             ) {

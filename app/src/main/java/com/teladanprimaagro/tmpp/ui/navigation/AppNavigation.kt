@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,14 +29,15 @@ import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
+import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
 import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
-import com.teladanprimaagro.tmpp.ui.screens.PengaturanScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -129,6 +130,11 @@ fun AppNavigation(
             )
         }
 
+        composable("ubah_format_unique_no_screen") {
+            UbahFormatUniqueNoScreen(navController, settingsViewModel
+            )
+        }
+
         composable("kelola_kemandoran_screen") {
             KelolaKemandoranScreen(
                 navController, settingsViewModel
@@ -139,6 +145,7 @@ fun AppNavigation(
                 navController, settingsViewModel
             )
         }
+
         composable("kelola_blok_screen") {
             KelolaBlokScreen(
                 navController, settingsViewModel
@@ -170,6 +177,14 @@ fun AppNavigation(
                 pengirimanViewModel = pengirimanViewModel
             )
         }
+
+        composable("spb_settings_screen") {
+            SpbSettingsScreen(
+                navController = navController,
+                settingsViewModel = settingsViewModel
+            )
+        }
+
         composable("kelola_supir_screen") {
             KelolaSupirScreen(
                 navController = navController,

@@ -19,7 +19,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
 
-    // StateFlow untuk menyimpan data panen yang sedang diedit
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
     val panenDataToEdit: StateFlow<PanenData?> = _panenDataToEdit.asStateFlow()
 
@@ -45,20 +44,11 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             .combine(_sortOrderAscending) { list, isAscending ->
-                val sortedList = if (isAscending) {
-                    when (_sortBy.value) {
-                        "Nama" -> list.sortedBy { it.namaPemanen }
-                        "Blok" -> list.sortedBy { it.blok }
-                        else -> list
-                    }
+                if (isAscending) {
+                    list
                 } else {
-                    when (_sortBy.value) {
-                        "Nama" -> list.sortedByDescending { it.namaPemanen }
-                        "Blok" -> list.sortedByDescending { it.blok }
-                        else -> list
-                    }
+                    list.reversed()
                 }
-                sortedList
             }
             .combine(_selectedPemanenFilter) { list, pemanenFilter ->
                 if (pemanenFilter == "Semua") {
@@ -140,8 +130,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun clearFilters() {
-        _selectedPemanenFilter.value = "Semua Pemanen"
-        _selectedBlokFilter.value = "Semua Blok"
+        _selectedPemanenFilter.value = "Semua"
+        _selectedBlokFilter.value = "Semua"
     }
 
     fun updatePanenData(panen: PanenData) {
@@ -152,7 +142,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadPanenDataById(id: Int) {
         viewModelScope.launch {
-            _panenDataToEdit.value = panenDao.getPanenById(id.toString())
+            _panenDataToEdit.value = panenDao.getPanenById(id)
         }
     }
 
@@ -169,6 +159,12 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun deletePanenDataById(id: Int) {
         viewModelScope.launch {
             panenDao.deletePanenById(id)
+        }
+    }
+
+    fun deleteSelectedPanenData(ids: List<Int>) {
+        viewModelScope.launch {
+            panenDao.deleteMultiplePanen(ids)
         }
     }
 }

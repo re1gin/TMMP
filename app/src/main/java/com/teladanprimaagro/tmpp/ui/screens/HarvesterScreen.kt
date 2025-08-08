@@ -24,7 +24,7 @@ fun HarvesterContent(
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize(),
+            .padding(horizontal = 1.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FullDateCard(title = "Hai, Harvester!")
@@ -33,23 +33,20 @@ fun HarvesterContent(
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+                .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                horizontalArrangement = Arrangement.SpaceAround, // Mengatur jarak di sekitar setiap item
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MenuButton(
                     text = "Panen",
                     icon = Icons.Default.Add,
-                    // --- Perubahan di sini ---
-                    onClick = { navController.navigate("panenInputScreen/-1") } // Mengirim -1 untuk mode input baru
-                    // --- Akhir perubahan ---
+                    onClick = { navController.navigate("panenInputScreen/-1") }
                 )
 
                 MenuButton(
@@ -61,7 +58,7 @@ fun HarvesterContent(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround,
+                horizontalArrangement = Arrangement.SpaceAround, // Mengatur jarak di sekitar setiap item
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 MenuButton(

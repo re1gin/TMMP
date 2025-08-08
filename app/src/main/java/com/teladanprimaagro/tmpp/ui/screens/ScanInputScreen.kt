@@ -3,48 +3,23 @@ package com.teladanprimaagro.tmpp.ui.screens
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Nfc
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -55,7 +30,10 @@ import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.ScanStatus
 import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.util.NfcReadDialog
+import com.teladanprimaagro.tmpp.ui.components.SuccessScanDialog
+import com.teladanprimaagro.tmpp.ui.components.DuplicateScanDialog
 import kotlinx.coroutines.launch
+import androidx.core.content.ContextCompat
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,22 +45,21 @@ fun ScanInputScreen(
     nfcIntentFromActivity: State<Intent?>
 ) {
     val context = LocalContext.current
+    val vibrator = ContextCompat.getSystemService(context, Vibrator::class.java)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
     val nfcState by sharedNfcViewModel.nfcState.collectAsState()
     var showNfcReadDialog by remember { mutableStateOf(false) }
 
-    // Ambil data dari PengirimanViewModel
     val scannedItems by pengirimanViewModel.scannedItems.collectAsState()
     val totalBuahCalculated by pengirimanViewModel.totalBuahCalculated
 
-    // Ambil status scan dari PengirimanViewModel
     val scanStatus by pengirimanViewModel.scanStatus.collectAsState()
 
-    // State untuk mengontrol dialog
-    var showDuplicateDialog by remember { mutableStateOf<String?>(null) }
-    var showSuccessDialog by remember { mutableStateOf(false) }
+    // NEW: States to control custom dialogs
+    var showDuplicateDialog by remember { mutableStateOf(false) }
+    var showSuccessScanDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(nfcState) {
         when (val state = nfcState) {
@@ -90,11 +67,11 @@ fun ScanInputScreen(
                 showNfcReadDialog = false
             }
             is NfcOperationState.ReadError -> {
-                snackbarHostState.showSnackbar(state.message)
+                coroutineScope.launch { snackbarHostState.showSnackbar(state.message) }
             }
             is NfcOperationState.GeneralStatus -> {
                 if (!state.isEnabled) {
-                    snackbarHostState.showSnackbar(state.message ?: "NFC tidak tersedia atau dinonaktifkan.")
+                    coroutineScope.launch { snackbarHostState.showSnackbar(state.message ?: "NFC tidak tersedia atau dinonaktifkan.") }
                 }
             }
             else -> { /* Do nothing */ }
@@ -104,14 +81,26 @@ fun ScanInputScreen(
     LaunchedEffect(scanStatus) {
         when(val status = scanStatus) {
             is ScanStatus.Success -> {
-                showSuccessDialog = true
+                showSuccessScanDialog = true
+                if (vibrator != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
+                } else if (vibrator != null) {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(100)
+                }
             }
             is ScanStatus.Duplicate -> {
-                showDuplicateDialog = status.uniqueNo
+                showDuplicateDialog = true
+                if (vibrator != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
+                } else if (vibrator != null) {
+                    @Suppress("DEPRECATION")
+                    vibrator.vibrate(longArrayOf(0, 200, 100, 200), -1)
+                }
             }
             is ScanStatus.Idle -> {
-                showSuccessDialog = false
-                showDuplicateDialog = null
+                showSuccessScanDialog = false
+                showDuplicateDialog = false
             }
             is ScanStatus.Finalized -> { /* Do nothing */ }
         }
@@ -262,62 +251,22 @@ fun ScanInputScreen(
         )
     }
 
-    // Pop-up untuk duplikasi
-    showDuplicateDialog?.let { uniqueNo ->
-        DuplicateAlertDialog(
+    if (showDuplicateDialog) {
+        DuplicateScanDialog(
             onDismissRequest = {
-                // Reset status di ViewModel agar dialog tidak muncul lagi
-                showDuplicateDialog = null
+                showDuplicateDialog = false
+                pengirimanViewModel.resetScanStatus() // Reset status di ViewModel
             },
-            uniqueNo = uniqueNo
+            uniqueNo = (scanStatus as? ScanStatus.Duplicate)?.uniqueNo ?: ""
         )
     }
 
-    // Pop-up untuk sukses scan
-    if (showSuccessDialog) {
-        SuccessAlertDialog(
+    if (showSuccessScanDialog) {
+        SuccessScanDialog(
             onDismissRequest = {
-                // Reset status di ViewModel agar dialog tidak muncul lagi
-                showSuccessDialog = false
+                showSuccessScanDialog = false
+                pengirimanViewModel.resetScanStatus() // Reset status di ViewModel
             }
         )
     }
-}
-
-
-@Composable
-private fun DuplicateAlertDialog(
-    onDismissRequest: () -> Unit,
-    uniqueNo: String
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = "Peringatan Duplikasi Data") },
-        text = {
-            Text(text = "Tag dengan ID '$uniqueNo' sudah pernah di-scan. Data tidak ditambahkan.")
-        },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("OK")
-            }
-        }
-    )
-}
-
-@Composable
-private fun SuccessAlertDialog(
-    onDismissRequest: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(text = "Scan Berhasil!") },
-        text = {
-            Text(text = "Item baru berhasil ditambahkan ke daftar pengiriman.")
-        },
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text("Selesai")
-            }
-        }
-    )
 }

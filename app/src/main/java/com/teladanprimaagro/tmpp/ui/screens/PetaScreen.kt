@@ -40,7 +40,7 @@ fun PetaScreen(
         OfflineMapView(
             modifier = Modifier.fillMaxSize(),
             panenLocations = panenLocations,
-            onLocationClick = { panen: PanenData -> // <-- Tentukan tipe parameter panen secara eksplisit
+            onLocationClick = { panen: PanenData ->
                 selectedPanenData = panen
             }
         )

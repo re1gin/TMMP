@@ -34,7 +34,6 @@ data class ScannedItem(
     val totalBuah: Int
 )
 
-// Definisikan sealed class untuk status scan
 sealed class ScanStatus {
     object Idle : ScanStatus()
     object Success : ScanStatus()
@@ -46,7 +45,7 @@ sealed class ScanStatus {
 class PengirimanViewModel(application: Application) : AndroidViewModel(application) {
 
     private val pengirimanDao: PengirimanDao = AppDatabase.getDatabase(application).pengirimanDao()
-    private val scannedItemDao: ScannedItemDao = AppDatabase.getDatabase(application).scannedItemDao() // Tambahkan ini
+    private val scannedItemDao: ScannedItemDao = AppDatabase.getDatabase(application).scannedItemDao()
     private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
     private val gson = Gson()
 
@@ -56,10 +55,8 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     val spbNumber = mutableStateOf("")
 
-    // Ubah _scannedItems agar membaca dari database
     private val _scannedItems = scannedItemDao.getAllScannedItems()
         .map { list ->
-            // Konversi dari ScannedItemEntity ke ScannedItem
             list.map { ScannedItem(it.uniqueNo, it.tanggal, it.blok, it.totalBuah) }
         }
         .stateIn(
@@ -69,7 +66,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         )
     val scannedItems: StateFlow<List<ScannedItem>> = _scannedItems
 
-    // State untuk memberikan umpan balik status scan ke UI
     private val _scanStatus = MutableStateFlow<ScanStatus>(ScanStatus.Idle)
     val scanStatus: StateFlow<ScanStatus> = _scanStatus.asStateFlow()
 
@@ -96,14 +92,12 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     init {
         generateSpbNumber(selectedMandorLoading = "A")
-        // Langganan ke perubahan database untuk memperbarui UI
         viewModelScope.launch {
             scannedItems.collect { items ->
                 if (items.isNotEmpty()) {
                     uniqueNoDisplay.value = if (items.size == 1) items.first().uniqueNo else "${items.size} Item Discan"
                     dateTimeDisplay.value = items.first().tanggal
                 } else {
-                    uniqueNoDisplay.value = "Scan NFC"
                     dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
                 }
                 totalBuahCalculated.intValue = items.sumOf { it.totalBuah }
@@ -151,23 +145,25 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         counter++
         settingsViewModel.setSpbCounter(counter)
 
+        val spbFormat = settingsViewModel.getSpbFormat()
+        val afdCode = settingsViewModel.getAfdCode()
+
         val sequenceNumber = String.format(Locale.getDefault(), "%04d", counter)
         val romanMonth = getRomanMonth(currentDateTime.month)
 
-        spbNumber.value = "E005/ESPB/AFD1/$romanMonth/$currentYear/${selectedMandorLoading}$sequenceNumber"
+        spbNumber.value = "$spbFormat/$afdCode/$romanMonth/$currentYear/${selectedMandorLoading}$sequenceNumber"
         Log.d("PengirimanViewModel", "Generated SPB: ${spbNumber.value}")
     }
 
     fun addScannedItem(item: ScannedItem) {
         viewModelScope.launch {
-            // Cek duplikat di database
+            _scanStatus.value = ScanStatus.Idle
             val isDuplicate = scannedItemDao.getAllScannedItems().first().any { it.uniqueNo == item.uniqueNo }
 
             if (isDuplicate) {
                 _scanStatus.value = ScanStatus.Duplicate(item.uniqueNo)
                 Log.d("PengirimanViewModel", "Scan item rejected: Duplicate uniqueNo -> ${item.uniqueNo}")
             } else {
-                // Simpan item ke database
                 scannedItemDao.insertScannedItem(
                     ScannedItemEntity(
                         uniqueNo = item.uniqueNo,
@@ -188,7 +184,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         mandorLoading: String
     ) {
         viewModelScope.launch {
-            // Ambil data item yang discan dari database
             val scannedItemsFromDb = scannedItemDao.getAllScannedItems().first()
 
             if (scannedItemsFromDb.isEmpty()) {
@@ -228,16 +223,12 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             )
             pengirimanDao.insertPengiriman(newPengiriman)
 
-            // Hapus semua item dari tabel sementara setelah finalisasi
             scannedItemDao.deleteAllScannedItems()
 
-            // Reset state lokal
             uniqueNoDisplay.value = "Scan NFC"
             dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
             totalBuahCalculated.intValue = 0
             _scanStatus.value = ScanStatus.Finalized
-
-            generateSpbNumber(selectedMandorLoading = "A")
             Log.d("PengirimanViewModel", "Item difinalisasi dan disimpan. Total Pengiriman: ${pengirimanList.value.size}")
         }
     }
@@ -245,7 +236,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     fun clearAllPengirimanData() {
         viewModelScope.launch {
             pengirimanDao.clearAllPengiriman()
-            scannedItemDao.deleteAllScannedItems() // Pastikan tabel sementara juga dibersihkan
+            scannedItemDao.deleteAllScannedItems()
             uniqueNoDisplay.value = "Scan NFC"
             dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
             totalBuahCalculated.intValue = 0
@@ -253,5 +244,21 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             generateSpbNumber(selectedMandorLoading = "A")
             _scanStatus.value = ScanStatus.Idle
         }
+    }
+
+    fun deletePengirimanDataById(id: Int) {
+        viewModelScope.launch {
+            pengirimanDao.deletePengirimanById(id)
+        }
+    }
+
+    fun deleteSelectedPengirimanData(ids: List<Int>) {
+        viewModelScope.launch {
+            pengirimanDao.deleteMultiplePengiriman(ids)
+        }
+    }
+
+    fun resetScanStatus() {
+        _scanStatus.value = ScanStatus.Idle
     }
 }

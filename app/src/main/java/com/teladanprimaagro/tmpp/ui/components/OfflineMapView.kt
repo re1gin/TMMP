@@ -43,8 +43,6 @@ fun OfflineMapView(
     AndroidView(
         factory = {
             MapView(it).apply {
-                // Atur sumber ubin ke MAPNIK. Osmdroid akan otomatis
-                // menggunakan ubin dari cache (folder offline) jika ada.
                 setTileSource(TileSourceFactory.MAPNIK)
 
                 setMultiTouchControls(true)

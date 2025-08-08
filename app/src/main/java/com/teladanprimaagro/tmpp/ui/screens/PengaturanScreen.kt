@@ -84,6 +84,13 @@ fun PengaturanScreen(
             userRole?.let { role ->
                 when (role) {
                     UserRole.HARVESTER -> {
+
+                        SettingMenuItem(text = "Format Nomor Unik") {
+                            pendingNavigationRoute = "ubah_format_unique_no_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+
                         SettingMenuItem(text = "Kemandoran") {
                             pendingNavigationRoute = "kelola_kemandoran_screen"
                             showPasswordDialog = true
@@ -117,6 +124,12 @@ fun PengaturanScreen(
 
                         SettingMenuItem(text = "Nomor Polisi") {
                             pendingNavigationRoute = "kelola_kendaraan_screen"
+                            showPasswordDialog = true
+                        }
+                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
+
+                        SettingMenuItem(text = "Pengaturan SPB") {
+                            pendingNavigationRoute = "spb_settings_screen"
                             showPasswordDialog = true
                         }
                         HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))

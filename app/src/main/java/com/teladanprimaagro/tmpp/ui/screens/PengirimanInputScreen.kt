@@ -80,12 +80,10 @@ fun PengirimanInputScreen(
     val noPolisiOptions = settingsViewModel.kendaraanList
     val mandorLoadingOptions = listOf("A", "B", "C", "D") // Opsi untuk mandor loading
 
-    val uniqueNoDisplay = pengirimanViewModel.uniqueNoDisplay
     val dateTimeDisplay = pengirimanViewModel.dateTimeDisplay
     val totalBuahCalculated = pengirimanViewModel.totalBuahCalculated
     val spbNumber = pengirimanViewModel.spbNumber
 
-    // State lokal untuk Dropdown
     var selectedSupir by remember(supirOptions) { mutableStateOf(supirOptions.firstOrNull() ?: "") }
     var supirExpanded by remember { mutableStateOf(false) }
 
@@ -104,8 +102,6 @@ fun PengirimanInputScreen(
             pengirimanViewModel.spbNumber.value = "Pilih Mandor Loading"
         }
     }
-
-    val currentUserRole = settingsViewModel.getUserRole() ?: UserRole.HARVESTER
 
     Column(
         modifier = Modifier

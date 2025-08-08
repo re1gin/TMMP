@@ -14,9 +14,8 @@ interface PengirimanDao {
     @Query("SELECT * FROM pengiriman_data ORDER BY id DESC")
     fun getAllPengiriman(): Flow<List<PengirimanData>>
 
-    // Ini adalah perubahan yang Anda lakukan: dari Flow ke suspend
     @Query("SELECT * FROM pengiriman_data WHERE id = :id")
-    suspend fun getPengirimanById(id: Int): PengirimanData? // Sudah benar
+    suspend fun getPengirimanById(id: Int): PengirimanData?
 
     @Update
     suspend fun updatePengiriman(pengiriman: PengirimanData)
@@ -26,4 +25,7 @@ interface PengirimanDao {
 
     @Query("DELETE FROM pengiriman_data WHERE id = :id")
     suspend fun deletePengirimanById(id: Int)
+
+    @Query("DELETE FROM pengiriman_data WHERE id IN (:ids)")
+    suspend fun deleteMultiplePengiriman(ids: List<Int>)
 }
