@@ -144,7 +144,7 @@ fun RekapPanenScreen(
                             Icon(
                                 imageVector = Icons.Default.DeleteForever,
                                 contentDescription = "Hapus Semua",
-                                tint = MaterialTheme.colorScheme.onPrimary
+                                tint = Color.Red
                             )
                         }
                     }

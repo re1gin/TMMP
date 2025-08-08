@@ -758,14 +758,12 @@ fun PanenInputScreen(
                 },
                 dataToWrite = nfcDataToPass,
                 onWriteComplete = { success, message ->
-                    showNfcWriteDialog = false // Tutup dialog NFC setelah selesai menulis
+                    showNfcWriteDialog = false
                     nfcDataToPass = null
-                    dataToSaveToRoom = null
 
                     if (success) {
-                        showSuccessDialog = true // Tampilkan dialog berhasil
+                        showSuccessDialog = true
 
-                        // Logika untuk getar berhasil (ringan dan pendek)
                         vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
 
                         dataToSaveToRoom?.let { originalData ->
@@ -775,14 +773,14 @@ fun PanenInputScreen(
                                 panenViewModel.addPanenData(originalData)
                             }
                         }
-                        // Navigasi tidak langsung dilakukan di sini
                     } else {
-                        failureMessage = message // Simpan pesan gagal
-                        showFailureDialog = true // Tampilkan dialog gagal
-
-                        // Logika untuk getar gagal (lebih kuat dan berulang)
+                        failureMessage = message
+                        showFailureDialog = true
                         vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
                     }
+
+                    // Reset dataToSaveToRoom ke null di sini, setelah data berhasil disimpan atau gagal.
+                    dataToSaveToRoom = null
                 },
                 nfcIntentFromActivity = nfcIntentFromActivity
             )
