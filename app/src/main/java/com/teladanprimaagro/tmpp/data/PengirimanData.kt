@@ -14,7 +14,9 @@ data class PengirimanData(
     val uniqueNo: String, // Dari NFC
     val tanggalNfc: String, // Dari NFC
     val blok: String, // Dari NFC
-    val detailScannedItemsJson: String, // Tetap simpan detail ini jika diperlukan untuk analisis
+    val detailScannedItemsJson: String, // Menyimpan daftar ScannedItem dalam format JSON
     val mandorLoading: String, // Kolom baru: Mandor Loading
-    val isUploaded: Boolean = false // Status upload
+    val isUploaded: Boolean = false, // Status upload
+    val isFinalized: Boolean = false // Kolom baru untuk statistik finalisasi
 )
+

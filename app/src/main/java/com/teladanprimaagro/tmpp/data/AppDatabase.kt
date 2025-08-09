@@ -11,7 +11,7 @@ import androidx.room.RoomDatabase
         PengirimanData::class,
         ScannedItemEntity::class
     ],
-    version = 7, // Versi harus dinaikkan jika ada perubahan skema
+    version = 8, // Versi harus dinaikkan jika ada perubahan skema
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

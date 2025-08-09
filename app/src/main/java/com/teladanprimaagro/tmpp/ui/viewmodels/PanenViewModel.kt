@@ -106,6 +106,43 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             initialValue = 0
         )
 
+    val statistikJenisBuahPerPemanen: StateFlow<Map<String, Map<String, Int>>> = panenDao.getAllPanen()
+        .map { panenList ->
+            panenList.groupBy { it.namaPemanen }
+                .mapValues { (_, dataList) ->
+                    mapOf(
+                        "Buah N" to dataList.sumOf { it.buahN },
+                        "Buah A" to dataList.sumOf { it.buahA },
+                        "Buah OR" to dataList.sumOf { it.buahOR },
+                        "Buah E" to dataList.sumOf { it.buahE },
+                        "Buah AB" to dataList.sumOf { it.buahAB },
+                        "Buah BL" to dataList.sumOf { it.buahBL }
+                    )
+                }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
+
+    // New StateFlow to calculate total of each fruit type
+    val totalJenisBuah: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+        .map { panenList ->
+            mapOf(
+                "Buah N" to panenList.sumOf { it.buahN },
+                "Buah A" to panenList.sumOf { it.buahA },
+                "Buah OR" to panenList.sumOf { it.buahOR },
+                "Buah E" to panenList.sumOf { it.buahE },
+                "Buah AB" to panenList.sumOf { it.buahAB },
+                "Buah BL" to panenList.sumOf { it.buahBL }
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyMap()
+        )
 
     fun addPanenData(panen: PanenData) {
         viewModelScope.launch {

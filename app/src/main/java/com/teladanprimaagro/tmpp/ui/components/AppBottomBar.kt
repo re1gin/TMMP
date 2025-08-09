@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
@@ -30,7 +31,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray // Asumsikan Anda punya warna TextGray
+import com.teladanprimaagro.tmpp.ui.theme.TextGray
 
 @Composable
 fun AppBottomBar(navController: NavController, userRole: UserRole) {
@@ -38,12 +39,15 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Daftar item navigasi
-    val navItems = listOf(
+    // Mendefinisikan item navigasi dasar untuk semua pengguna
+    val navItems = mutableListOf(
         NavigationItem("Home", Icons.Default.Home, "home_screen"),
-        NavigationItem("Lokasi", Icons.Default.LocationOn, "peta_screen"), // Rute peta
-        NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen")
+        NavigationItem("Lokasi", Icons.Default.LocationOn, "peta_screen")
     )
+    if (userRole == UserRole.DRIVER) {
+        navItems.add(NavigationItem("Laporan", Icons.Default.Description, "laporan_screen"))
+    }
+    navItems.add(NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen"))
 
     BottomAppBar(
         containerColor = BackgroundDarkGray,
@@ -66,7 +70,6 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
                     textColor = textColor,
                     onClick = {
                         navController.navigate(item.route) {
-                            // popUpTo start destination untuk menghindari duplikasi
                             navController.graph.startDestinationRoute?.let { startDestination ->
                                 popUpTo(startDestination) {
                                     saveState = true
@@ -81,6 +84,7 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
         }
     }
 }
+
 
 @Composable
 private fun RowScope.BottomNavItem(

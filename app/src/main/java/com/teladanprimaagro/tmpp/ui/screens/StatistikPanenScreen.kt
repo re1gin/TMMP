@@ -2,6 +2,7 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,14 +15,25 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
+import com.teladanprimaagro.tmpp.ui.theme.NeonGreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
+
+// Added colors for each fruit type
+val buahNColor = Color(0xFF4CAF50) // Green
+val buahAColor = Color(0xFFFF9800) // Orange
+val buahORColor = Color(0xFF2196F3) // Blue
+val buahEColor = Color(0xFFE91E63) // Pink
+val buahABColor = Color(0xFF9C27B0) // Purple
+val buahBLColor = Color(0xFFFFEB3B) // Yellow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,12 +41,16 @@ fun StatistikPanenScreen(
     navController: NavController,
     panenViewModel: PanenViewModel = viewModel()
 ) {
+    val totalDataMasuk by panenViewModel.totalDataMasuk.collectAsState()
+    val totalSemuaBuah by panenViewModel.totalSemuaBuah.collectAsState()
     val statistikPerPemanen by panenViewModel.statistikPerPemanen.collectAsState()
     val statistikPerBlok by panenViewModel.statistikPerBlok.collectAsState()
+    val statistikJenisBuahPerPemanen by panenViewModel.statistikJenisBuahPerPemanen.collectAsState()
+    val totalJenisBuah by panenViewModel.totalJenisBuah.collectAsState()
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = "Statistik Panen",
@@ -51,75 +67,130 @@ fun StatistikPanenScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Statistik Per Pemanen
-            StatistikSection(
-                title = "Total Buah per Pemanen",
-                data = statistikPerPemanen
+            item {
+                SummarySection(
+                    totalDataMasuk = totalDataMasuk,
+                    totalSemuaBuah = totalSemuaBuah
+                )
+            }
+
+            // Bar chart for total fruit per harvester
+            item {
+                StatistikSection(
+                    title = "Total Buah per Pemanen",
+                    data = statistikPerPemanen,
+                    barColor = NeonGreen
+                )
+            }
+
+            // Bar chart for total fruit per block
+            item {
+                StatistikSection(
+                    title = "Total Buah per Blok",
+                    data = statistikPerBlok,
+                    barColor = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            // Tabel untuk detail buah per pemanen
+            item {
+                FruitTableSection(
+                    data = statistikJenisBuahPerPemanen,
+                    totalJenisBuah = totalJenisBuah
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SummarySection(totalDataMasuk: Int, totalSemuaBuah: Int) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .padding(16.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "$totalDataMasuk",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Statistik Per Blok
-            StatistikSection(
-                title = "Total Buah per Blok",
-                data = statistikPerBlok
+            Text(
+                text = "Data Masuk",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        // Tambahkan pemisah vertikal jika perlu, atau gunakan Spacer
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "$totalSemuaBuah",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = NeonGreen
+            )
+            Text(
+                text = "Total Buah",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
 }
 
 @Composable
-fun StatistikSection(title: String, data: Map<String, Int>) {
-    // Cari nilai maksimum untuk menentukan skala bar
+fun StatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
     val maxValue = data.values.maxOrNull()?.toFloat() ?: 0f
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(BackgroundLightGray.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(16.dp)
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
+            color = MaterialTheme.colorScheme.onSurface
         )
-        HorizontalDivider(Modifier.padding(bottom = 8.dp))
+        HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
         if (data.isEmpty()) {
             Text(
                 text = "Belum ada data panen.",
                 style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 8.dp)
             )
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 300.dp)
-            ) {
-                items(data.toList()) { (key, value) ->
-                    BarChartItem(
-                        label = key,
-                        value = value,
-                        maxValue = maxValue,
-                        barColor = MaterialTheme.colorScheme.primary
-                    )
-                }
+            data.forEach { (key, value) ->
+                BarChartItem(
+                    label = key,
+                    value = value,
+                    maxValue = maxValue,
+                    barColor = barColor
+                )
             }
         }
     }
@@ -134,10 +205,10 @@ fun BarChartItem(
 ) {
     var animationPlayed by remember { mutableStateOf(false) }
 
-    // Animasi untuk bar chart
     val barWidth by animateFloatAsState(
         targetValue = if (animationPlayed) (value.toFloat() / maxValue) else 0f,
-        animationSpec = tween(durationMillis = 1000)
+        animationSpec = tween(durationMillis = 1000),
+        label = "bar_chart_animation_for_${label.replace(" ", "_")}"
     )
     LaunchedEffect(key1 = Unit) {
         animationPlayed = true
@@ -155,7 +226,8 @@ fun BarChartItem(
             overflow = TextOverflow.Ellipsis,
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.width(8.dp))
         Box(
@@ -178,7 +250,185 @@ fun BarChartItem(
             text = "$value",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.width(40.dp)
+        )
+    }
+}
+
+
+@Composable
+fun FruitTableSection(
+    data: Map<String, Map<String, Int>>,
+    totalJenisBuah: Map<String, Int>
+) {
+    val buahColors = mapOf(
+        "Buah N" to buahNColor,
+        "Buah A" to buahAColor,
+        "Buah OR" to buahORColor,
+        "Buah E" to buahEColor,
+        "Buah AB" to buahABColor,
+        "Buah BL" to buahBLColor
+    )
+    val sortedFruitKeys = listOf("Buah N", "Buah A", "Buah OR", "Buah E", "Buah AB", "Buah BL")
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Detail Buah per Pemanen",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        HorizontalDivider(Modifier.padding(bottom = 8.dp))
+
+        if (data.isEmpty()) {
+            Text(
+                text = "Belum ada data panen buah.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        } else {
+            // Header Tabel
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Nama",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1.2f)
+                )
+                sortedFruitKeys.forEach { jenis ->
+                    // Memodifikasi header agar ada indikator warna
+                    Row(
+                        modifier = Modifier.weight(0.5f),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(buahColors[jenis] ?: Color.Gray)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = jenis.replace("Buah ", ""),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            // Baris data per pemanen (tetap sama)
+            data.forEach { (pemanen, jenisBuahMap) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = pemanen,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.weight(1.2f),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1
+                    )
+                    sortedFruitKeys.forEach { jenis ->
+                        val value = jenisBuahMap[jenis] ?: 0
+                        Text(
+                            text = "$value",
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.weight(0.5f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
+
+            // Baris total (tetap sama)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Total",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.weight(1.2f)
+                )
+                sortedFruitKeys.forEach { jenis ->
+                    val total = totalJenisBuah[jenis] ?: 0
+                    Text(
+                        text = "$total",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(0.5f),
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        }
+
+        // Legenda warna (tetap sama)
+        HorizontalDivider(Modifier.padding(top = 16.dp, bottom = 8.dp))
+        Text(
+            text = "Indikator Warna",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            val items = buahColors.filter { (jenis, _) ->
+                (totalJenisBuah[jenis] ?: 0) > 0
+            }
+
+            val weightPerItem = 1f / (items.size.takeIf { it > 0 } ?: 1)
+
+            items.forEach { (jenis, color) ->
+                Box(
+                    modifier = Modifier
+                        .weight(weightPerItem, fill = true)
+                        .padding(4.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LegendItem(label = jenis, color = color)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LegendItem(label: String, color: Color) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Canvas(modifier = Modifier.size(16.dp)) {
+            drawRect(color = color)
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = label.replace("Buah ", ""),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

@@ -28,4 +28,10 @@ interface PengirimanDao {
 
     @Query("DELETE FROM pengiriman_data WHERE id IN (:ids)")
     suspend fun deleteMultiplePengiriman(ids: List<Int>)
+
+    @Query("SELECT * FROM pengiriman_data WHERE waktuPengiriman BETWEEN :startDate AND :endDate ORDER BY waktuPengiriman DESC")
+    fun getDataByDateRange(startDate: String, endDate: String): Flow<List<PengirimanData>>
+
+    @Query("DELETE FROM pengiriman_data WHERE waktuPengiriman < :dateThreshold")
+    suspend fun deleteOldPengiriman(dateThreshold: String)
 }
