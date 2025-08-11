@@ -265,7 +265,6 @@ fun PanenInputScreen(
         }
     )
 
-
     fun generateUniqueCode(
         dateTime: LocalDateTime,
         block: String,
@@ -295,7 +294,7 @@ fun PanenInputScreen(
     }
 
     fun createImageUri(context: Context): Uri {
-        val photosDir = File(context.cacheDir, "panen_photos")
+        val photosDir = File(context.filesDir, "panen_photos")
         photosDir.mkdirs()
 
         val newFile = File(photosDir, "IMG_${System.currentTimeMillis()}.jpg")
@@ -659,6 +658,7 @@ fun PanenInputScreen(
                         ).show()
                         return@Button
                     }
+
                     if (totalBuah <= 0) {
                         Toast.makeText(
                             context,
@@ -723,8 +723,7 @@ fun PanenInputScreen(
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFADFF2F),
-                    contentColor = Color.Black
-                )
+                    contentColor = Color.Black),
             ) {
                 Text(if (isEditing) "Simpan Perubahan" else "Kirim", fontWeight = FontWeight.Bold)
             }
@@ -778,8 +777,6 @@ fun PanenInputScreen(
                         showFailureDialog = true
                         vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
                     }
-
-                    // Reset dataToSaveToRoom ke null di sini, setelah data berhasil disimpan atau gagal.
                     dataToSaveToRoom = null
                 },
                 nfcIntentFromActivity = nfcIntentFromActivity

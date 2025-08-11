@@ -14,6 +14,9 @@ interface PanenDao {
     @Query("SELECT * FROM panen_entries WHERE id = :panenId")
     suspend fun getPanenById(panenId: Int): PanenData?
 
+    @Query("SELECT * FROM panen_entries WHERE id IN (:ids)")
+    suspend fun getPanenByIds(ids: List<Int>): List<PanenData>
+
     @Insert
     suspend fun insertPanen(panen: PanenData)
 
@@ -28,4 +31,10 @@ interface PanenDao {
 
     @Query("DELETE FROM panen_entries WHERE id IN (:ids)")
     suspend fun deleteMultiplePanen(ids: List<Int>)
+
+    @Query("SELECT * FROM panen_entries WHERE isSynced = 0")
+    fun getUnsyncedPanenDataFlow(): Flow<List<PanenData>>
+
+    @Update
+    suspend fun updateMultiplePanen(panenList: List<PanenData>)
 }

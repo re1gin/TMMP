@@ -1,4 +1,3 @@
-// com.teladanprimaagro.tmpp.ui.viewmodels/SettingsViewModel.kt
 package com.teladanprimaagro.tmpp.ui.viewmodels
 
 import android.app.Application
@@ -10,6 +9,9 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.UserRole
 import androidx.core.content.edit
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 private const val PREFS_NAME = "app_settings_prefs"
 private const val KEY_UNIQUE_NO_FORMAT = "unique_no_format"
@@ -22,13 +24,17 @@ private const val KEY_SUPIR_LIST = "supir_list"
 private const val KEY_KENDARAAN_LIST = "kendaraan_list"
 private const val KEY_IS_LOGGED_IN = "is_logged_in"
 private const val KEY_USER_ROLE = "user_role"
-private const val KEY_SPB_COUNTER = "spb_counter"
 private const val KEY_SPB_LAST_MONTH = "spb_last_month"
 private const val KEY_SPB_LAST_YEAR = "spb_last_year"
 private const val KEY_SPB_FORMAT = "spb_format"
 private const val DEFAULT_SPB_FORMAT = "AME/TPE"
 private const val KEY_AFD_CODE = "afd_code"
 private const val DEFAULT_AFD_CODE = "AFD1"
+
+private const val KEY_SELECTED_MANDOR_LOADING = "selected_mandor_loading"
+private const val DEFAULT_MANDOR_LOADING = "Pilih Mandor Loading"
+
+private fun getSpbCounterKeyForMandor(mandor: String): String = "spb_counter_$mandor"
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -42,6 +48,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val tphList = mutableStateListOf<String>()
     val supirList = mutableStateListOf<String>()
     val kendaraanList = mutableStateListOf<String>()
+
+    val mandorLoadingOptions = listOf("A", "B", "C", "D")
+    private val _selectedMandorLoading = MutableStateFlow(
+        sharedPreferences.getString(KEY_SELECTED_MANDOR_LOADING, mandorLoadingOptions.first())
+            ?: mandorLoadingOptions.first()
+    )
+    val selectedMandorLoading: StateFlow<String> = _selectedMandorLoading.asStateFlow()
 
     init {
         loadDataLists()
@@ -88,22 +101,22 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     private fun ensureDefaultListsPopulated() {
         if (mandorList.isEmpty()) {
-            mandorList.addAll(listOf("Nama Mandor Default 1", "Nama Mandor Default 2"))
+            mandorList.addAll(listOf("Mandor 1", "Mandor 2"))
         }
         if (pemanenList.isEmpty()) {
-            pemanenList.addAll(listOf("Nama Pemanen Default 1", "Nama Pemanen Default 2"))
+            pemanenList.addAll(listOf("Pemanen 1", "Pemanen 2"))
         }
         if (blokList.isEmpty()) {
-            blokList.addAll(listOf("A01 Default", "A02 Default"))
+            blokList.addAll(listOf("A01", "A02"))
         }
         if (tphList.isEmpty()) {
-            tphList.addAll(listOf("TPH 001 Default", "TPH 002 Default"))
+            tphList.addAll(listOf("TPH 001", "TPH 002"))
         }
         if (supirList.isEmpty()) {
-            supirList.addAll(listOf("Pilih Supir", "Supir A Default", "Supir B Default"))
+            supirList.addAll(listOf("Pilih Supir", "Supir A", "Supir B"))
         }
         if (kendaraanList.isEmpty()) {
-            kendaraanList.addAll(listOf("Pilih No Polisi", "B 1234 ABC Default", "B 5678 DEF Default"))
+            kendaraanList.addAll(listOf("Pilih No Polisi", "B 1234", "B 5678 DEF"))
         }
 
         saveDataLists()
@@ -150,6 +163,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
                 null
             }
         }
+    }
+
+    fun setMandorLoading(mandor: String) {
+        sharedPreferences.edit {
+            putString(KEY_SELECTED_MANDOR_LOADING, mandor)
+        }
+        _selectedMandorLoading.value = mandor
     }
 
     fun addMandor(name: String) {
@@ -288,13 +308,23 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    // --- Fungsi untuk mengelola SPB Counter ---
-    fun getSpbCounter(): Int {
-        return sharedPreferences.getInt(KEY_SPB_COUNTER, 0)
+    fun getSpbCounterForMandor(mandor: String): Int {
+        val key = getSpbCounterKeyForMandor(mandor)
+        return sharedPreferences.getInt(key, 0)
     }
 
-    fun setSpbCounter(counter: Int) {
-        sharedPreferences.edit { putInt(KEY_SPB_COUNTER, counter) }
+    fun setSpbCounterForMandor(mandor: String, counter: Int) {
+        val key = getSpbCounterKeyForMandor(mandor)
+        sharedPreferences.edit { putInt(key, counter) }
+    }
+
+    fun resetAllSpbCounters() {
+        sharedPreferences.edit {
+            mandorLoadingOptions.forEach { mandor ->
+                val key = getSpbCounterKeyForMandor(mandor)
+                remove(key)
+            }
+        }
     }
 
     fun getSpbLastMonth(): Int {

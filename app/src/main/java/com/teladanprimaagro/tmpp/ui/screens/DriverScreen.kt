@@ -77,7 +77,7 @@ fun DriverContent(
                 MenuButton(
                     text = "Unggah Data",
                     icon = Icons.Default.Backup,
-                    onClick = { /* TODO: Ini Masih Perbaikan */ }
+                    onClick = { navController.navigate("data_pengiriman_screen")}
                 )
             }
         }

@@ -1,7 +1,5 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-// SpbSettingsScreen.kt
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -10,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -23,6 +22,18 @@ fun SpbSettingsScreen(
 
     val currentAfdCode = settingsViewModel.getAfdCode()
     var newAfdCode by remember { mutableStateOf(currentAfdCode) }
+
+    // Ambil opsi mandor loading dari ViewModel
+    val mandorLoadingOptions = settingsViewModel.mandorLoadingOptions
+    val selectedMandorLoadingState by settingsViewModel.selectedMandorLoading.collectAsState()
+    var selectedMandorLoading by remember { mutableStateOf(selectedMandorLoadingState) }
+
+    var mandorLoadingExpanded by remember { mutableStateOf(false) }
+
+    // Gunakan LaunchedEffect untuk memperbarui state lokal jika nilai dari ViewModel berubah
+    LaunchedEffect(selectedMandorLoadingState) {
+        selectedMandorLoading = selectedMandorLoadingState
+    }
 
     Scaffold(
         topBar = {
@@ -67,10 +78,26 @@ fun SpbSettingsScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
+            // Pengaturan Pilihan Mandor Loading
+            Text("Pilihan Mandor Loading", style = MaterialTheme.typography.titleMedium)
+            DropdownInputField(
+                label = "Mandor Loading",
+                options = mandorLoadingOptions,
+                selectedOption = selectedMandorLoading,
+                onOptionSelected = {
+                    selectedMandorLoading = it
+                },
+                expanded = mandorLoadingExpanded,
+                onExpandedChange = { mandorLoadingExpanded = it },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
             Button(
                 onClick = {
                     settingsViewModel.setSpbFormat(newSpbFormat)
                     settingsViewModel.setAfdCode(newAfdCode)
+                    settingsViewModel.setMandorLoading(selectedMandorLoading) // Simpan pilihan mandor loading
                     navController.popBackStack()
                 },
                 modifier = Modifier.fillMaxWidth()

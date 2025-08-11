@@ -52,6 +52,7 @@ fun ScanInputScreen(
     val nfcState by sharedNfcViewModel.nfcState.collectAsState()
     var showNfcReadDialog by remember { mutableStateOf(false) }
 
+    // Menggunakan scannedItems untuk SummaryBox, sesuai dengan alur yang sudah ada
     val scannedItems by pengirimanViewModel.scannedItems.collectAsState()
     val totalBuahCalculated by pengirimanViewModel.totalBuahCalculated
 
@@ -140,6 +141,7 @@ fun ScanInputScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // SummaryBox tetap menggunakan data dari alur utama (pengiriman)
                     SummaryBox(label = "Item Scan", value = scannedItems.size.toString())
                     SummaryBox(label = "Total Buah", value = totalBuahCalculated.toString())
                 }
@@ -244,6 +246,7 @@ fun ScanInputScreen(
                 sharedNfcViewModel.resetNfcState()
             },
             onReadComplete = { scannedItem ->
+                // Panggil addScannedItem, ViewModel akan menangani validasi dan penyimpanan
                 pengirimanViewModel.addScannedItem(scannedItem)
             },
             nfcIntentFromActivity = nfcIntentFromActivity,

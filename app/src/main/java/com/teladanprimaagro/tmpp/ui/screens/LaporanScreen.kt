@@ -1,12 +1,13 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -39,24 +40,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.data.MainStats
 import com.teladanprimaagro.tmpp.ui.theme.NeonGreen
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.viewmodels.ReportViewModel
+import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
-    navController: NavController,
-    paddingValues: PaddingValues,
-    reportViewModel: ReportViewModel = viewModel()
+    pengirimanViewModel: PengirimanViewModel = viewModel()
 ) {
-    val mainStats by reportViewModel.mainStats.collectAsState()
-    val blokSummary by reportViewModel.blokSummary.collectAsState()
-    val supirSummary by reportViewModel.supirSummary.collectAsState()
+    val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()
+    val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
+    val blokSummary by pengirimanViewModel.blokSummary.collectAsState()
+    val supirSummary by pengirimanViewModel.supirSummary.collectAsState()
 
-    // Menggunakan Scaffold untuk struktur dasar
+    // Ambil state totalSuccessfulScans dari ViewModel
+    val totalSuccessfulScans by pengirimanViewModel.totalSuccessfulScans.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -90,7 +91,11 @@ fun LaporanScreen(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                MainStatsColumn(mainStats = mainStats)
+                MainStatsColumn(
+                    totalBuah = totalSemuaBuah,
+                    totalScanned = totalSuccessfulScans, // Gunakan totalSuccessfulScans di sini
+                    totalFinalized = totalDataMasuk
+                )
             }
 
             // Statistik Per Blok
@@ -115,7 +120,7 @@ fun LaporanScreen(
 }
 
 @Composable
-fun MainStatsColumn(mainStats: MainStats) {
+fun MainStatsColumn(totalBuah: Int, totalScanned: Int, totalFinalized: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -125,11 +130,11 @@ fun MainStatsColumn(mainStats: MainStats) {
             )
             .padding(16.dp)
     ) {
-        StatistikItem("Total Buah", mainStats.totalBuah.toString(), MaterialTheme.colorScheme.onSurface)
+        StatistikItem("Total Buah", totalBuah.toString(), MaterialTheme.colorScheme.onSurface)
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Discan", mainStats.totalScannedData.toString(), MaterialTheme.colorScheme.onSurface)
+        StatistikItem("Data Scan", totalScanned.toString(), MaterialTheme.colorScheme.onSurface)
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Final", mainStats.finalizedData.toString(), MaterialTheme.colorScheme.onSurface)
+        StatistikItem("Data Masuk", totalFinalized.toString(), MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -153,7 +158,6 @@ fun StatistikItem(label: String, value: String, color: Color) {
         )
     }
 }
-
 
 @Composable
 fun ReportStatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
@@ -202,7 +206,6 @@ fun ReportBarChartItem(
 ) {
     var animationPlayed by remember { mutableStateOf(false) }
 
-    // Animasi untuk bar chart
     val barWidth by animateFloatAsState(
         targetValue = if (animationPlayed) (value.toFloat() / maxValue) else 0f,
         animationSpec = tween(durationMillis = 1000),

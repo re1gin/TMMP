@@ -9,5 +9,12 @@ data class ScannedItemEntity(
     val uniqueNo: String,
     val tanggal: String,
     val blok: String,
-    val totalBuah: Int
+    val totalBuah: Int,
+)
+
+@Entity(tableName = "finalized_unique_nos")
+data class FinalizedUniqueNoEntity(
+    @PrimaryKey(autoGenerate = false)
+    val uniqueNo: String,
+    val finalizedAt: Long = System.currentTimeMillis()
 )

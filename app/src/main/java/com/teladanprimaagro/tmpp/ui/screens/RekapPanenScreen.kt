@@ -74,7 +74,7 @@ import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RekapPanenScreen(
     navController: NavController,
@@ -186,6 +186,7 @@ fun RekapPanenScreen(
                             label = { Text("Sortir Berdasarkan") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortDropdownExpanded) },
                             modifier = Modifier
+                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 
@@ -243,6 +244,7 @@ fun RekapPanenScreen(
                             label = { Text("Filter Pemanen") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pemanenDropdownExpanded) },
                             modifier = Modifier
+                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 
@@ -276,6 +278,7 @@ fun RekapPanenScreen(
                             label = { Text("Filter Blok") },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = blokDropdownExpanded) },
                             modifier = Modifier
+                                .menuAnchor()
                                 .fillMaxWidth()
                         )
 

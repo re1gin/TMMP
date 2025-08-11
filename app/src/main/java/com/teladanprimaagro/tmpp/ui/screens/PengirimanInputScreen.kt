@@ -3,7 +3,6 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import android.annotation.SuppressLint
 import android.os.Build
-import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -63,6 +61,8 @@ import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
 import androidx.compose.runtime.LaunchedEffect // Import LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -78,7 +78,6 @@ fun PengirimanInputScreen(
 
     val supirOptions = settingsViewModel.supirList
     val noPolisiOptions = settingsViewModel.kendaraanList
-    val mandorLoadingOptions = listOf("A", "B", "C", "D") // Opsi untuk mandor loading
 
     val dateTimeDisplay = pengirimanViewModel.dateTimeDisplay
     val totalBuahCalculated = pengirimanViewModel.totalBuahCalculated
@@ -90,17 +89,13 @@ fun PengirimanInputScreen(
     var selectedVehicle by remember(noPolisiOptions) { mutableStateOf(noPolisiOptions.firstOrNull() ?: "") }
     var vehicleExpanded by remember { mutableStateOf(false) }
 
-    var selectedMandorLoading by remember(mandorLoadingOptions) { mutableStateOf(mandorLoadingOptions.firstOrNull() ?: "") }
-    var mandorLoadingExpanded by remember { mutableStateOf(false) }
+    // Ambil nilai mandor loading dari SettingsViewModel
+    val selectedMandorLoading by settingsViewModel.selectedMandorLoading.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
-
+    // Menambahkan LaunchedEffect untuk memicu pembuatan SPB baru
     LaunchedEffect(selectedMandorLoading) {
-        if (selectedMandorLoading.isNotBlank()) {
-            pengirimanViewModel.generateSpbNumber(selectedMandorLoading = selectedMandorLoading)
-        } else {
-            // Jika tidak ada mandor yang dipilih, mungkin tampilkan placeholder atau default
-            pengirimanViewModel.spbNumber.value = "Pilih Mandor Loading"
-        }
+        pengirimanViewModel.generateSpbNumber(selectedMandorLoading)
     }
 
     Column(
@@ -132,7 +127,7 @@ fun PengirimanInputScreen(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { /* TODO: Masih Belum Siap */ }) {
+            IconButton(onClick = { navController.navigate("spb_settings_screen") }) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Pengaturan",
@@ -149,19 +144,6 @@ fun PengirimanInputScreen(
                 .verticalScroll(scrollState)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-
-            // Dropdown untuk Mandor Loading (Pindahkan ke atas SPB)
-            DropdownInputField(
-                label = "Mandor Loading",
-                options = mandorLoadingOptions,
-                selectedOption = selectedMandorLoading,
-                onOptionSelected = {
-                    selectedMandorLoading = it
-                },
-                expanded = mandorLoadingExpanded,
-                onExpandedChange = { mandorLoadingExpanded = it }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
 
             // Tampilkan No. SPB yang digenerate otomatis
             TextInputField(
@@ -300,19 +282,17 @@ fun PengirimanInputScreen(
 
         Button(
             onClick = {
-                // Teruskan nilai selectedSupir, selectedVehicle, dan selectedMandorLoading ke ViewModel
-                pengirimanViewModel.finalizeScannedItemsAsPengiriman(
-                    namaSupir = selectedSupir,
-                    noPolisi = selectedVehicle,
-                    mandorLoading = selectedMandorLoading
-                )
-                // Setelah finalisasi, reset state lokal dropdown ke nilai default
-                selectedSupir = supirOptions.firstOrNull() ?: ""
-                selectedVehicle = noPolisiOptions.firstOrNull() ?: ""
-                selectedMandorLoading = mandorLoadingOptions.firstOrNull() ?: ""
+                coroutineScope.launch {
+                    pengirimanViewModel.finalizeScannedItemsAsPengiriman(
+                        namaSupir = selectedSupir,
+                        noPolisi = selectedVehicle
+                    )
+                    selectedSupir = supirOptions.firstOrNull() ?: ""
+                    selectedVehicle = noPolisiOptions.firstOrNull() ?: ""
 
-                navController.navigate("rekap_pengiriman_screen") {
-                    popUpTo("pengiriman_input_screen") { inclusive = true }
+                    navController.navigate("rekap_pengiriman_screen") {
+                        popUpTo("pengiriman_input_screen") { inclusive = true }
+                    }
                 }
             },
             modifier = Modifier
@@ -322,8 +302,7 @@ fun PengirimanInputScreen(
             colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
             enabled = scannedItems.isNotEmpty() &&
                     selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
-                    selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi" &&
-                    selectedMandorLoading.isNotBlank() // Pastikan mandor loading juga terpilih
+                    selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi"
         ) {
             Text("Finalisasi Pengiriman", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
         }

@@ -28,7 +28,7 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 )
             }
         },
-        text = {}, // Kosongkan teks karena sudah ada di title
+        text = {},
         confirmButton = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -43,7 +43,7 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 }
             }
         },
-        containerColor = Color(0xFF333333), // Warna latar belakang dialog
+        containerColor = Color(0xFF333333),
         shape = RoundedCornerShape(16.dp)
     )
 }

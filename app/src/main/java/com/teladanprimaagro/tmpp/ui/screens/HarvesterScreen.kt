@@ -70,7 +70,7 @@ fun HarvesterContent(
                 MenuButton(
                     text = "Data Terkirim",
                     icon = Icons.Default.CloudDone,
-                    onClick = { /* TODO: Ini Masih Perbaikan */ }
+                    onClick = { navController.navigate("data_terkirim_screen") }
                 )
             }
         }

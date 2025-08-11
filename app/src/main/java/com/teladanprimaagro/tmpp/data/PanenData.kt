@@ -22,5 +22,6 @@ data class PanenData(
     val buahE: Int,
     val buahAB: Int,
     val buahBL: Int,
-    val imageUri: String? = null
+    val imageUri: String? = null,
+    val isSynced: Boolean = false
 )

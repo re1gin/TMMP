@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.teladanprimaagro.tmpp" />
+                  <option name="mobileSdkAppId" value="1:941393902965:android:c5f778c26548dca427673c" />
+                  <option name="projectId" value="ineka-application" />
+                  <option name="projectNumber" value="941393902965" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

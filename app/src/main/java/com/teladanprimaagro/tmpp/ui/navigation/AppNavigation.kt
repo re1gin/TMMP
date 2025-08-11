@@ -15,6 +15,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.screens.DataTerkirimCard
+import com.teladanprimaagro.tmpp.ui.screens.DataTerkirimScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
@@ -32,6 +34,7 @@ import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
 import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
 import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.StatusPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
 import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
@@ -130,6 +133,12 @@ fun AppNavigation(
             )
         }
 
+        composable("data_terkirim_screen") {
+            DataTerkirimScreen(
+                navController = navController,
+            )
+        }
+
         composable("ubah_format_unique_no_screen") {
             UbahFormatUniqueNoScreen(navController, settingsViewModel
             )
@@ -178,12 +187,19 @@ fun AppNavigation(
             )
         }
 
+        composable("data_pengiriman_screen") {
+            StatusPengirimanScreen(
+                navController = navController,
+            )
+        }
+
         composable("spb_settings_screen") {
             SpbSettingsScreen(
                 navController = navController,
                 settingsViewModel = settingsViewModel
             )
         }
+
 
         composable("kelola_supir_screen") {
             KelolaSupirScreen(

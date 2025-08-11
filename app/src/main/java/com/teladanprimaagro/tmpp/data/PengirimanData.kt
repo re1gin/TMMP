@@ -3,7 +3,7 @@ package com.teladanprimaagro.tmpp.data
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "pengiriman_data") // Nama tabel disederhanakan menjadi "pengiriman_data"
+@Entity(tableName = "pengiriman_entries")
 data class PengirimanData(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val waktuPengiriman: String,
@@ -18,5 +18,6 @@ data class PengirimanData(
     val mandorLoading: String, // Kolom baru: Mandor Loading
     val isUploaded: Boolean = false, // Status upload
     val isFinalized: Boolean = false // Kolom baru untuk statistik finalisasi
+
 )
 

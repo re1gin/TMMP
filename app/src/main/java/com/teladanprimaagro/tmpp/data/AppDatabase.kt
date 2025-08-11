@@ -9,9 +9,10 @@ import androidx.room.RoomDatabase
     entities = [
         PanenData::class,
         PengirimanData::class,
-        ScannedItemEntity::class
+        ScannedItemEntity::class,
+        FinalizedUniqueNoEntity::class
     ],
-    version = 8, // Versi harus dinaikkan jika ada perubahan skema
+    version = 14,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
