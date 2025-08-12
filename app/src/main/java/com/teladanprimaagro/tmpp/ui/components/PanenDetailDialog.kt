@@ -1,6 +1,5 @@
 package com.teladanprimaagro.tmpp.ui.components
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -17,9 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil.compose.rememberAsyncImagePainter
-import com.teladanprimaagro.tmpp.data.PanenData // Sesuaikan package Anda
+import com.teladanprimaagro.tmpp.data.PanenData
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
+import androidx.core.net.toUri
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,9 +54,13 @@ fun PanenDetailDialog(
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // Tampilkan gambar jika ada
-                panenData.imageUri?.let { uriString ->
-                    val imageUri = Uri.parse(uriString)
+                // --- PERUBAHAN DI SINI ---
+                // Logika untuk menampilkan gambar dari URI lokal atau URL Firebase.
+                // Prioritaskan localImageUri, jika tidak ada, gunakan firebaseImageUrl.
+                val imageToDisplay = panenData.localImageUri ?: panenData.firebaseImageUrl
+
+                imageToDisplay?.let { uriString ->
+                    val imageUri = uriString.toUri()
                     Image(
                         painter = rememberAsyncImagePainter(model = imageUri),
                         contentDescription = "Gambar Panen",
@@ -69,6 +73,7 @@ fun PanenDetailDialog(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
+                // --- AKHIR PERUBAHAN ---
 
                 DetailRow("No. Unik:", panenData.uniqueNo)
                 DetailRow("Tanggal/Waktu:", panenData.tanggalWaktu)
@@ -85,6 +90,10 @@ fun PanenDetailDialog(
                 DetailRow("Buah E:", panenData.buahE.toString())
                 DetailRow("Buah AB:", panenData.buahAB.toString())
                 DetailRow("Berondolan Lepas:", panenData.buahBL.toString())
+
+                // Tambahan: Tampilkan status sinkronisasi
+                DetailRow("Status Sinkron:", if (panenData.isSynced) "Sudah Sinkron" else "Belum Sinkron")
+
 
                 Spacer(modifier = Modifier.height(24.dp))
 

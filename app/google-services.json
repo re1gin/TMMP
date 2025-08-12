@@ -1,13 +1,14 @@
 {
   "project_info": {
-    "project_number": "941393902965",
-    "project_id": "ineka-application",
-    "storage_bucket": "ineka-application.firebasestorage.app"
+    "project_number": "248356156096",
+    "firebase_url": "https://ineka-database-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "ineka-database",
+    "storage_bucket": "ineka-database.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:941393902965:android:c5f778c26548dca427673c",
+        "mobilesdk_app_id": "1:248356156096:android:71f9e7e9a96f87ec9df325",
         "android_client_info": {
           "package_name": "com.teladanprimaagro.tmpp"
         }
@@ -15,7 +16,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCibAYQfzaRzj8j-wU5vdd_zP9dc5rSbX4"
+          "current_key": "AIzaSyB79sSaAwVztoSDF86Kukig1hZ7cMfarBk"
         }
       ],
       "services": {

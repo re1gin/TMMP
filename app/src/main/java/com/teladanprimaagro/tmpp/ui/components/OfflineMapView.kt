@@ -6,7 +6,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import com.teladanprimaagro.tmpp.data.PanenData
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -69,9 +68,6 @@ fun OfflineMapView(
                     marker.snippet = "Blok: ${panen.blok}, Total Buah: ${panen.totalBuah}"
 
                     val color = (AndroidColor.BLUE + (index * 12345) % 0xFFFFFF)
-                    val iconDrawable = ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default)
-                    iconDrawable?.setTint(color)
-                    marker.icon = iconDrawable
 
                     marker.setOnMarkerClickListener { _, _ ->
                         onLocationClick(panen)

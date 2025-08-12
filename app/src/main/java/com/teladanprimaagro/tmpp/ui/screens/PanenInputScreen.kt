@@ -119,7 +119,7 @@ fun getLocation(
     }
 }
 
-
+// --- Komponen Composable Utama ---
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,7 +144,7 @@ fun PanenInputScreen(
     var locationPart2 by remember(panenDataToEdit) { mutableStateOf(panenDataToEdit?.locationPart2 ?: "") }
 
     val foremanOptions = settingsViewModel.mandorList.toList()
-    var selectedForeman by remember(panenDataToEdit, foremanOptions) { // Added panenDataToEdit as key
+    var selectedForeman by remember(panenDataToEdit, foremanOptions) {
         mutableStateOf(panenDataToEdit?.kemandoran ?: foremanOptions.firstOrNull() ?: "")
     }
     var foremanExpanded by remember { mutableStateOf(false) }
@@ -177,7 +177,7 @@ fun PanenInputScreen(
     val totalBuah = remember(buahN, buahAB, buahOR) { buahN + buahAB + buahOR }
 
     var imageUri by remember(panenDataToEdit) {
-        mutableStateOf(panenDataToEdit?.imageUri?.toUri())
+        mutableStateOf(panenDataToEdit?.localImageUri?.toUri())
     }
     var imageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
@@ -228,7 +228,6 @@ fun PanenInputScreen(
     var nfcDataToPass by remember { mutableStateOf<PanenData?>(null) }
     val nfcAdapter: NfcAdapter? = remember { NfcAdapter.getDefaultAdapter(context) }
     val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    var dataToSaveToRoom by remember { mutableStateOf<PanenData?>(null) }
 
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showFailureDialog by remember { mutableStateOf(false) }
@@ -247,7 +246,6 @@ fun PanenInputScreen(
                         locationPart2 = lon
                     }
                 }
-
                 permissions.getOrDefault(
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     false
@@ -257,7 +255,6 @@ fun PanenInputScreen(
                         locationPart2 = lon
                     }
                 }
-
                 else -> {
                     Toast.makeText(context, "Izin lokasi ditolak.", Toast.LENGTH_SHORT).show()
                 }
@@ -270,7 +267,6 @@ fun PanenInputScreen(
         block: String,
         totalBuah: Int
     ): String {
-
         val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
         val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
@@ -333,7 +329,6 @@ fun PanenInputScreen(
                             Toast.makeText(context, "Gagal memuat gambar: ${e.message}", Toast.LENGTH_LONG).show()
                         }
 
-                        imageUri = null
                         imageUri = capturedUri
                     }
                 }
@@ -708,10 +703,10 @@ fun PanenInputScreen(
                         buahE = buahE,
                         buahAB = buahAB,
                         buahBL = buahBL,
-                        imageUri = imageUri?.toString()
+                        localImageUri = imageUri?.toString(),
+                        firebaseImageUrl = null,
+                        isSynced = false
                     )
-
-                    dataToSaveToRoom = panenDataFinal
 
                     nfcDataToPass = panenDataFinal.copy(id = 0)
                     showNfcWriteDialog = true
@@ -753,7 +748,6 @@ fun PanenInputScreen(
                 onDismissRequest = {
                     showNfcWriteDialog = false
                     nfcDataToPass = null
-                    dataToSaveToRoom = null
                 },
                 dataToWrite = nfcDataToPass,
                 onWriteComplete = { success, message ->
@@ -762,22 +756,43 @@ fun PanenInputScreen(
 
                     if (success) {
                         showSuccessDialog = true
-
                         vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
 
-                        dataToSaveToRoom?.let { originalData ->
-                            if (isEditing) {
-                                panenViewModel.updatePanenData(originalData)
-                            } else {
-                                panenViewModel.addPanenData(originalData)
-                            }
+                        val panenData = PanenData(
+                            id = panenDataToEdit?.id ?: 0,
+                            tanggalWaktu = dateTimeDisplay,
+                            uniqueNo = uniqueNo,
+                            locationPart1 = locationPart1,
+                            locationPart2 = locationPart2,
+                            kemandoran = selectedForeman,
+                            namaPemanen = selectedHarvester,
+                            blok = selectedBlock,
+                            noTph = selectedTph,
+                            totalBuah = totalBuah,
+                            buahN = buahN,
+                            buahA = buahA,
+                            buahOR = buahOR,
+                            buahE = buahE,
+                            buahAB = buahAB,
+                            buahBL = buahBL,
+                            localImageUri = imageUri?.toString(),
+                            firebaseImageUrl = panenDataToEdit?.firebaseImageUrl,
+                            isSynced = false
+                        )
+
+                        // --- PERUBAHAN DI SINI ---
+                        // Menggunakan fungsi compressImageAndSavePanen yang baru
+                        if (isEditing) {
+                            panenViewModel.updatePanenData(panenData)
+                        } else {
+                            panenViewModel.compressImageAndSavePanen(panenData, imageUri)
                         }
+                        // --- AKHIR PERUBAHAN ---
                     } else {
                         failureMessage = message
                         showFailureDialog = true
                         vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
                     }
-                    dataToSaveToRoom = null
                 },
                 nfcIntentFromActivity = nfcIntentFromActivity
             )

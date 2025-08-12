@@ -29,9 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGray
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
+import com.teladanprimaagro.tmpp.data.UserRole
 
 @Composable
 fun AppBottomBar(navController: NavController, userRole: UserRole) {

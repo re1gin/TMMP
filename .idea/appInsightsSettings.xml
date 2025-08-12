@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.teladanprimaagro.tmpp" />
-                  <option name="mobileSdkAppId" value="1:941393902965:android:c5f778c26548dca427673c" />
-                  <option name="projectId" value="ineka-application" />
-                  <option name="projectNumber" value="941393902965" />
+                  <option name="mobileSdkAppId" value="1:248356156096:android:71f9e7e9a96f87ec9df325" />
+                  <option name="projectId" value="ineka-database" />
+                  <option name="projectNumber" value="248356156096" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

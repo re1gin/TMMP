@@ -22,6 +22,7 @@ data class PanenData(
     val buahE: Int,
     val buahAB: Int,
     val buahBL: Int,
-    val imageUri: String? = null,
+    val localImageUri: String? = null,
+    val firebaseImageUrl: String? = null,
     val isSynced: Boolean = false
 )
