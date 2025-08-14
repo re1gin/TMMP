@@ -1,4 +1,4 @@
-package com.teladanprimaagro.tmpp.ui.viewmodels
+package com.teladanprimaagro.tmpp.viewmodels
 
 import android.app.Application
 import android.os.Build
@@ -77,7 +77,8 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
     private val connectivityObserver = ConnectivityObserver(application)
     private val gson = Gson()
-    private val pengirimanDbRef = FirebaseDatabase.getInstance().getReference("pengirimanEntries")
+    private val pengirimanDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("pengirimanEntries")
+    private val finalizedUniqueNoDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("finalizedUniqueNos")
 
     // --- State untuk UI (Composable) ---
     val uniqueNoDisplay = mutableStateOf("Scan NFC")
@@ -188,7 +189,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     suspend fun getPengirimanById(id: Int): PengirimanData? = pengirimanDao.getPengirimanById(id)
-    suspend fun getPengirimanByIds(ids: List<Int>): List<PengirimanData> = pengirimanDao.getPengirimanByIds(ids)
 
 
     fun generateSpbNumber(selectedMandorLoading: String) {
@@ -276,8 +276,21 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             )
 
             pengirimanDao.insertPengiriman(newPengiriman)
+
             scannedItemsFromDb.forEach { item ->
-                pengirimanDao.insertFinalizedUniqueNo(FinalizedUniqueNoEntity(uniqueNo = item.uniqueNo))
+                val finalizedEntity = FinalizedUniqueNoEntity(uniqueNo = item.uniqueNo)
+                pengirimanDao.insertFinalizedUniqueNo(finalizedEntity)
+
+                if (isConnected.value) {
+                    viewModelScope.launch {
+                        try {
+                            finalizedUniqueNoDbRef.child(item.uniqueNo).setValue(finalizedEntity).await()
+                            Log.d("PengirimanViewModel", "FIREBASE: Finalized uniqueNo ${item.uniqueNo} uploaded.")
+                        } catch (e: Exception) {
+                            Log.e("PengirimanViewModel", "Failed to upload finalized uniqueNo ${item.uniqueNo}: ${e.message}")
+                        }
+                    }
+                }
             }
             scannedItemDao.deleteAllScannedItems()
 
@@ -324,7 +337,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     private fun mapToSimplePengirimanData(pengirimanData: PengirimanData): SimplePengirimanData {
-        val scannedItemsType = object : TypeToken<List<ScannedItem>>() {}.type
+        val scannedItemsType = object : com.google.gson.reflect.TypeToken<List<ScannedItem>>() {}.type
         val rawDetailScannedItems: List<ScannedItem> = gson.fromJson(pengirimanData.detailScannedItemsJson, scannedItemsType) ?: emptyList()
 
         val ringkasanPerBlok = rawDetailScannedItems
@@ -349,6 +362,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             try {
                 // Hapus semua data dari Firebase
                 pengirimanDbRef.removeValue().await()
+                finalizedUniqueNoDbRef.removeValue().await()
                 Log.d("PengirimanViewModel", "FIREBASE: All data successfully removed from Firebase.")
             } catch (e: Exception) {
                 Log.e("PengirimanViewModel", "Failed to delete all data from Firebase: ${e.message}", e)
@@ -363,27 +377,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    fun deletePengirimanDataById(id: Int) {
-        viewModelScope.launch {
-            try {
-                // Ambil data dari Room sebelum dihapus untuk mendapatkan spbNumber
-                val pengirimanData = pengirimanDao.getPengirimanById(id)
-                if (pengirimanData != null) {
-                    val firebaseKey = pengirimanData.spbNumber.replace('/', '-')
-                    // Hapus data dari Firebase
-                    pengirimanDbRef.child(firebaseKey).removeValue().await()
-                    Log.d("PengirimanViewModel", "FIREBASE: Data with SPB ${pengirimanData.spbNumber} deleted from Firebase path: $firebaseKey")
-                }
-            } catch (e: Exception) {
-                Log.e("PengirimanViewModel", "Failed to delete from Firebase: ${e.message}")
-            } finally {
-                // Hapus data dari Room
-                pengirimanDao.deletePengirimanById(id)
-                Log.d("PengirimanViewModel", "ROOM: Pengiriman data deleted for ID: $id")
-            }
-        }
-    }
-
     fun deleteSelectedPengirimanData(ids: List<Int>) {
         viewModelScope.launch {
             try {
@@ -393,6 +386,14 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
                     val firebaseKey = data.spbNumber.replace('/', '-')
                     pengirimanDbRef.child(firebaseKey).removeValue().await()
                     Log.d("PengirimanViewModel", "FIREBASE: Data with SPB ${data.spbNumber} deleted from Firebase path: $firebaseKey")
+
+                    val scannedItemsType = object : com.google.gson.reflect.TypeToken<List<ScannedItem>>() {}.type
+                    val rawDetailScannedItems: List<ScannedItem> = gson.fromJson(data.detailScannedItemsJson, scannedItemsType) ?: emptyList()
+
+                    rawDetailScannedItems.forEach { item ->
+                        finalizedUniqueNoDbRef.child(item.uniqueNo).removeValue().await()
+                        Log.d("PengirimanViewModel", "FIREBASE: Finalized uniqueNo ${item.uniqueNo} deleted.")
+                    }
                 }
             } catch (e: Exception) {
                 Log.e("PengirimanViewModel", "Failed to delete multiple data from Firebase: ${e.message}")

@@ -39,9 +39,9 @@ import androidx.compose.ui.window.Dialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.PengirimanData
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.ScannedItem
+import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
+import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException

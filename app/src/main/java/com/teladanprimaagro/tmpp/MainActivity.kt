@@ -20,11 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import com.teladanprimaagro.tmpp.ui.navigation.AppNavigation
+import com.teladanprimaagro.tmpp.navigation.AppNavigation
 import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
-import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.workers.PanenCleanupWorker
 import com.teladanprimaagro.tmpp.workers.PengirimanCleanupWorker
 import java.util.Calendar

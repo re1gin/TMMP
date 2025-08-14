@@ -23,10 +23,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
-import com.teladanprimaagro.tmpp.ui.viewmodels.NfcOperationState
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.ScanStatus
-import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.ScanStatus
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.util.NfcReadDialog
 import com.teladanprimaagro.tmpp.ui.components.SuccessScanDialog
 import com.teladanprimaagro.tmpp.ui.components.DuplicateScanDialog

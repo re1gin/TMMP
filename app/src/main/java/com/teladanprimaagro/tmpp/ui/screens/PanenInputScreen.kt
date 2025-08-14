@@ -61,6 +61,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -83,10 +84,11 @@ import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.IconOrange
+import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
+import com.teladanprimaagro.tmpp.ui.theme.RedLight1
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -377,7 +379,7 @@ fun PanenInputScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
+                .background(brush = Brush.verticalGradient(listOf(PrimaryOrange, BackgroundLightGray)))
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -471,7 +473,7 @@ fun PanenInputScreen(
                         .padding(start = 8.dp)
                         .fillMaxHeight()
                         .background(
-                            color = if (isEditing) Color.Gray.copy(alpha = 0.5f) else IconOrange,
+                            color = if (isEditing) Color.Gray.copy(alpha = 0.5f) else RedLight1,
                             shape = RoundedCornerShape(10.dp)
                         )
                 ) {

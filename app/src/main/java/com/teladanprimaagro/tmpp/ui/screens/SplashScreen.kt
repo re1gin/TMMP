@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.material3.*
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.R
 import kotlinx.coroutines.delay
 

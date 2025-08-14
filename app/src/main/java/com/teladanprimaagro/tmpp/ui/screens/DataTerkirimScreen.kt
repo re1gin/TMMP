@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

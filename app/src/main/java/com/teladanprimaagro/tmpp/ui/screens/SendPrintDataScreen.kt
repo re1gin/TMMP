@@ -26,11 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.getDetailScannedItems
-import com.teladanprimaagro.tmpp.ui.viewmodels.ScannedItem
+import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

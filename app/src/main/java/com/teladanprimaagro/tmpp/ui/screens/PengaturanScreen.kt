@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -29,10 +29,6 @@ fun AppTopBar() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.primary,
-                RoundedCornerShape(bottomEnd = 20.dp, bottomStart = 20.dp)
-            )
             .padding(top = 16.dp, bottom = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -52,7 +48,7 @@ fun AppTopBar() {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(10.dp)),
+                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(50.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Image(

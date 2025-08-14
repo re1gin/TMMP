@@ -24,7 +24,7 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

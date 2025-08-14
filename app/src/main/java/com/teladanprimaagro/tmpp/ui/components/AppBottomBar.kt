@@ -1,5 +1,6 @@
 package com.teladanprimaagro.tmpp.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Home
@@ -29,8 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.data.UserRole
 
 @Composable
@@ -50,8 +50,8 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
     navItems.add(NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen"))
 
     BottomAppBar(
-        containerColor = BackgroundDarkGray,
-        contentColor = Color.White
+        containerColor = Color.White, // Biarkan transparan jika Anda ingin warna latar belakang dari layout di atasnya
+        contentColor = Color.White,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -60,14 +60,15 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
         ) {
             navItems.forEach { item ->
                 val isSelected = currentRoute == item.route
-                val iconColor = if (isSelected) Color.White else TextGray
-                val textColor = if (isSelected) Color.White else TextGray
+                val iconColor = if (isSelected) Color.White else Color.Black // Ikon hitam saat tidak dipilih
+                val textColor = if (isSelected) Color.White else Color.Gray
 
                 BottomNavItem(
                     icon = item.icon,
                     label = item.label,
                     iconColor = iconColor,
                     textColor = textColor,
+                    isSelected = isSelected,
                     onClick = {
                         navController.navigate(item.route) {
                             navController.graph.startDestinationRoute?.let { startDestination ->
@@ -85,26 +86,29 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
     }
 }
 
-
 @Composable
 private fun RowScope.BottomNavItem(
     icon: ImageVector,
     label: String,
     iconColor: Color,
     textColor: Color,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    val backgroundColor = if (isSelected) Color.Red else Color.Transparent
+
     Column(
         modifier = Modifier
             .weight(1f)
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp) // Mengatur padding untuk bentuk lingkaran yang lebih baik
+            .background(color = backgroundColor, shape = CircleShape)
+            .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(30.dp),
             tint = iconColor
         )
         Spacer(modifier = Modifier.height(4.dp))

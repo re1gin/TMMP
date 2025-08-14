@@ -1,21 +1,14 @@
-@file:Suppress("DEPRECATION")
-
 package com.teladanprimaagro.tmpp.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.Typography
 import androidx.compose.material3.Shapes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -26,48 +19,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
-// Skema Warna
-private val DarkColorPalette = darkColorScheme(
-    primary = PrimaryOrange,
-    onPrimary = TextWhite,
-    primaryContainer = PrimaryDarkOrange,
-    onPrimaryContainer = TextWhite,
+// Skema Warna (Hanya LightColorPalette yang dipertahankan)
 
-    secondary = SecondaryGray,
-    onSecondary = TextWhite,
-
-    background = BackgroundBlack,
-    onBackground = TextWhite,
-
-    surface = BackgroundDarkGray,
-    onSurface = TextWhite,
-
-    error = Color.Red,
-    onError = TextWhite,
-
-    outline = PrimaryOrange
+private val AdminColorPalette = lightColorScheme(
+    // --- Warna Utama ---
+    primary = PrimaryOrange, //Background utama
+    onPrimary = Black, //Warna Teks Utama
+    primaryContainer = OrangePink1, //Background Gradient Utama
+    onPrimaryContainer = OrangePink2, //Background Gradient Sekunder
 )
 
-private val LightColorPalette = lightColorScheme(
-    primary = PrimaryOrange,
-    onPrimary = TextBlack,
-    primaryContainer = PrimaryDarkOrange,
-    onPrimaryContainer = TextWhite,
-
-    secondary = SecondaryGray,
-    onSecondary = TextWhite,
-
-    background = BackgroundWhite,
-    onBackground = Color.Black,
-
-    surface = BackgroundWhite,
-    onSurface = Color.Black,
-
-    error = Color.Red,
-    onError = TextWhite,
-
-    outline = PrimaryOrange
-)
 
 // Tipografi (Gaya Teks)
 val TeladanPrimaAgroTypography = Typography(
@@ -110,24 +71,15 @@ val TeladanPrimaAgroShapes = Shapes(
 
 @Composable
 fun TeladanPrimaAgroTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkColorPalette
-        else -> LightColorPalette
-    }
+    val colorScheme = AdminColorPalette
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.primary.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false // Setel ke false agar ikon status bar terang
         }
     }
 

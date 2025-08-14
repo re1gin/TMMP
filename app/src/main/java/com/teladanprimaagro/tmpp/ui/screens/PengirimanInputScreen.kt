@@ -57,8 +57,8 @@ import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import androidx.compose.runtime.LaunchedEffect // Import LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch

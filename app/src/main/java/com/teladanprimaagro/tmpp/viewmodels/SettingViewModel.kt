@@ -1,4 +1,4 @@
-package com.teladanprimaagro.tmpp.ui.viewmodels
+package com.teladanprimaagro.tmpp.viewmodels
 
 import android.app.Application
 import android.content.Context
@@ -64,37 +64,37 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private fun loadDataLists() {
         val mandorJson = sharedPreferences.getString(KEY_MANDOR_LIST, null)
         if (mandorJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             mandorList.addAll(gson.fromJson(mandorJson, type))
         }
 
         val pemanenJson = sharedPreferences.getString(KEY_PEMANEN_LIST, null)
         if (pemanenJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             pemanenList.addAll(gson.fromJson(pemanenJson, type))
         }
 
         val blokJson = sharedPreferences.getString(KEY_BLOK_LIST, null)
         if (blokJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             blokList.addAll(gson.fromJson(blokJson, type))
         }
 
         val tphJson = sharedPreferences.getString(KEY_TPH_LIST, null)
         if (tphJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             tphList.addAll(gson.fromJson(tphJson, type))
         }
 
         val supirJson = sharedPreferences.getString(KEY_SUPIR_LIST, null)
         if (supirJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             supirList.addAll(gson.fromJson(supirJson, type))
         }
 
         val kendaraanJson = sharedPreferences.getString(KEY_KENDARAAN_LIST, null)
         if (kendaraanJson != null) {
-            val type = object : TypeToken<List<String>>() {}.type
+            val type = object : com.google.gson.reflect.TypeToken<List<String>>() {}.type
             kendaraanList.addAll(gson.fromJson(kendaraanJson, type))
         }
     }

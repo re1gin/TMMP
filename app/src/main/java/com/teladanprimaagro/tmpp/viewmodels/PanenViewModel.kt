@@ -1,11 +1,10 @@
-package com.teladanprimaagro.tmpp.ui.viewmodels
+package com.teladanprimaagro.tmpp.viewmodels
 
 import android.annotation.SuppressLint
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,15 +32,14 @@ import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@SuppressLint("StaticFieldLeak")
 class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
-    private val panenDbRef = FirebaseDatabase.getInstance().getReference("panenEntries")
+    private val panenDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("panenEntries")
     private val storage = FirebaseStorage.getInstance()
     private val storageRef: StorageReference = storage.reference.child("images")
-
     private val context = application.applicationContext
-
 
     // ==================== UI State and Filters ====================
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
@@ -146,42 +144,31 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun compressImageAndSavePanen(panenData: PanenData, imageUri: Uri?) {
         viewModelScope.launch {
             if (imageUri == null) {
-                // Jika tidak ada gambar, langsung simpan data tanpa URI gambar
                 savePanenData(panenData)
                 return@launch
             }
-
             try {
-                // Kompres gambar
                 val compressedUri = compressImage(imageUri)
-                Log.d("PanenViewModel", "Gambar berhasil dikompres ke URI: $compressedUri")
-
                 val panenDataWithCompressedImage = panenData.copy(
                     localImageUri = compressedUri.toString(),
                     isSynced = false
                 )
-
                 savePanenData(panenDataWithCompressedImage)
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Gagal mengkompres gambar: ${e.message}", e)
+            } catch (_: Exception) {
                 savePanenData(panenData.copy(localImageUri = null))
             }
         }
     }
 
-    /**
-     * Menyimpan data panen ke Room.
-     */
     private fun savePanenData(panenData: PanenData) {
         viewModelScope.launch {
             try {
                 panenDao.insertPanen(panenData)
-                Log.d("PanenViewModel", "ROOM: Data panen berhasil dimasukkan secara lokal.")
                 if (isConnected.value) {
                     syncDataToServer()
                 }
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Gagal menyimpan data ke Room: ${e.message}", e)
+            } catch (_: Exception) {
+                // Handle exception
             }
         }
     }
@@ -191,26 +178,19 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
                 val bitmap = BitmapFactory.decodeStream(inputStream)
-
                 if (bitmap == null) {
-                    continuation.resume(uri) // Gagal, kembalikan URI asli
+                    continuation.resume(uri)
                     return@launch
                 }
-
                 val compressedImageFile = File(context.cacheDir, "compressed_image_${UUID.randomUUID()}.jpg")
                 val outputStream = FileOutputStream(compressedImageFile)
-
-                // Kompres bitmap menjadi JPEG dengan kualitas 80
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-
                 outputStream.flush()
                 outputStream.close()
-
                 val compressedUri = compressedImageFile.toUri()
                 continuation.resume(compressedUri)
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Error saat kompresi gambar: ${e.message}")
-                continuation.resume(uri) // Gagal, kembalikan URI asli
+            } catch (_: Exception) {
+                continuation.resume(uri)
             }
         }
     }
@@ -222,47 +202,31 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 val unsyncedDataList = panenDao.getUnsyncedPanenDataFlow().first()
                 _totalItemsToSync.value = unsyncedDataList.size
                 _syncProgress.value = 0f
-
                 if (unsyncedDataList.isNotEmpty()) {
                     for ((index, panenData) in unsyncedDataList.withIndex()) {
                         try {
                             var firebaseImageUrl: String? = panenData.firebaseImageUrl
-
-                            // LANGKAH PENCEGAHAN DUPLIKASI GAMBAR
-                            // Hanya unggah gambar jika ada URI lokal dan belum memiliki URL Firebase.
-                            // Ini akan mencegah gambar yang sudah pernah diunggah dikirim lagi.
                             if (panenData.localImageUri != null && panenData.firebaseImageUrl.isNullOrEmpty()) {
                                 val imageUri = panenData.localImageUri.toUri()
                                 val imageName = UUID.randomUUID().toString()
                                 val imageRef = storageRef.child("$imageName.jpg")
-
                                 imageRef.putFile(imageUri).await()
                                 firebaseImageUrl = imageRef.downloadUrl.await().toString()
-                                Log.d("PanenViewModel", "Gambar untuk No. Unik ${panenData.uniqueNo} disinkronkan. URL: $firebaseImageUrl")
                             }
-
-                            // Langkah 2: Perbarui data di Room dengan URL Firebase dan status sinkron.
                             val updatedData = panenData.copy(
                                 firebaseImageUrl = firebaseImageUrl,
                                 isSynced = true
                             )
                             panenDao.updatePanen(updatedData)
-                            Log.d("PanenViewModel", "ROOM: Data ${updatedData.uniqueNo} diperbarui dengan URL Firebase dan status sinkron.")
-
-                            // Langkah 3: Unggah data yang sudah lengkap ke Firebase Realtime Database.
                             panenDbRef.child(updatedData.uniqueNo).setValue(updatedData).await()
-                            Log.d("PanenViewModel", "FIREBASE: Data ${updatedData.uniqueNo} berhasil diunggah.")
-
                             _syncProgress.value = (index + 1).toFloat() / unsyncedDataList.size.toFloat()
-
-                        } catch (e: Exception) {
-                            Log.e("PanenViewModel", "Gagal mengunggah item dengan No. Unik ${panenData.uniqueNo}: ${e.message}", e)
-                            // Lanjutkan ke item berikutnya meskipun ada yang gagal
+                        } catch (_: Exception) {
+                            // Handle exception
                         }
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Gagal menyinkronkan data: ${e.message}", e)
+            } catch (_: Exception) {
+                // Handle exception
             } finally {
                 _isSyncing.value = false
                 _syncProgress.value = 0f
@@ -297,35 +261,23 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         try {
             val imageRef = storage.getReferenceFromUrl(imageUrl)
             imageRef.delete().await()
-            Log.d("PanenViewModel", "FIREBASE STORAGE: Gambar berhasil dihapus dari URL: $imageUrl")
-        } catch (e: Exception) {
-            Log.e("PanenViewModel", "FIREBASE STORAGE: Gagal menghapus gambar: ${e.message}", e)
-            // Log error tapi jangan hentikan proses karena mungkin gambar sudah tidak ada
-            // atau ada masalah koneksi.
+        } catch (_: Exception) {
+            // Handle exception
         }
     }
 
     fun clearAllPanenData() {
         viewModelScope.launch {
             try {
-                // Ambil semua data panen untuk mendapatkan URL gambar
                 val allPanen = panenDao.getAllPanen().firstOrNull() ?: emptyList()
-
-                // Hapus semua data dari Firebase Realtime Database
                 panenDbRef.removeValue().await()
-                Log.d("PanenViewModel", "FIREBASE: All data successfully removed from Firebase.")
-
-                // Hapus gambar terkait dari Firebase Storage
                 allPanen.forEach { panen ->
                     deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
                 }
-
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Failed to delete all data from Firebase: ${e.message}", e)
+            } catch (_: Exception) {
+                // Handle exception
             } finally {
-                // Hapus semua data dari Room
                 panenDao.clearAllPanen()
-                Log.d("PanenViewModel", "ROOM: All data cleared from local DB.")
             }
         }
     }
@@ -335,18 +287,12 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             val panenData = panenDao.getPanenById(id)
             if (panenData != null) {
                 try {
-                    // Hapus gambar dari Firebase Storage
                     deleteImageFromFirebaseStorage(panenData.firebaseImageUrl)
-
-                    // Hapus data dari Firebase Realtime Database
                     panenDbRef.child(panenData.uniqueNo).removeValue().await()
-                    Log.d("PanenViewModel", "FIREBASE: Data with Unique No ${panenData.uniqueNo} deleted from Firebase.")
-                } catch (e: Exception) {
-                    Log.e("PanenViewModel", "Failed to delete from Firebase: ${e.message}")
+                } catch (_: Exception) {
+                    // Handle exception
                 } finally {
-                    // Hapus data dari Room
                     panenDao.deletePanenById(id)
-                    Log.d("PanenViewModel", "ROOM: Panen data deleted for ID: $id")
                 }
             }
         }
@@ -357,19 +303,13 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             val dataToDelete = panenDao.getPanenByIds(ids)
             dataToDelete.forEach { panen ->
                 try {
-                    // Hapus gambar dari Firebase Storage
                     deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
-
-                    // Hapus data dari Firebase Realtime Database
                     panenDbRef.child(panen.uniqueNo).removeValue().await()
-                    Log.d("PanenViewModel", "FIREBASE: Data with Unique No ${panen.uniqueNo} deleted from Firebase.")
-                } catch (e: Exception) {
-                    Log.e("PanenViewModel", "Failed to delete item ${panen.uniqueNo} from Firebase: ${e.message}")
+                } catch (_: Exception) {
+                    // Handle exception
                 }
             }
-            // Hapus semua data yang dipilih dari Room
             panenDao.deleteMultiplePanen(ids)
-            Log.d("PanenViewModel", "ROOM: Deleted multiple panen data with IDs: $ids")
         }
     }
 

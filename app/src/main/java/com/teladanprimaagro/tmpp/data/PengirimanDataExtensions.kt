@@ -2,7 +2,7 @@ package com.teladanprimaagro.tmpp.data
 
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.teladanprimaagro.tmpp.ui.viewmodels.ScannedItem
+import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 
 private val gson = Gson()
 

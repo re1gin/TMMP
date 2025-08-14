@@ -26,9 +26,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
-import com.teladanprimaagro.tmpp.ui.viewmodels.NfcOperationState
-import com.teladanprimaagro.tmpp.ui.viewmodels.ScannedItem
-import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
+import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.nio.charset.Charset
 
 @Composable

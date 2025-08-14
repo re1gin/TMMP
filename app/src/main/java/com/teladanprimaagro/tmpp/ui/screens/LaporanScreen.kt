@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teladanprimaagro.tmpp.ui.theme.NeonGreen
 import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

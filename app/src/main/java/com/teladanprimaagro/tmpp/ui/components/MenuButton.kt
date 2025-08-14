@@ -25,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -34,17 +36,21 @@ import androidx.compose.ui.unit.sp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
+fun MenuButton(
+    text: String,
+    icon: ImageVector,
+    gradientColors: List<Color>,
+    onClick: () -> Unit
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.95f else 1f,
-        animationSpec = tween(durationMillis = 100)
+        animationSpec = tween(durationMillis = 100), label = ""
     )
 
     Card(
-        // Perubahan: Mengatur lebar dan tinggi secara terpisah untuk membuat tombol lebih tinggi
         modifier = Modifier
             .size(width = 150.dp, height = 180.dp)
             .graphicsLayer {
@@ -52,42 +58,48 @@ fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
                 scaleY = scale
             },
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.5f)
-        ),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
         onClick = onClick,
-        interactionSource = interactionSource
+        interactionSource = interactionSource,
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .background(Brush.verticalGradient(gradientColors)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
+            Column(
                 modifier = Modifier
-                    .size(80.dp)
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(50.dp)),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = text,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(48.dp)
+                Box(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .background(Color.White.copy(0.7f), RoundedCornerShape(50.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = text,
+                        tint = Color.Black,
+                        modifier = Modifier.size(48.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = text,
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    textAlign = TextAlign.Center
                 )
             }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = text,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center
-            )
         }
     }
 }

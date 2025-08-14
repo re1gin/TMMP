@@ -24,7 +24,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
+import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint

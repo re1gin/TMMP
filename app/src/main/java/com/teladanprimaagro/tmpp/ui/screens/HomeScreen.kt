@@ -1,4 +1,3 @@
-
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.os.Build
@@ -7,7 +6,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.components.AppTopBar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -36,6 +35,7 @@ fun HomeScreen(
 ) {
     var contentVisible by remember { mutableStateOf(false) }
 
+
     LaunchedEffect(Unit) {
         contentVisible = true
     }
@@ -44,10 +44,9 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .background(MaterialTheme.colorScheme.background),
+            .padding(horizontal = 0.dp, vertical = 0.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AppTopBar()
         AnimatedVisibility(
             visible = contentVisible,
             enter = fadeIn(animationSpec = tween(durationMillis = 500, delayMillis = 200)),
@@ -55,7 +54,6 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
-                .padding(16.dp)
         ) {
             when (userRole) {
                 UserRole.HARVESTER -> HarvesterContent(navController = navController)
@@ -64,3 +62,4 @@ fun HomeScreen(
         }
     }
 }
+

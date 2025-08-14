@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.NeonGreen
-import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
 // Added colors for each fruit type
 val buahNColor = Color(0xFF4CAF50) // Green

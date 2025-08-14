@@ -1,4 +1,4 @@
-package com.teladanprimaagro.tmpp.ui.viewmodels
+package com.teladanprimaagro.tmpp.viewmodels
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

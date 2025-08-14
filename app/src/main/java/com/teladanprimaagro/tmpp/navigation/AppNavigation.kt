@@ -1,4 +1,4 @@
-package com.teladanprimaagro.tmpp.ui.navigation
+package com.teladanprimaagro.tmpp.navigation
 
 import android.content.Intent
 import android.os.Build
@@ -35,11 +35,11 @@ import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatusPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
-import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SharedNfcViewModel
+import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

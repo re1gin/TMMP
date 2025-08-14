@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
-import com.teladanprimaagro.tmpp.ui.viewmodels.PengirimanViewModel
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)

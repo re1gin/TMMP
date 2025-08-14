@@ -32,7 +32,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.IconOrange
+import com.teladanprimaagro.tmpp.ui.theme.TextGray
+import com.teladanprimaagro.tmpp.ui.theme.Red
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,7 +46,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
     ) {
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = TextGray,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
@@ -60,7 +61,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 onClick = { if (count > 0) onCountChange(count - 1) },
                 modifier = Modifier
                     .size(40.dp)
-                    .background(IconOrange, CircleShape)
+                    .background(Red, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
@@ -104,7 +105,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 onClick = { onCountChange(count + 1) },
                 modifier = Modifier
                     .size(40.dp)
-                    .background(IconOrange, CircleShape)
+                    .background(Red, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,

@@ -19,11 +19,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.IconOrange
 import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.theme.RedLight1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +92,7 @@ fun LoginScreen(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Logo",
                     modifier = Modifier.size(48.dp),
-                    tint = IconOrange
+                    tint = RedLight1
                 )
             }
 
@@ -125,7 +125,7 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = "Ikon Username",
-                        tint = IconOrange
+                        tint = RedLight1
                     )
                 },
                 isError = usernameError,
@@ -148,8 +148,8 @@ fun LoginScreen(
                     unfocusedLabelColor = if (usernameError) MaterialTheme.colorScheme.error else TextGray,
                     disabledLabelColor = TextGray.copy(alpha = 0.38f),
                     errorLabelColor = MaterialTheme.colorScheme.error,
-                    focusedTrailingIconColor = IconOrange,
-                    unfocusedTrailingIconColor = IconOrange,
+                    focusedTrailingIconColor = RedLight1,
+                    unfocusedTrailingIconColor = RedLight1,
                     errorTrailingIconColor = MaterialTheme.colorScheme.error
                 )
             )
@@ -189,7 +189,7 @@ fun LoginScreen(
                     val description = if (passwordVisible) "Sembunyikan password" else "Tampilkan password"
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = description, tint = IconOrange)
+                        Icon(imageVector = image, contentDescription = description, tint = RedLight1)
                     }
                 },
                 isError = passwordError,
@@ -212,8 +212,8 @@ fun LoginScreen(
                     unfocusedLabelColor = if (passwordError) MaterialTheme.colorScheme.error else TextGray,
                     disabledLabelColor = TextGray.copy(alpha = 0.38f),
                     errorLabelColor = MaterialTheme.colorScheme.error,
-                    focusedTrailingIconColor = IconOrange,
-                    unfocusedTrailingIconColor = IconOrange,
+                    focusedTrailingIconColor = RedLight1,
+                    unfocusedTrailingIconColor = RedLight1,
                     errorTrailingIconColor = MaterialTheme.colorScheme.error
                 )
             )

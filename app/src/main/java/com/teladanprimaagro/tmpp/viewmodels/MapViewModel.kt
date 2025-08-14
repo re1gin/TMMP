@@ -1,4 +1,4 @@
-package com.teladanprimaagro.tmpp.ui.viewmodels
+package com.teladanprimaagro.tmpp.viewmodels
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel

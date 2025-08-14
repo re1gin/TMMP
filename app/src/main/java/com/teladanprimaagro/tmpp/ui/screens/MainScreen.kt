@@ -10,8 +10,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.components.AppBottomBar
-import com.teladanprimaagro.tmpp.ui.viewmodels.MapViewModel
-import com.teladanprimaagro.tmpp.ui.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

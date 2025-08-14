@@ -10,6 +10,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 
 @Composable
 fun SuccessDialog(onDismiss: () -> Unit) {
@@ -24,7 +26,7 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                     text = "Data Berhasil ✓",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = SuccessGreen
                 )
             }
         },
@@ -61,7 +63,7 @@ fun FailureDialog(message: String, onDismiss: () -> Unit) {
                     text = "Gagal ❌",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = DangerRed
                 )
             }
         },
