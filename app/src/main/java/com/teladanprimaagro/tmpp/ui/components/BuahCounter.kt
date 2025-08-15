@@ -31,9 +31,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.theme.Red
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +43,8 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
     ) {
         Text(
             text = label,
-            color = TextGray,
+            // Menggunakan onPrimary untuk teks utama
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
@@ -61,12 +59,14 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 onClick = { if (count > 0) onCountChange(count - 1) },
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Red, CircleShape)
+                    // Menggunakan onPrimary sebagai warna background lingkaran
+                    .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
                     contentDescription = "Kurang",
-                    tint = Color.Black
+                    // Menggunakan primary sebagai warna ikon agar kontras
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -86,12 +86,17 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 singleLine = true,
                 shape = RoundedCornerShape(8.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = DotGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = Color.White,
+                    // Warna teks di dalam TextField
+                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                    // Warna border saat aktif
+                    focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    // Warna cursor
+                    cursorColor = MaterialTheme.colorScheme.onPrimary,
+                    // Warna background container
+                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
                 ),
                 modifier = Modifier.width(100.dp),
                 textStyle = LocalTextStyle.current.copy(
@@ -105,12 +110,13 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 onClick = { onCountChange(count + 1) },
                 modifier = Modifier
                     .size(40.dp)
-                    .background(Red, CircleShape)
+                    // Menggunakan onPrimary sebagai warna background lingkaran
+                    .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Tambah",
-                    tint = Color.Black
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }

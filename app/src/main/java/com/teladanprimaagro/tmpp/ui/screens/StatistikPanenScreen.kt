@@ -21,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.NeonGreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
 // Added colors for each fruit type
@@ -52,7 +51,7 @@ fun StatistikPanenScreen(
                     Text(
                         text = "Statistik Panen",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 navigationIcon = {
@@ -60,12 +59,12 @@ fun StatistikPanenScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -90,7 +89,7 @@ fun StatistikPanenScreen(
                 StatistikSection(
                     title = "Total Buah per Pemanen",
                     data = statistikPerPemanen,
-                    barColor = NeonGreen
+                    barColor = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -129,12 +128,12 @@ fun SummarySection(totalDataMasuk: Int, totalSemuaBuah: Int) {
                 text = "$totalDataMasuk",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+                color = Color.White
             )
             Text(
                 text = "Data Masuk",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = Color.White
             )
         }
         // Tambahkan pemisah vertikal jika perlu, atau gunakan Spacer
@@ -144,12 +143,12 @@ fun SummarySection(totalDataMasuk: Int, totalSemuaBuah: Int) {
                 text = "$totalSemuaBuah",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = NeonGreen
+                color = Color.White
             )
             Text(
                 text = "Total Buah",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface
+                color = Color.White
             )
         }
     }
@@ -169,7 +168,7 @@ fun StatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White
         )
         HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
@@ -177,7 +176,7 @@ fun StatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
             Text(
                 text = "Belum ada data panen.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                color = Color.White.copy(alpha = 0.6f),
                 modifier = Modifier.padding(top = 8.dp)
             )
         } else {
@@ -224,7 +223,7 @@ fun BarChartItem(
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White
         )
         Spacer(modifier = Modifier.width(8.dp))
         Box(
@@ -247,7 +246,7 @@ fun BarChartItem(
             text = "$value",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = Color.White,
             modifier = Modifier.width(40.dp)
         )
     }
@@ -259,6 +258,7 @@ fun FruitTableSection(
     data: Map<String, Map<String, Int>>,
     totalJenisBuah: Map<String, Int>
 ) {
+    // Definisi warna tetap statis untuk setiap jenis buah
     val buahColors = mapOf(
         "Buah N" to buahNColor,
         "Buah A" to buahAColor,
@@ -279,7 +279,7 @@ fun FruitTableSection(
             text = "Detail Buah per Pemanen",
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = Color.White,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         HorizontalDivider(Modifier.padding(bottom = 8.dp))
@@ -288,7 +288,7 @@ fun FruitTableSection(
             Text(
                 text = "Belum ada data panen buah.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                color = Color.White.copy(alpha = 0.6f)
             )
         } else {
             // Header Tabel
@@ -301,10 +301,10 @@ fun FruitTableSection(
                     text = "Nama",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     modifier = Modifier.weight(1.2f)
                 )
                 sortedFruitKeys.forEach { jenis ->
-                    // Memodifikasi header agar ada indikator warna
                     Row(
                         modifier = Modifier.weight(0.5f),
                         verticalAlignment = Alignment.CenterVertically,
@@ -320,13 +320,13 @@ fun FruitTableSection(
                         Text(
                             text = jenis.replace("Buah ", ""),
                             style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
             }
-
-            // Baris data per pemanen (tetap sama)
+            // Baris data per pemanen
             data.forEach { (pemanen, jenisBuahMap) ->
                 Row(
                     modifier = Modifier
@@ -338,6 +338,7 @@ fun FruitTableSection(
                     Text(
                         text = pemanen,
                         style = MaterialTheme.typography.bodySmall,
+                        color = Color.White,
                         modifier = Modifier.weight(1.2f),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
@@ -347,6 +348,7 @@ fun FruitTableSection(
                         Text(
                             text = "$value",
                             style = MaterialTheme.typography.bodySmall,
+                            color = Color.White,
                             modifier = Modifier.weight(0.5f),
                             textAlign = TextAlign.Center
                         )
@@ -356,7 +358,7 @@ fun FruitTableSection(
 
             HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
-            // Baris total (tetap sama)
+            // Baris total
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -366,6 +368,7 @@ fun FruitTableSection(
                     text = "Total",
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
+                    color = Color.White,
                     modifier = Modifier.weight(1.2f)
                 )
                 sortedFruitKeys.forEach { jenis ->
@@ -374,6 +377,7 @@ fun FruitTableSection(
                         text = "$total",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
+                        color = Color.White,
                         modifier = Modifier.weight(0.5f),
                         textAlign = TextAlign.Center
                     )
@@ -381,12 +385,13 @@ fun FruitTableSection(
             }
         }
 
-        // Legenda warna (tetap sama)
+        // Legenda warna
         HorizontalDivider(Modifier.padding(top = 16.dp, bottom = 8.dp))
         Text(
             text = "Indikator Warna",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
+            color = Color.White,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         FlowRow(
@@ -425,7 +430,7 @@ fun LegendItem(label: String, color: Color) {
         Text(
             text = label.replace("Buah ", ""),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White
         )
     }
 }

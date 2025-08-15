@@ -108,14 +108,14 @@ fun ScanInputScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan NFC", color = MaterialTheme.colorScheme.onPrimary) },
+                title = { Text("Scan NFC", color = MaterialTheme.colorScheme.primary) },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali", tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -150,7 +150,7 @@ fun ScanInputScreen(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 val nfcStatusText = (nfcState as? NfcOperationState.GeneralStatus)?.message
                     ?: if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) "NFC tidak aktif." else "Siap untuk memindai."
-                val nfcIconColor = if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                val nfcIconColor = if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimary
                 val nfcBgColor = nfcIconColor.copy(alpha = 0.2f)
 
                 Icon(
@@ -225,7 +225,7 @@ fun ScanInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(

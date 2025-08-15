@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -67,10 +68,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.components.PanenDetailDialog
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
+import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
@@ -119,7 +117,7 @@ fun RekapPanenScreen(
                     Text(
                         text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Panen",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 navigationIcon = {
@@ -134,7 +132,7 @@ fun RekapPanenScreen(
                         Icon(
                             imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -150,7 +148,7 @@ fun RekapPanenScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -187,16 +185,45 @@ fun RekapPanenScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sortDropdownExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                errorTextColor = MaterialTheme.colorScheme.error,
+
+                                // Warna container
+                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                errorContainerColor = MaterialTheme.colorScheme.error,
+
+                                // Warna cursor
+                                cursorColor = MaterialTheme.colorScheme.onPrimary,
+                                errorCursorColor = MaterialTheme.colorScheme.error,
+
+                                // Hilangkan garis bawah
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = MaterialTheme.colorScheme.error,
+
+                                // Warna label
+                                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
+                                errorLabelColor = MaterialTheme.colorScheme.error,
+                            )
                         )
 
                         ExposedDropdownMenu(
                             expanded = sortDropdownExpanded,
-                            onDismissRequest = { sortDropdownExpanded = false }
+                            onDismissRequest = { sortDropdownExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
                         ) {
                             sortOptions.forEach { sortCriteria ->
                                 DropdownMenuItem(
-                                    text = { Text(sortCriteria) },
+                                    text = { Text(sortCriteria, color = MaterialTheme.colorScheme.onSecondary)},
                                     onClick = {
                                         panenViewModel.setSortBy(sortCriteria)
                                         sortDropdownExpanded = false
@@ -212,16 +239,16 @@ fun RekapPanenScreen(
                         onClick = { panenViewModel.toggleSortOrder() },
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurface,
-                            containerColor = Color.Transparent
+                            contentColor = MaterialTheme.colorScheme.onSecondary,
+                            containerColor = MaterialTheme.colorScheme.surface
                         ),
-                        border = BorderStroke(1.dp, DotGray),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         modifier = Modifier.wrapContentWidth()
                     ) {
                         Icon(
                             imageVector = if (sortOrderAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                             contentDescription = if (sortOrderAscending) "Urutkan Menaik" else "Urutkan Menurun",
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(if (sortOrderAscending) "Asc" else "Desc")
@@ -245,16 +272,45 @@ fun RekapPanenScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pemanenDropdownExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                errorTextColor = MaterialTheme.colorScheme.error,
+
+                                // Warna container
+                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                errorContainerColor = MaterialTheme.colorScheme.error,
+
+                                // Warna cursor
+                                cursorColor = MaterialTheme.colorScheme.onPrimary,
+                                errorCursorColor = MaterialTheme.colorScheme.error,
+
+                                // Hilangkan garis bawah
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = MaterialTheme.colorScheme.error,
+
+                                // Warna label
+                                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
+                                errorLabelColor = MaterialTheme.colorScheme.error,
+                            )
                         )
 
                         ExposedDropdownMenu(
                             expanded = pemanenDropdownExpanded,
-                            onDismissRequest = { pemanenDropdownExpanded = false }
+                            onDismissRequest = { pemanenDropdownExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
                         ) {
                             pemanenFilterOptions.value.forEach { pemanen ->
                                 DropdownMenuItem(
-                                    text = { Text(pemanen) },
+                                    text = { Text(pemanen, color = MaterialTheme.colorScheme.onSecondary) },
                                     onClick = {
                                         panenViewModel.setPemanenFilter(pemanen)
                                         pemanenDropdownExpanded = false
@@ -279,16 +335,45 @@ fun RekapPanenScreen(
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = blokDropdownExpanded) },
                             modifier = Modifier
                                 .menuAnchor()
-                                .fillMaxWidth()
+                                .fillMaxWidth(),
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                errorTextColor = MaterialTheme.colorScheme.error,
+
+                                // Warna container
+                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
+                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                errorContainerColor = MaterialTheme.colorScheme.error,
+
+                                // Warna cursor
+                                cursorColor = MaterialTheme.colorScheme.onPrimary,
+                                errorCursorColor = MaterialTheme.colorScheme.error,
+
+                                // Hilangkan garis bawah
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = MaterialTheme.colorScheme.error,
+
+                                // Warna label
+                                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
+                                disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
+                                errorLabelColor = MaterialTheme.colorScheme.error,
+                            )
                         )
 
                         ExposedDropdownMenu(
                             expanded = blokDropdownExpanded,
-                            onDismissRequest = { blokDropdownExpanded = false }
+                            onDismissRequest = { blokDropdownExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
                         ) {
                             blokFilterOptions.value.forEach { blok ->
                                 DropdownMenuItem(
-                                    text = { Text(blok) },
+                                    text = { Text(blok, color = MaterialTheme.colorScheme.onSecondary) },
                                     onClick = {
                                         panenViewModel.setBlokFilter(blok)
                                         blokDropdownExpanded = false
@@ -324,7 +409,7 @@ fun RekapPanenScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .background(PrimaryOrange, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -357,7 +442,7 @@ fun RekapPanenScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(horizontal = 16.dp)
-                    .background(BackgroundLightGray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .background(Gray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
             ) {
                 if (panenList.isEmpty()) {
                     item {
@@ -367,7 +452,7 @@ fun RekapPanenScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             textAlign = TextAlign.Center,
-                            color = TextGray
+                            color = Gray
                         )
                     }
                 } else {
@@ -396,7 +481,7 @@ fun RekapPanenScreen(
                                 navController.navigate("panenInputScreen/${editedData.id}")
                             }
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
+                        HorizontalDivider(thickness = 0.5.dp, color = Gray.copy(alpha = 0.5f))
                     }
                 }
             }
@@ -464,7 +549,7 @@ fun RekapPanenScreen(
 
             Text(
                 text = "*Data akan di reset setiap pukul 00.00",
-                color = TextGray,
+                color = Gray,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -566,7 +651,7 @@ fun TableRow(
     onDetailClick: (PanenData) -> Unit,
     onEditClick: (PanenData) -> Unit
 ) {
-    val backgroundColor = if (isSelected) BackgroundLightGray.copy(alpha = 0.5f) else Color.Transparent
+    val backgroundColor = if (isSelected) Gray.copy(alpha = 0.5f) else Color.Transparent
 
     Row(
         modifier = Modifier
@@ -605,7 +690,7 @@ fun TableRow(
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit",
-                    tint = PrimaryOrange,
+                    tint = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onEditClick(data) }
@@ -615,7 +700,7 @@ fun TableRow(
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = "Detail",
-                    tint = PrimaryOrange,
+                    tint = MaterialTheme.colorScheme.onSecondary,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onDetailClick(data) }
@@ -648,26 +733,3 @@ fun RowScope.TableCellText(text: String, weight: Float) {
     )
 }
 
-@Composable
-fun SummaryBox(label: String, value: String) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(110.dp)
-            .background(PrimaryOrange, RoundedCornerShape(8.dp))
-            .padding(vertical = 8.dp, horizontal = 10.dp)
-    ) {
-        Text(
-            text = label,
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium
-        )
-        Text(
-            text = value,
-            color = MaterialTheme.colorScheme.onPrimary,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}

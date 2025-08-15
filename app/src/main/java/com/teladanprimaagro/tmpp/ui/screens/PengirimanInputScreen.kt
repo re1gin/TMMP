@@ -1,4 +1,3 @@
-// com.teladanprimaagro.tmpp.ui.screens/PengirimanInputScreen.kt
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.annotation.SuppressLint
@@ -20,8 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -35,12 +34,17 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,14 +57,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
-import androidx.compose.runtime.LaunchedEffect // Import LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -88,222 +86,226 @@ fun PengirimanInputScreen(
     var selectedVehicle by remember(noPolisiOptions) { mutableStateOf(noPolisiOptions.firstOrNull() ?: "") }
     var vehicleExpanded by remember { mutableStateOf(false) }
 
-    // Ambil nilai mandor loading dari SettingsViewModel
     val selectedMandorLoading by settingsViewModel.selectedMandorLoading.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    // Menambahkan LaunchedEffect untuk memicu pembuatan SPB baru
     LaunchedEffect(selectedMandorLoading) {
         pengirimanViewModel.generateSpbNumber(selectedMandorLoading)
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background)
-            .imePadding(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Pengiriman",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { navController.navigate("spb_settings_screen") }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Pengaturan",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
-            }
-            Text(
-                text = "Pengiriman",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
             )
-            IconButton(onClick = { navController.navigate("spb_settings_screen") }) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Pengaturan",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(16.dp)
-                .verticalScroll(scrollState)
+                .fillMaxSize()
+                .padding(innerPadding)
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Tampilkan No. SPB yang digenerate otomatis
-            TextInputField(
-                label = "No. SPB",
-                value = spbNumber.value,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TextInputField(
-                label = "Tanggal/Jam",
-                value = dateTimeDisplay.value,
-                onValueChange = {},
-                readOnly = true
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Dropdown untuk Nama Supir
-            DropdownInputField(
-                label = "Nama Supir",
-                options = supirOptions.toList(),
-                selectedOption = selectedSupir,
-                onOptionSelected = {
-                    selectedSupir = it
-                },
-                expanded = supirExpanded,
-                onExpandedChange = { supirExpanded = it }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Dropdown untuk No Polisi
-            DropdownInputField(
-                label = "No Polisi",
-                options = noPolisiOptions.toList(),
-                selectedOption = selectedVehicle,
-                onOptionSelected = { selectedVehicle = it },
-                expanded = vehicleExpanded,
-                onExpandedChange = { vehicleExpanded = it }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(16.dp)
+                    .verticalScroll(scrollState)
             ) {
-                Text(
-                    text = "Total Buah",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                OutlinedTextField(
-                    value = totalBuahCalculated.intValue.toString(),
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TextInputField(
+                    label = "No. SPB",
+                    value = spbNumber.value,
                     onValueChange = {},
                     readOnly = true,
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = DotGray,
-                        disabledBorderColor = DotGray,
-                        disabledContainerColor = BackgroundLightGray,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    modifier = Modifier.width(120.dp)
+                    modifier = Modifier.fillMaxWidth()
                 )
-            }
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = DotGray
-            )
+                Spacer(modifier = Modifier.height(12.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = PrimaryOrange,
-                        RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceAround,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                TableHeaderText(text = "No", color = Color.White)
-                TableHeaderText(text = "No. Unik", color = Color.White)
-                TableHeaderText(text = "Blok", color = Color.White)
-                TableHeaderText(text = "Total Buah", color = Color.White)
-            }
+                TextInputField(
+                    label = "Tanggal/Jam",
+                    value = dateTimeDisplay.value,
+                    onValueChange = {},
+                    readOnly = true
+                )
+                Spacer(modifier = Modifier.height(12.dp))
 
-            // Daftar Item yang Discan
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .background(BackgroundLightGray.copy(alpha = 0.1f))
-                    .border(1.dp, PrimaryOrange, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
-            ) {
-                if (scannedItems.isEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "Belum ada item yang discan. Scan tag NFC!",
-                                color = TextGray,
-                                style = MaterialTheme.typography.bodyMedium
+                DropdownInputField(
+                    label = "Nama Supir",
+                    options = supirOptions.toList(),
+                    selectedOption = selectedSupir,
+                    onOptionSelected = {
+                        selectedSupir = it
+                    },
+                    expanded = supirExpanded,
+                    onExpandedChange = { supirExpanded = it }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                DropdownInputField(
+                    label = "No Polisi",
+                    options = noPolisiOptions.toList(),
+                    selectedOption = selectedVehicle,
+                    onOptionSelected = { selectedVehicle = it },
+                    expanded = vehicleExpanded,
+                    onExpandedChange = { vehicleExpanded = it }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Total Buah",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    OutlinedTextField(
+                        value = totalBuahCalculated.intValue.toString(),
+                        onValueChange = {},
+                        readOnly = true,
+                        singleLine = true,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            // Warna teks di dalam TextField
+                            focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                            // Warna border
+                            focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                            disabledBorderColor = MaterialTheme.colorScheme.outline,
+                            // Warna background container
+                            disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                            // Warna cursor (tidak terlihat karena readOnly)
+                            cursorColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        modifier = Modifier.width(120.dp)
+                    )
+                }
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.outline
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    TableHeaderText(text = "No", color = MaterialTheme.colorScheme.onPrimary)
+                    TableHeaderText(text = "No. Unik", color = MaterialTheme.colorScheme.onPrimary)
+                    TableHeaderText(text = "Blok", color = MaterialTheme.colorScheme.onPrimary)
+                    TableHeaderText(text = "Total Buah", color = MaterialTheme.colorScheme.onPrimary)
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                ) {
+                    if (scannedItems.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    "Belum ada item yang discan. Scan tag NFC!",
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    } else {
+                        itemsIndexed(scannedItems) { index, item ->
+                            TableRow(
+                                no = index + 1,
+                                noUnik = item.uniqueNo,
+                                blok = item.blok,
+                                totalBuah = item.totalBuah
                             )
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
                         }
                     }
-                } else {
-                    itemsIndexed(scannedItems) { index, item ->
-                        TableRow(
-                            no = index + 1,
-                            noUnik = item.uniqueNo,
-                            blok = item.blok,
-                            totalBuah = item.totalBuah
-                        )
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray)
-                    }
                 }
+                Spacer(modifier = Modifier.height(24.dp))
             }
-            Spacer(modifier = Modifier.height(24.dp))
-        }
 
-        Button(
-            onClick = {
-                coroutineScope.launch {
-                    pengirimanViewModel.finalizeScannedItemsAsPengiriman(
-                        namaSupir = selectedSupir,
-                        noPolisi = selectedVehicle
-                    )
-                    selectedSupir = supirOptions.firstOrNull() ?: ""
-                    selectedVehicle = noPolisiOptions.firstOrNull() ?: ""
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        pengirimanViewModel.finalizeScannedItemsAsPengiriman(
+                            namaSupir = selectedSupir,
+                            noPolisi = selectedVehicle
+                        )
+                        selectedSupir = supirOptions.firstOrNull() ?: ""
+                        selectedVehicle = noPolisiOptions.firstOrNull() ?: ""
 
-                    navController.navigate("rekap_pengiriman_screen") {
-                        popUpTo("pengiriman_input_screen") { inclusive = true }
+                        navController.navigate("rekap_pengiriman_screen") {
+                            popUpTo("pengiriman_input_screen") { inclusive = true }
+                        }
                     }
-                }
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp)
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange),
-            enabled = scannedItems.isNotEmpty() &&
-                    selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
-                    selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi"
-        ) {
-            Text("Finalisasi Pengiriman", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 16.dp)
+                    .height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                enabled = scannedItems.isNotEmpty() &&
+                        selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
+                        selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi"
+            ) {
+                Text("Finalisasi Pengiriman", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
         }
     }
 }

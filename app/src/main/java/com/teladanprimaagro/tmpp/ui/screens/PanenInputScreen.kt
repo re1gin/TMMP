@@ -82,11 +82,6 @@ import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.components.FailureDialog
 import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.theme.RedLight1
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
@@ -379,7 +374,7 @@ fun PanenInputScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
-                .background(brush = Brush.verticalGradient(listOf(PrimaryOrange, BackgroundLightGray)))
+                .background(MaterialTheme.colorScheme.onPrimary)
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -388,12 +383,12 @@ fun PanenInputScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.surfaceContainer
                 )
             }
             Text(
                 text = if (isEditing) "Edit Panen" else "Panen",
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -401,7 +396,7 @@ fun PanenInputScreen(
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = "Pengaturan",
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    tint = MaterialTheme.colorScheme.surfaceContainer
                 )
             }
         }
@@ -411,7 +406,7 @@ fun PanenInputScreen(
                 .fillMaxWidth()
                 .weight(1f)
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
+                    color = Color.Transparent,
                 )
                 .padding(16.dp)
                 .verticalScroll(scrollState)
@@ -473,7 +468,7 @@ fun PanenInputScreen(
                         .padding(start = 8.dp)
                         .fillMaxHeight()
                         .background(
-                            color = if (isEditing) Color.Gray.copy(alpha = 0.5f) else RedLight1,
+                            color = if (isEditing) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onPrimary,
                             shape = RoundedCornerShape(10.dp)
                         )
                 ) {
@@ -538,7 +533,7 @@ fun PanenInputScreen(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
                 thickness = 1.dp,
-                color = DotGray
+                color = MaterialTheme.colorScheme.primary
             )
             BuahCounter(label = "Buah N", count = buahN, onCountChange = { buahN = it })
             Spacer(modifier = Modifier.height(10.dp))
@@ -563,7 +558,7 @@ fun PanenInputScreen(
             ) {
                 Text(
                     text = "Total Buah",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -574,14 +569,18 @@ fun PanenInputScreen(
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                        disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = DotGray,
-                        disabledBorderColor = DotGray,
-                        disabledContainerColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.primary
+                        // Warna teks di dalam TextField
+                        focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
+                        // Warna border
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        disabledBorderColor = MaterialTheme.colorScheme.outline,
+                        // Warna background container
+                        disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                        // Warna cursor (tidak terlihat karena readOnly)
+                        cursorColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier.width(120.dp)
                 )
@@ -591,8 +590,8 @@ fun PanenInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .background(BackgroundLightGray, RoundedCornerShape(8.dp))
-                    .border(1.dp, DotGray, RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
                     .clip(RoundedCornerShape(8.dp))
                     .clickable {
                         if (ContextCompat.checkSelfPermission(
@@ -630,13 +629,13 @@ fun PanenInputScreen(
                         Icon(
                             imageVector = Icons.Default.CameraAlt,
                             contentDescription = "Ambil Gambar",
-                            tint = DotGray,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(64.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Ambil Gambar",
-                            color = TextGray,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -738,7 +737,7 @@ fun PanenInputScreen(
                     Box(
                         modifier = Modifier
                             .size(8.dp)
-                            .background(DotGray, shape = RoundedCornerShape(50))
+                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50))
                             .padding(horizontal = 4.dp)
                     )
                     if (it < 2) Spacer(modifier = Modifier.width(8.dp))

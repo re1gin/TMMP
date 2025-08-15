@@ -8,10 +8,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Clear // Ikon untuk batal edit
-import androidx.compose.material.icons.filled.Done // Ikon untuk simpan edit
-import androidx.compose.material.icons.filled.Delete // Ikon untuk hapus
-import androidx.compose.material.icons.filled.Edit // Ikon untuk edit
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,9 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,173 +30,172 @@ fun KelolaBlokScreen(
     settingsViewModel: SettingsViewModel
 ) {
     var newBlokName by remember { mutableStateOf("") }
-    // State untuk melacak blok yang sedang diedit
     var editingBlok by remember { mutableStateOf<String?>(null) }
-    // State untuk menyimpan teks edit sementara
     var editedBlokName by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-            Text(
-                text = "Kelola Blok",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(48.dp)) // Untuk menyeimbangkan header
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                )
-                .padding(16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            OutlinedTextField(
-                value = newBlokName,
-                onValueChange = { newBlokName = it },
-                label = { Text("Nama Blok Baru") },
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = DotGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = BackgroundLightGray,
-                    unfocusedContainerColor = BackgroundLightGray,
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    if (newBlokName.isNotBlank()) {
-                        settingsViewModel.addBlok(newBlokName.trim())
-                        newBlokName = ""
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Kelola Blok",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface // Menggunakan surface sebagai background utama
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                )
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFADFF2F),
-                    contentColor = Color.Black
+                    .weight(1f)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = newBlokName,
+                    onValueChange = { newBlokName = it },
+                    label = { Text("Nama Blok Baru") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Tambah Blok", fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Daftar Blok:",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                Button(
+                    onClick = {
+                        if (newBlokName.isNotBlank()) {
+                            settingsViewModel.addBlok(newBlokName.trim())
+                            newBlokName = ""
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Tambah")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Tambah Blok", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
 
-            HorizontalDivider(thickness = 1.dp, color = DotGray)
-            Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Daftar Blok:",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                items(settingsViewModel.blokList, key = { it }) { blok -> // Tambahkan key untuk performa
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (editingBlok == blok) {
-                            // Tampilan saat mode edit
-                            OutlinedTextField(
-                                value = editedBlokName,
-                                onValueChange = { editedBlokName = it },
-                                singleLine = true,
-                                shape = RoundedCornerShape(8.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = DotGray,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                    focusedContainerColor = BackgroundLightGray,
-                                    unfocusedContainerColor = BackgroundLightGray,
-                                ),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // Tombol Simpan
-                            IconButton(
-                                onClick = {
-                                    if (editedBlokName.isNotBlank() && editedBlokName.trim() != blok) {
-                                        settingsViewModel.updateBlok(blok, editedBlokName.trim())
-                                    }
-                                    editingBlok = null
-                                },
-                                enabled = editedBlokName.isNotBlank() // Aktifkan hanya jika ada teks
-                            ) {
-                                Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
-                            }
-                            // Tombol Batal
-                            IconButton(onClick = { editingBlok = null }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
-                            }
-                        } else {
-                            // Tampilan normal
-                            Text(
-                                text = blok,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 16.sp,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // Tombol Edit
-                            IconButton(onClick = {
-                                editingBlok = blok
-                                editedBlokName = blok
-                            }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
-                            }
-                            // Tombol Hapus
-                            IconButton(onClick = { settingsViewModel.removeBlok(blok) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(settingsViewModel.blokList, key = { it }) { blok ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (editingBlok == blok) {
+                                OutlinedTextField(
+                                    value = editedBlokName,
+                                    onValueChange = { editedBlokName = it },
+                                    singleLine = true,
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                        cursorColor = MaterialTheme.colorScheme.primary,
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = {
+                                        if (editedBlokName.isNotBlank() && editedBlokName.trim() != blok) {
+                                            settingsViewModel.updateBlok(blok, editedBlokName.trim())
+                                        }
+                                        editingBlok = null
+                                    },
+                                    enabled = editedBlokName.isNotBlank()
+                                ) {
+                                    Icon(Icons.Default.Done, contentDescription = "Simpan", tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(onClick = { editingBlok = null }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Batal", tint = MaterialTheme.colorScheme.error)
+                                }
+                            } else {
+                                Text(
+                                    text = blok,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(onClick = {
+                                    editingBlok = blok
+                                    editedBlokName = blok
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                IconButton(onClick = { settingsViewModel.removeBlok(blok) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
+                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                     }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
                 }
             }
         }

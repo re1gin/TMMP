@@ -16,14 +16,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,180 +29,172 @@ fun KelolaKendaraanScreen(
     settingsViewModel: SettingsViewModel
 ) {
     var newKendaraanName by remember { mutableStateOf("") }
-    // State untuk melacak kendaraan yang sedang diedit
     var editingKendaraan by remember { mutableStateOf<String?>(null) }
-    // State untuk menyimpan teks edit sementara
     var editedKendaraanName by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Top Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-            Text(
-                text = "Kelola Kendaraan",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.width(48.dp)) // Untuk menyeimbangkan header
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(
-                    color = MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                )
-                .padding(16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Input untuk nama kendaraan baru (nomor polisi)
-            OutlinedTextField(
-                value = newKendaraanName,
-                onValueChange = { newKendaraanName = it.uppercase() },
-                label = { Text("Nomor Polisi Baru") },
-                singleLine = true,
-                shape = RoundedCornerShape(8.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = DotGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    focusedContainerColor = BackgroundLightGray,
-                    unfocusedContainerColor = BackgroundLightGray,
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Tombol Tambah
-            Button(
-                onClick = {
-                    if (newKendaraanName.isNotBlank()) {
-                        settingsViewModel.addKendaraan(newKendaraanName.trim()) // Gunakan trim() untuk membersihkan spasi
-                        newKendaraanName = "" // Bersihkan input setelah ditambahkan
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Kelola Kendaraan",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(
+                    color = MaterialTheme.colorScheme.background,
+                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                )
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFADFF2F), // Warna hijau terang
-                    contentColor = Color.Black
+                    .weight(1f)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    )
+                    .padding(16.dp)
+            ) {
+                Spacer(modifier = Modifier.height(24.dp))
+
+                OutlinedTextField(
+                    value = newKendaraanName,
+                    onValueChange = { newKendaraanName = it.uppercase() },
+                    label = { Text("Nomor Polisi Baru") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Tambah")
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Tambah Kendaraan", fontWeight = FontWeight.Bold)
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Daftar Kendaraan:",
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+                Button(
+                    onClick = {
+                        if (newKendaraanName.isNotBlank()) {
+                            settingsViewModel.addKendaraan(newKendaraanName.trim())
+                            newKendaraanName = ""
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Tambah")
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Tambah Kendaraan", fontWeight = FontWeight.Bold)
+                }
+                Spacer(modifier = Modifier.height(24.dp))
 
-            HorizontalDivider(thickness = 1.dp, color = DotGray)
-            Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Daftar Kendaraan:",
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
 
-            // Daftar kendaraan yang sudah ada
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Gunakan key untuk performa dan stabilitas UI saat daftar berubah
-                items(settingsViewModel.kendaraanList, key = { it }) { kendaraan ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (editingKendaraan == kendaraan) {
-                            // Tampilan saat mode edit
-                            OutlinedTextField(
-                                value = editedKendaraanName,
-                                onValueChange = { editedKendaraanName = it.uppercase() },
-                                singleLine = true,
-                                shape = RoundedCornerShape(8.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedBorderColor = DotGray,
-                                    cursorColor = MaterialTheme.colorScheme.primary,
-                                    focusedContainerColor = BackgroundLightGray,
-                                    unfocusedContainerColor = BackgroundLightGray,
-                                ),
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // Tombol Simpan
-                            IconButton(
-                                onClick = {
-                                    // Validasi: Pastikan nama baru tidak kosong dan tidak sama dengan nama lama (setelah trim)
-                                    if (editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan) {
-                                        settingsViewModel.updateKendaraan(kendaraan, editedKendaraanName.trim())
-                                    }
-                                    editingKendaraan = null // Keluar dari mode edit setelah simpan
-                                },
-                                // Tombol aktif hanya jika ada teks dan teksnya berbeda dari yang lama
-                                enabled = editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan
-                            ) {
-                                Icon(Icons.Default.Done, contentDescription = "Simpan", tint = Color.Green)
-                            }
-                            // Tombol Batal
-                            IconButton(onClick = { editingKendaraan = null }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Batal", tint = Color.Red)
-                            }
-                        } else {
-                            // Tampilan normal
-                            Text(
-                                text = kendaraan,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 16.sp,
-                                modifier = Modifier.weight(1f)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            // Tombol Edit
-                            IconButton(onClick = {
-                                editingKendaraan = kendaraan // Masuk mode edit untuk item ini
-                                editedKendaraanName = kendaraan // Inisialisasi teks edit dengan nama kendaraan saat ini
-                            }) {
-                                Icon(Icons.Default.Edit, contentDescription = "Edit", tint = TextGray)
-                            }
-                            // Tombol Hapus
-                            IconButton(onClick = { settingsViewModel.removeKendaraan(kendaraan) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    items(settingsViewModel.kendaraanList, key = { it }) { kendaraan ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (editingKendaraan == kendaraan) {
+                                OutlinedTextField(
+                                    value = editedKendaraanName,
+                                    onValueChange = { editedKendaraanName = it.uppercase() },
+                                    singleLine = true,
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                        cursorColor = MaterialTheme.colorScheme.primary,
+                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = {
+                                        if (editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan) {
+                                            settingsViewModel.updateKendaraan(kendaraan, editedKendaraanName.trim())
+                                        }
+                                        editingKendaraan = null
+                                    },
+                                    enabled = editedKendaraanName.isNotBlank() && editedKendaraanName.trim() != kendaraan
+                                ) {
+                                    Icon(Icons.Default.Done, contentDescription = "Simpan", tint = MaterialTheme.colorScheme.primary)
+                                }
+                                IconButton(onClick = { editingKendaraan = null }) {
+                                    Icon(Icons.Default.Clear, contentDescription = "Batal", tint = MaterialTheme.colorScheme.error)
+                                }
+                            } else {
+                                Text(
+                                    text = kendaraan,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 16.sp,
+                                    modifier = Modifier.weight(1f)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(onClick = {
+                                    editingKendaraan = kendaraan
+                                    editedKendaraanName = kendaraan
+                                }) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                                IconButton(onClick = { settingsViewModel.removeKendaraan(kendaraan) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
+                                }
                             }
                         }
+                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                     }
-                    HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
                 }
             }
         }

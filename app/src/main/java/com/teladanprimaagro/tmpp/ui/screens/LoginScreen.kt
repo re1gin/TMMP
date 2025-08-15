@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -19,11 +18,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.theme.RedLight1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +39,6 @@ fun LoginScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // Bagian Atas Oranye
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -66,7 +61,6 @@ fun LoginScreen(
             )
         }
 
-        // Bagian Bawah Hitam
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -80,11 +74,13 @@ fun LoginScreen(
         ) {
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Placeholder Logo yang Disesuaikan (Lebih Sederhana)
             Box(
                 modifier = Modifier
                     .size(64.dp)
-                    .background(color = BackgroundLightGray, shape = RoundedCornerShape(50))
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(50)
+                    )
                     .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -92,7 +88,7 @@ fun LoginScreen(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Logo",
                     modifier = Modifier.size(48.dp),
-                    tint = RedLight1
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -125,32 +121,19 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Filled.Person,
                         contentDescription = "Ikon Username",
-                        tint = RedLight1
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 },
                 isError = usernameError,
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    errorTextColor = MaterialTheme.colorScheme.error,
-                    focusedContainerColor = BackgroundLightGray,
-                    unfocusedContainerColor = BackgroundLightGray,
-                    disabledContainerColor = BackgroundLightGray,
-                    errorContainerColor = BackgroundLightGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    errorCursorColor = MaterialTheme.colorScheme.error,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = MaterialTheme.colorScheme.error,
-                    focusedLabelColor = if (usernameError) MaterialTheme.colorScheme.error else TextGray,
-                    unfocusedLabelColor = if (usernameError) MaterialTheme.colorScheme.error else TextGray,
-                    disabledLabelColor = TextGray.copy(alpha = 0.38f),
-                    errorLabelColor = MaterialTheme.colorScheme.error,
-                    focusedTrailingIconColor = RedLight1,
-                    unfocusedTrailingIconColor = RedLight1,
-                    errorTrailingIconColor = MaterialTheme.colorScheme.error
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    errorLabelColor = MaterialTheme.colorScheme.error
                 )
             )
             if (usernameError) {
@@ -182,39 +165,23 @@ fun LoginScreen(
                     .fillMaxWidth(0.8f)
                     .heightIn(min = 56.dp),
                 trailingIcon = {
-                    val image = if (passwordVisible)
-                        Icons.Filled.Visibility
-                    else Icons.Filled.VisibilityOff
-
+                    val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                     val description = if (passwordVisible) "Sembunyikan password" else "Tampilkan password"
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(imageVector = image, contentDescription = description, tint = RedLight1)
+                        Icon(imageVector = image, contentDescription = description, tint = MaterialTheme.colorScheme.primary)
                     }
                 },
                 isError = passwordError,
                 colors = TextFieldDefaults.colors(
-                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                    disabledTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    errorTextColor = MaterialTheme.colorScheme.error,
-                    focusedContainerColor = BackgroundLightGray,
-                    unfocusedContainerColor = BackgroundLightGray,
-                    disabledContainerColor = BackgroundLightGray,
-                    errorContainerColor = BackgroundLightGray,
-                    cursorColor = MaterialTheme.colorScheme.primary,
-                    errorCursorColor = MaterialTheme.colorScheme.error,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    errorIndicatorColor = MaterialTheme.colorScheme.error,
-                    focusedLabelColor = if (passwordError) MaterialTheme.colorScheme.error else TextGray,
-                    unfocusedLabelColor = if (passwordError) MaterialTheme.colorScheme.error else TextGray,
-                    disabledLabelColor = TextGray.copy(alpha = 0.38f),
-                    errorLabelColor = MaterialTheme.colorScheme.error,
-                    focusedTrailingIconColor = RedLight1,
-                    unfocusedTrailingIconColor = RedLight1,
-                    errorTrailingIconColor = MaterialTheme.colorScheme.error
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    errorContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                    focusedLabelColor = MaterialTheme.colorScheme.primary,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    errorLabelColor = MaterialTheme.colorScheme.error
                 )
             )
             if (passwordError) {
@@ -230,35 +197,24 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Tombol Login
             Button(
                 onClick = {
-                    usernameError = false
-                    passwordError = false
+                    usernameError = username.isBlank()
+                    passwordError = password.isBlank()
                     loginError = false
 
-                    if (username.isBlank()) {
-                        usernameError = true
-                    }
-                    if (password.isBlank()) {
-                        passwordError = true
-                    }
-
                     if (usernameError || passwordError) {
-                        loginError = true
                         return@Button
                     }
 
-                    // Logika autentikasi dummy
                     val authenticatedUserRole: UserRole? = when {
-                        username == "pemanen" && password == "panen123" -> UserRole.HARVESTER
-                        username == "supir" && password == "supir123" -> UserRole.DRIVER
+                        username.trim() == "pemanen" && password.trim() == "panen123" -> UserRole.HARVESTER
+                        username.trim() == "supir" && password.trim() == "supir123" -> UserRole.DRIVER
                         else -> null
                     }
 
                     if (authenticatedUserRole != null) {
                         settingsViewModel.loginSuccess(authenticatedUserRole)
-
                         navController.navigate("main_screen/${authenticatedUserRole.name}") {
                             popUpTo("login_screen") { inclusive = true }
                         }
@@ -278,7 +234,7 @@ fun LoginScreen(
                 Text("LOGIN", fontWeight = FontWeight.Bold)
             }
 
-            if (loginError && !usernameError && !passwordError) {
+            if (loginError) {
                 Text(
                     text = "Username atau password salah",
                     color = MaterialTheme.colorScheme.error,

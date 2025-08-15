@@ -26,10 +26,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.getDetailScannedItems
+import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -119,7 +118,7 @@ fun SendPrintDataScreen(
                     text = "Data Pengiriman SPB: ${pengirimanData!!.spbNumber}",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = PrimaryOrange,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
@@ -127,7 +126,6 @@ fun SendPrintDataScreen(
 
                 Button(
                     onClick = {
-                        // Cek dan minta izin sebelum mencoba mencetak
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                             if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                                 permissionLauncher.launch(
@@ -140,7 +138,6 @@ fun SendPrintDataScreen(
                                 showDeviceListDialog = true
                             }
                         } else {
-                            // Untuk versi lama, cukup periksa izin BLUETOOTH
                             if (context.checkSelfPermission(Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
                                 permissionLauncher.launch(arrayOf(Manifest.permission.BLUETOOTH))
                             } else {
@@ -148,8 +145,10 @@ fun SendPrintDataScreen(
                             }
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(0.8f).height(60.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryOrange)
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(60.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.Print, contentDescription = "Cetak Data", modifier = Modifier.size(24.dp))
@@ -238,13 +237,12 @@ private suspend fun printData(context: Context, device: BluetoothDevice, data: P
     }
 }
 
-
 @RequiresApi(Build.VERSION_CODES.O)
 private fun ThermalPrinter(data: PengirimanData): String {
-    val ESC = 0x1B.toChar() // Escape
-    val GS = 0x1D.toChar() // Group Separator
-    val LF = 0x0A.toChar() // Line Feed
-    val FF = 0x0C.toChar() // Form Feed
+    val ESC = 0x1B.toChar()
+    val GS = 0x1D.toChar()
+    val LF = 0x0A.toChar()
+    val FF = 0x0C.toChar()
 
     val output = StringBuilder()
 
@@ -273,10 +271,8 @@ private fun ThermalPrinter(data: PengirimanData): String {
     // --- Bagian Detail Scan dengan Agregasi ---
     output.append("Detail Scan (Per Blok):\n")
 
-    // Mendapatkan list item yang discan
     val rawScannedItems = data.getDetailScannedItems()
 
-    // Mengagregasi data berdasarkan blok
     val aggregatedScannedItems = rawScannedItems
         .groupBy { it.blok }
         .map { (blok, itemsInBlock) ->
@@ -304,7 +300,6 @@ private fun ThermalPrinter(data: PengirimanData): String {
     output.append("UTAMAKAN KESELAMATAN BANG!\n")
     output.append("================================\n")
 
-    // Tambahkan baris kosong dan Form Feed untuk memastikan semua data tercetak
     output.append(LF)
     output.append(LF)
     output.append(LF)

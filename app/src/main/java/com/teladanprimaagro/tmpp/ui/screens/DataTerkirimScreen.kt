@@ -39,16 +39,25 @@ fun DataTerkirimScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Status Data Panen") },
+                title = {
+                    Text(
+                        text = "Status Data Panen",
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                },
                 navigationIcon = {
-                    // Perbaikan: Ganti 'popBackBack' menjadi 'popBackStack'
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Kembali"
+                            contentDescription = "Kembali",
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         }
     ) { paddingValues ->

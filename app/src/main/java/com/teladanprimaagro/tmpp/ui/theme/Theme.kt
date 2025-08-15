@@ -22,15 +22,31 @@ import androidx.core.view.WindowCompat
 // Skema Warna (Hanya LightColorPalette yang dipertahankan)
 
 private val AdminColorPalette = lightColorScheme(
-    // --- Warna Utama ---
-    primary = PrimaryOrange, //Background utama
-    onPrimary = Black, //Warna Teks Utama
-    primaryContainer = OrangePink1, //Background Gradient Utama
-    onPrimaryContainer = OrangePink2, //Background Gradient Sekunder
+
+    primary = Black, //Warna Utama (Background)
+    onPrimary = TealPrimary, //Warna Utama (Komponen)
+
+
+    // --- Secondary & Tertiary Colors ---
+    secondary = DeepTeal, // Background for date and menu cards
+    onSecondary = TealPrimary, // Text and label on cards,
+
+    // --- Background & Surface Colors ---
+    background = Black, // Main screen background and Background second Card
+    onBackground = DarkBlueTeal, // Main background card
+
+    surface = DeepTeal, // Background for menu buttons
+    onSurface = BlackTeal, // Icon Background
+    surfaceVariant = TealPrimary, // For Icon
+    onSurfaceVariant = White, // Text and label
+
+    // --- Special Colors ---
+    outline = TealPrimary, // Main border color
+    surfaceContainer = Color.Black, // Background for input fields adn Main text
+    surfaceBright = Color.White, // Background for input fields adn Main text
+
 )
 
-
-// Tipografi (Gaya Teks)
 val TeladanPrimaAgroTypography = Typography(
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,

@@ -22,8 +22,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
 
@@ -37,125 +35,118 @@ fun PengaturanScreen(
 ) {
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
-
     val adminPassword = "supersawit2025"
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(paddingValues)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "Pengaturan",
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Pengaturan",
+                        color = MaterialTheme.colorScheme.primary,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
-        }
-
+        },
+        modifier = Modifier.padding(paddingValues)
+    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+                .fillMaxSize()
+                .padding(innerPadding)
                 .background(
-                    color = MaterialTheme.colorScheme.surface,
+                    color = MaterialTheme.colorScheme.background,
                     shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
                 )
-                .padding(16.dp) // Tambahkan padding di sini untuk konten utama
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            SettingMenuItem(text = "Tema") {
-                // Aksi untuk Tema
-            }
-            HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-            // Gunakan `userRole?.let` untuk menangani kasus null
-            userRole?.let { role ->
-                when (role) {
-                    UserRole.HARVESTER -> {
-
-                        SettingMenuItem(text = "Format Nomor Unik") {
-                            pendingNavigationRoute = "ubah_format_unique_no_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "Kemandoran") {
-                            pendingNavigationRoute = "kelola_kemandoran_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "Pemanen") {
-                            pendingNavigationRoute = "kelola_pemanen_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "Blok") {
-                            pendingNavigationRoute = "kelola_blok_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "No. TPH") {
-                            pendingNavigationRoute = "kelola_tph_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-                    }
-                    UserRole.DRIVER -> {
-                        SettingMenuItem(text = "Nama Supir") {
-                            pendingNavigationRoute = "kelola_supir_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "Nomor Polisi") {
-                            pendingNavigationRoute = "kelola_kendaraan_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-
-                        SettingMenuItem(text = "Pengaturan SPB") {
-                            pendingNavigationRoute = "spb_settings_screen"
-                            showPasswordDialog = true
-                        }
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.3f))
-                    }
-                }
-            } ?: run {
-                // Opsional: Tampilkan pesan atau nonaktifkan item jika userRole null
-                Text(
-                    text = "Peran pengguna tidak ditemukan.",
-                    modifier = Modifier.padding(16.dp),
-                    color = TextGray
-                )
-            }
-
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            SettingMenuItem(
-                text = "Logout",
-                icon = Icons.AutoMirrored.Filled.ExitToApp,
-                iconTint = MaterialTheme.colorScheme.error
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(
+                        color = MaterialTheme.colorScheme.background,
+                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    )
+                    .padding(16.dp)
             ) {
-                settingsViewModel.logout()
-                navController.navigate("login_screen") {
-                    popUpTo(navController.graph.id) {
-                        inclusive = true
+                Spacer(modifier = Modifier.height(24.dp))
+
+                SettingMenuItem(text = "Tema") {
+                }
+                HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+
+                userRole?.let { role ->
+                    when (role) {
+                        UserRole.HARVESTER -> {
+                            SettingMenuItem(text = "Format Nomor Unik") {
+                                pendingNavigationRoute = "ubah_format_unique_no_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "Kemandoran") {
+                                pendingNavigationRoute = "kelola_kemandoran_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "Pemanen") {
+                                pendingNavigationRoute = "kelola_pemanen_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "Blok") {
+                                pendingNavigationRoute = "kelola_blok_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "No. TPH") {
+                                pendingNavigationRoute = "kelola_tph_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                        }
+                        UserRole.DRIVER -> {
+                            SettingMenuItem(text = "Nama Supir") {
+                                pendingNavigationRoute = "kelola_supir_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "Nomor Polisi") {
+                                pendingNavigationRoute = "kelola_kendaraan_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            SettingMenuItem(text = "Pengaturan SPB") {
+                                pendingNavigationRoute = "spb_settings_screen"
+                                showPasswordDialog = true
+                            }
+                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                        }
+                    }
+                } ?: run {
+                    Text(
+                        text = "Peran pengguna tidak ditemukan.",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                SettingMenuItem(
+                    text = "Logout",
+                    icon = Icons.AutoMirrored.Filled.ExitToApp,
+                    iconTint = MaterialTheme.colorScheme.error
+                ) {
+                    settingsViewModel.logout()
+                    navController.navigate("login_screen") {
+                        popUpTo(navController.graph.id) {
+                            inclusive = true
+                        }
                     }
                 }
             }
@@ -185,7 +176,7 @@ fun PengaturanScreen(
 fun SettingMenuItem(
     text: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-    iconTint: Color = TextGray,
+    iconTint: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     onClick: () -> Unit
 ) {
     Row(
@@ -197,7 +188,7 @@ fun SettingMenuItem(
     ) {
         Text(
             text = text,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
@@ -218,19 +209,15 @@ fun PasswordConfirmationDialog(
 ) {
     var passwordInput by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    var showError by remember { mutableStateOf(false) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Konfirmasi Sandi") },
+        title = { Text("Konfirmasi Sandi", color = MaterialTheme.colorScheme.onSurface) },
         text = {
             Column {
                 OutlinedTextField(
                     value = passwordInput,
-                    onValueChange = {
-                        passwordInput = it
-                        showError = false // Reset error saat input berubah
-                    },
+                    onValueChange = { passwordInput = it },
                     label = { Text("Sandi Admin") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -246,35 +233,25 @@ fun PasswordConfirmationDialog(
                             Icon(imageVector = image, contentDescription = description)
                         }
                     },
-                    isError = showError,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (showError) {
-                    Text(
-                        text = "Sandi salah",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
                     )
-                }
+                )
             }
         },
         confirmButton = {
             Button(
-                onClick = {
-                    if (passwordInput == "supersawit2025") {
-                        onConfirm(passwordInput)
-                    } else {
-                        showError = true // Set error jika sandi salah
-                    }
-                }
+                onClick = { onConfirm(passwordInput) },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text("Konfirmasi")
+                Text("Konfirmasi", color = MaterialTheme.colorScheme.onPrimary)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Batal")
+                Text("Batal", color = MaterialTheme.colorScheme.onSurface)
             }
         }
     )

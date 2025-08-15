@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -58,10 +59,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundLightGray
-import com.teladanprimaagro.tmpp.ui.theme.DotGray
-import com.teladanprimaagro.tmpp.ui.theme.PrimaryOrange
-import com.teladanprimaagro.tmpp.ui.theme.TextGray
+import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -80,7 +78,6 @@ fun RekapPengirimanScreen(
     var selectedPengirimanData by remember { mutableStateOf<PengirimanData?>(null) }
     var showDeleteAllDialog by remember { mutableStateOf(false) }
 
-    // State untuk multi-selection
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedItems by remember { mutableStateOf(setOf<Int>()) }
 
@@ -91,7 +88,7 @@ fun RekapPengirimanScreen(
                     Text(
                         text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Evakuasi",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.primary
                     )
                 },
                 navigationIcon = {
@@ -106,7 +103,7 @@ fun RekapPengirimanScreen(
                         Icon(
                             imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
@@ -116,11 +113,10 @@ fun RekapPengirimanScreen(
                             Icon(
                                 imageVector = Icons.Default.DeleteForever,
                                 contentDescription = "Hapus Semua",
-                                tint = Color.Red
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     } else {
-                        // Checkbox untuk memilih semua item
                         Checkbox(
                             checked = pengirimanList.isNotEmpty() && selectedItems.size == pengirimanList.size,
                             onCheckedChange = { isChecked ->
@@ -134,7 +130,7 @@ fun RekapPengirimanScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -147,12 +143,11 @@ fun RekapPengirimanScreen(
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Header tabel
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .background(PrimaryOrange, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
+                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
                     .padding(vertical = 8.dp, horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -174,7 +169,7 @@ fun RekapPengirimanScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(horizontal = 16.dp)
-                    .background(BackgroundLightGray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
             ) {
                 if (pengirimanList.isEmpty()) {
                     item {
@@ -184,7 +179,7 @@ fun RekapPengirimanScreen(
                                 .fillMaxWidth()
                                 .padding(16.dp),
                             textAlign = TextAlign.Center,
-                            color = TextGray
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 } else {
@@ -210,7 +205,7 @@ fun RekapPengirimanScreen(
                                 showDetailDialog = true
                             },
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = DotGray.copy(alpha = 0.5f))
+                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                     }
                 }
             }
@@ -253,7 +248,6 @@ fun RekapPengirimanScreen(
 
                     Button(
                         onClick = {
-                            // Panggil fungsi multi-delete
                             pengirimanViewModel.deleteSelectedPengirimanData(selectedItems.toList())
                             isSelectionMode = false
                             selectedItems = emptySet()
@@ -279,7 +273,7 @@ fun RekapPengirimanScreen(
 
             Text(
                 text = "*Data akan di reset setiap pukul 00.00",
-                color = TextGray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -288,7 +282,6 @@ fun RekapPengirimanScreen(
         }
     }
 
-    // Dialog untuk detail pengiriman
     if (showDetailDialog && selectedPengirimanData != null) {
         PengirimanDetailDialog(
             pengirimanEntry = selectedPengirimanData!!,
@@ -304,14 +297,13 @@ fun RekapPengirimanScreen(
         )
     }
 
-    // Dialog konfirmasi hapus semua
     if (showDeleteAllDialog) {
         Dialog(onDismissRequest = { showDeleteAllDialog = false }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
@@ -321,7 +313,7 @@ fun RekapPengirimanScreen(
                 ) {
                     Text(
                         text = "Hapus Semua Data?",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
@@ -329,7 +321,7 @@ fun RekapPengirimanScreen(
                     )
                     Text(
                         text = "Yakin hapus semua data? Aksi ini tidak dapat di batalkan!",
-                        color = Color.White.copy(alpha = 0.7f),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
@@ -346,8 +338,8 @@ fun RekapPengirimanScreen(
                                 .weight(1f)
                                 .padding(end = 10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFFF0600),
-                                contentColor = Color.White
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -363,8 +355,8 @@ fun RekapPengirimanScreen(
                                 .weight(1f)
                                 .padding(start = 10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFF89FF00),
-                                contentColor = Color.Black
+                                containerColor = MaterialTheme.colorScheme.tertiary,
+                                contentColor = MaterialTheme.colorScheme.onTertiary
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
@@ -387,7 +379,7 @@ fun PengirimanTableRow(
     onLongPress: (PengirimanData) -> Unit,
     onDetailClick: (PengirimanData) -> Unit,
 ) {
-    val backgroundColor = if (isSelected) BackgroundLightGray.copy(alpha = 0.5f) else Color.Transparent
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent
 
     Row(
         modifier = Modifier
@@ -421,12 +413,11 @@ fun PengirimanTableRow(
         TableCellText(text = data.totalBuah.toString(), weight = 0.20f)
 
         if (!isSelectionMode) {
-
             Box(modifier = Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = "Detail",
-                    tint = PrimaryOrange,
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onDetailClick(data) }

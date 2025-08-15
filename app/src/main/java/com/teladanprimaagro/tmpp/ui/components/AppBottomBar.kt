@@ -3,6 +3,7 @@ package com.teladanprimaagro.tmpp.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,19 +41,20 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    // Mendefinisikan item navigasi dasar untuk semua pengguna
     val navItems = mutableListOf(
         NavigationItem("Home", Icons.Default.Home, "home_screen"),
-        NavigationItem("Lokasi", Icons.Default.LocationOn, "peta_screen")
     )
+    if (userRole == UserRole.HARVESTER) {
+        navItems.add(NavigationItem("Lokasi", Icons.Default.LocationOn, "peta_screen"))
+    }
     if (userRole == UserRole.DRIVER) {
         navItems.add(NavigationItem("Laporan", Icons.Default.Description, "laporan_screen"))
     }
     navItems.add(NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen"))
 
     BottomAppBar(
-        containerColor = Color.White, // Biarkan transparan jika Anda ingin warna latar belakang dari layout di atasnya
-        contentColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -60,8 +63,12 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
         ) {
             navItems.forEach { item ->
                 val isSelected = currentRoute == item.route
-                val iconColor = if (isSelected) Color.White else Color.Black // Ikon hitam saat tidak dipilih
-                val textColor = if (isSelected) Color.White else Color.Gray
+
+                // Warna untuk ikon dan teks
+                val selectedColor = MaterialTheme.colorScheme.onPrimary
+                val unselectedColor = Color.White
+                val iconColor = if (isSelected) Color.Black else unselectedColor
+                val textColor = if (isSelected) selectedColor else unselectedColor
 
                 BottomNavItem(
                     icon = item.icon,
@@ -69,6 +76,7 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
                     iconColor = iconColor,
                     textColor = textColor,
                     isSelected = isSelected,
+                    selectedIconBackgroundColor = selectedColor,
                     onClick = {
                         navController.navigate(item.route) {
                             navController.graph.startDestinationRoute?.let { startDestination ->
@@ -93,24 +101,32 @@ private fun RowScope.BottomNavItem(
     iconColor: Color,
     textColor: Color,
     isSelected: Boolean,
+    selectedIconBackgroundColor: Color,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (isSelected) Color.Red else Color.Transparent
+    val iconBackgroundColor = if (isSelected) selectedIconBackgroundColor else Color.Transparent
 
     Column(
         modifier = Modifier
-            .weight(1f)
-            .padding(horizontal = 8.dp, vertical = 8.dp) // Mengatur padding untuk bentuk lingkaran yang lebih baik
-            .background(color = backgroundColor, shape = CircleShape)
+            .weight(2f)
             .clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.size(30.dp),
-            tint = iconColor
-        )
+        // Box ini yang akan memiliki background lingkaran
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .background(color = iconBackgroundColor, shape = CircleShape)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.size(30.dp),
+                tint = iconColor
+            )
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = label,
