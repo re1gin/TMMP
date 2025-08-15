@@ -36,6 +36,7 @@ fun PengaturanScreen(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
     val adminPassword = "supersawit2025"
+    var showThemeDialog by remember { mutableStateOf(false) } // State baru untuk dialog tema
 
     Scaffold(
         topBar = {
@@ -77,6 +78,7 @@ fun PengaturanScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 SettingMenuItem(text = "Tema") {
+                    showThemeDialog = true // Tampilkan dialog tema saat diklik
                 }
                 HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
 
@@ -170,6 +172,44 @@ fun PengaturanScreen(
             }
         )
     }
+
+    // Dialog untuk memilih tema
+    if (showThemeDialog) {
+        AlertDialog(
+            onDismissRequest = { showThemeDialog = false },
+            title = { Text("Pilih Tema", color = MaterialTheme.colorScheme.onSurface) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Button(
+                        onClick = {
+                            settingsViewModel.setYellowNeonTheme(false)
+                            showThemeDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "Blue Neon",
+                            color = Color.Blue)
+                    }
+                    Button(
+                        onClick = {
+                            settingsViewModel.setYellowNeonTheme(true)
+                            showThemeDialog = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            "Yellow Neon",
+                            color = Color.Yellow)
+                    }
+                }
+            },
+            confirmButton = {} // Tidak perlu tombol konfirmasi
+        )
+    }
 }
 
 @Composable
@@ -212,13 +252,13 @@ fun PasswordConfirmationDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Konfirmasi Sandi", color = MaterialTheme.colorScheme.onSurface) },
+        title = { Text("Konfirmasi Sandi", color = Color.Black) },
         text = {
             Column {
                 OutlinedTextField(
                     value = passwordInput,
                     onValueChange = { passwordInput = it },
-                    label = { Text("Sandi Admin") },
+                    label = { Text("Sandi Admin", color = Color.Black) },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -230,7 +270,9 @@ fun PasswordConfirmationDialog(
                         val description = if (passwordVisible) "Sembunyikan sandi" else "Tampilkan sandi"
 
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(imageVector = image, contentDescription = description)
+                            Icon(imageVector = image,
+                                contentDescription = description,
+                                tint = MaterialTheme.colorScheme.onPrimary)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),

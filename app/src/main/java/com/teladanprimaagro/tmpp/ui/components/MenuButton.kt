@@ -54,7 +54,7 @@ fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
             },
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.5f)
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
         ),
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.outline),
         onClick = onClick,

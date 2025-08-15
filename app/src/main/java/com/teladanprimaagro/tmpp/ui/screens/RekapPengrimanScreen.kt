@@ -417,7 +417,7 @@ fun PengirimanTableRow(
                 Icon(
                     imageVector = Icons.Default.Info,
                     contentDescription = "Detail",
-                    tint = MaterialTheme.colorScheme.primary,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onDetailClick(data) }

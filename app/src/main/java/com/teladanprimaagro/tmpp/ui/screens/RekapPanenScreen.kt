@@ -726,7 +726,7 @@ fun RowScope.TableHeaderText(text: String, weight: Float) {
 fun RowScope.TableCellText(text: String, weight: Float) {
     Text(
         text = text,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontSize = 12.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier.weight(weight)

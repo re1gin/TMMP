@@ -37,7 +37,8 @@ fun DriverContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         FullDateCard(title = "Hai, Driver!")
-        Spacer(modifier = Modifier.height(24.dp))
+
+        Spacer(modifier = Modifier.height(50.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),

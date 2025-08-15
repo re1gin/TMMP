@@ -21,7 +21,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.navigation.AppNavigation
-import com.teladanprimaagro.tmpp.ui.theme.TeladanPrimaAgroTheme
+import com.teladanprimaagro.tmpp.navigation.AppWrapper
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
@@ -31,10 +31,10 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
+    // A mutable state to hold the NFC intent, which is observed by the UI.
+    // This allows Jetpack Compose to react to new NFC tags.
     internal var _nfcIntent: MutableState<Intent?> = mutableStateOf(null)
     val nfcIntent: State<Intent?> = _nfcIntent
-
-    private val panenViewModel: PanenViewModel by viewModels()
     private val pengirimanViewModel: PengirimanViewModel by viewModels()
     private val sharedNfcViewModel: SharedNfcViewModel by viewModels()
 
@@ -42,15 +42,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
+        // Schedule the daily cleanup tasks for Panen and Pengiriman data.
         scheduleDailyCleanupWorkers(application)
 
+        // Set up the Jetpack Compose UI.
         setContent {
-            TeladanPrimaAgroTheme {
+            // Use AppWrapper to wrap the main application content.
+            AppWrapper {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // The main navigation component of the app.
                     AppNavigation(
                         nfcIntent = nfcIntent,
                         pengirimanViewModel = pengirimanViewModel,
@@ -59,11 +62,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        // Handle the initial intent when the app is launched by an NFC tag.
         handleInitialIntent(intent)
     }
 
     override fun onResume() {
         super.onResume()
+        // Check NFC availability and status when the app becomes active.
         val nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         if (nfcAdapter == null) {
             sharedNfcViewModel.updateGeneralNfcStatus(false, "NFC tidak tersedia di perangkat ini.")
@@ -71,6 +76,7 @@ class MainActivity : ComponentActivity() {
             sharedNfcViewModel.updateGeneralNfcStatus(false, "NFC dinonaktifkan. Harap aktifkan di pengaturan.")
         } else {
             sharedNfcViewModel.updateGeneralNfcStatus(true, null)
+            // Reset the NFC state in the ViewModel to prepare for a new scan.
             sharedNfcViewModel.resetNfcState()
         }
         Log.d("MainActivity", "NFC general status updated onResume")
@@ -78,6 +84,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onPause() {
         super.onPause()
+        // Reset the NFC state when the app is paused to prevent stale data.
         sharedNfcViewModel.resetNfcState()
         Log.d("MainActivity", "NFC state reset onPause")
     }
@@ -85,13 +92,16 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
+        // Update the NFC intent state when a new NFC tag is discovered while the app is running.
         _nfcIntent.value = intent
     }
 
     private fun handleInitialIntent(intent: Intent?) {
+        // Check if the app was launched by an NFC intent.
         if (intent != null && (intent.action == NfcAdapter.ACTION_NDEF_DISCOVERED || intent.action == NfcAdapter.ACTION_TAG_DISCOVERED)) {
             Log.d("MainActivity", "Initial NFC Intent detected in onCreate: ${intent.action}")
             _nfcIntent.value = intent
+            // Indicate that the app is in the process of writing to an NFC tag.
             sharedNfcViewModel.setWriting()
         }
     }
@@ -99,6 +109,7 @@ class MainActivity : ComponentActivity() {
     private fun scheduleDailyCleanupWorkers(application: Application) {
         val workManager = WorkManager.getInstance(application)
 
+        // Calculate the initial delay to run the task at midnight (00:00).
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = System.currentTimeMillis()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -106,12 +117,14 @@ class MainActivity : ComponentActivity() {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
 
+        // If the current time is past midnight, schedule it for the next day.
         if (calendar.timeInMillis <= System.currentTimeMillis()) {
             calendar.add(Calendar.DAY_OF_MONTH, 1)
         }
 
         val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
 
+        // Create and enqueue the periodic work request for Panen cleanup.
         val panenCleanupRequest = PeriodicWorkRequestBuilder<PanenCleanupWorker>(
             1, TimeUnit.DAYS
         )
@@ -125,6 +138,7 @@ class MainActivity : ComponentActivity() {
             panenCleanupRequest
         )
 
+        // Create and enqueue the periodic work request for Pengiriman cleanup.
         val pengirimanCleanupRequest = PeriodicWorkRequestBuilder<PengirimanCleanupWorker>(
             1, TimeUnit.DAYS
         )

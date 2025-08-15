@@ -22,10 +22,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.TextGrey
 import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
@@ -197,15 +200,17 @@ fun NfcReadDialog(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Status Pemindaian NFC") },
-        text = { Text(nfcReadStatusMessage) },
+        title = { Text("Status Pemindaian NFC", color = TextGrey) },
+        text = { Text(nfcReadStatusMessage, color = Color.White) },
+        containerColor = BackgroundDarkGrey,
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
                 Text(
-                    when (nfcState) {
+                    text = when (nfcState) {
                         is NfcOperationState.ReadSuccess, is NfcOperationState.ReadError -> "Oke"
                         else -> "Batal"
-                    }
+                    },
+                    color = Color.White
                 )
             }
         }

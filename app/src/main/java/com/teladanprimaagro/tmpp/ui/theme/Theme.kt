@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.teladanprimaagro.tmpp.ui.theme
 
 import android.app.Activity
@@ -19,9 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
-// Skema Warna (Hanya LightColorPalette yang dipertahankan)
-
-private val AdminColorPalette = lightColorScheme(
+private val BlueNeonColorPalette = lightColorScheme(
 
     primary = Black, //Warna Utama (Background)
     onPrimary = TealPrimary, //Warna Utama (Komponen)
@@ -32,19 +32,38 @@ private val AdminColorPalette = lightColorScheme(
     onSecondary = TealPrimary, // Text and label on cards,
 
     // --- Background & Surface Colors ---
-    background = Black, // Main screen background and Background second Card
+    background = Black, // Main screen background
     onBackground = DarkBlueTeal, // Main background card
 
     surface = DeepTeal, // Background for menu buttons
     onSurface = BlackTeal, // Icon Background
     surfaceVariant = TealPrimary, // For Icon
-    onSurfaceVariant = White, // Text and label
+    onSurfaceVariant = White, // Text dan label
 
     // --- Special Colors ---
     outline = TealPrimary, // Main border color
-    surfaceContainer = Color.Black, // Background for input fields adn Main text
-    surfaceBright = Color.White, // Background for input fields adn Main text
+    surfaceContainer = BackgroundDarkGrey, // Background for input fields adn Main text
+    surfaceBright = TextGrey, // Background for input fields adn Main text
+)
 
+private val YellowNeonColorPalette = lightColorScheme(
+    primary = Black,
+    onPrimary = Orange,
+
+    secondary = DarkBrown1,
+    onSecondary = Orange,
+
+    background = Black,
+    onBackground = DarkBrown2,
+
+    surface = DarkBrown1,
+    onSurface = Black,
+    surfaceVariant = Orange,
+    onSurfaceVariant = White,
+
+    outline = Orange,
+    surfaceContainer = TextGrey,
+    surfaceBright = Brown,
 )
 
 val TeladanPrimaAgroTypography = Typography(
@@ -87,9 +106,10 @@ val TeladanPrimaAgroShapes = Shapes(
 
 @Composable
 fun TeladanPrimaAgroTheme(
+    isYellowNeonTheme: Boolean = false, // Tambahkan parameter untuk memilih tema
     content: @Composable () -> Unit
 ) {
-    val colorScheme = AdminColorPalette
+    val colorScheme = if (isYellowNeonTheme) YellowNeonColorPalette else BlueNeonColorPalette
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {

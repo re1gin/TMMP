@@ -37,7 +37,7 @@ fun PanenDetailDialog(
                 .fillMaxHeight(0.8f) // Mengisi 80% tinggi layar
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier
@@ -49,14 +49,11 @@ fun PanenDetailDialog(
                 Text(
                     text = "Detail Data Panen",
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 
-                // --- PERUBAHAN DI SINI ---
-                // Logika untuk menampilkan gambar dari URI lokal atau URL Firebase.
-                // Prioritaskan localImageUri, jika tidak ada, gunakan firebaseImageUrl.
                 val imageToDisplay = panenData.localImageUri ?: panenData.firebaseImageUrl
 
                 imageToDisplay?.let { uriString ->
@@ -100,7 +97,7 @@ fun PanenDetailDialog(
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Text("Tutup")
                 }
@@ -128,7 +125,7 @@ fun DetailRow(label: String, value: String) {
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.weight(0.6f)
         )
     }

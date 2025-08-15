@@ -9,6 +9,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,10 +36,12 @@ fun DataTerkirimScreen(
     // Mengambil status sinkronisasi
     val isSyncing by panenViewModel.isSyncing.collectAsState()
 
-
     // Mengambil progres sinkronisasi
     val syncProgress by panenViewModel.syncProgress.collectAsState()
     val totalItemsToSync by panenViewModel.totalItemsToSync.collectAsState()
+
+    // State untuk mengontrol filter data
+    var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
 
     Scaffold(
         topBar = {
@@ -85,12 +92,65 @@ fun DataTerkirimScreen(
                 }
             }
 
-            if (allPanenData.isEmpty()) {
+            @OptIn(ExperimentalMaterial3Api::class)
+            if (allPanenData.isNotEmpty()) {
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    SegmentedButton(
+                        selected = selectedFilter == "Sudah Terkirim",
+                        onClick = { selectedFilter = "Sudah Terkirim" },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = SuccessGreen,
+                            activeContentColor = Color.White,
+                            activeBorderColor = Color.Transparent, // border saat aktif
+                            inactiveContainerColor = Color.White,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurface,
+                            inactiveBorderColor = Color.Transparent // border saat nonaktif
+                        )
+                    ) {
+                        Text("Sudah Terkirim")
+                    }
+
+                    SegmentedButton(
+                        selected = selectedFilter == "Belum Terkirim",
+                        onClick = { selectedFilter = "Belum Terkirim" },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = DangerRed,
+                            activeContentColor = Color.White,
+                            activeBorderColor = Color.Transparent,
+                            inactiveContainerColor = Color.White,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurface,
+                            inactiveBorderColor = Color.Transparent
+                        )
+                    ) {
+                        Text("Belum Terkirim")
+                    }
+                }
+            }
+
+            // Tentukan data yang akan ditampilkan berdasarkan filter yang dipilih
+            val filteredData = when (selectedFilter) {
+                "Sudah Terkirim" -> allPanenData.filter { it.isSynced }
+                "Belum Terkirim" -> allPanenData.filter { !it.isSynced }
+                else -> emptyList()
+            }
+
+            if (filteredData.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Belum ada data panen.", style = MaterialTheme.typography.bodyLarge)
+                    val message = if (selectedFilter == "Sudah Terkirim") {
+                        "Belum ada data panen yang terkirim."
+                    } else {
+                        "Belum ada data panen yang menunggu."
+                    }
+                    Text(message, style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 LazyColumn(
@@ -98,43 +158,10 @@ fun DataTerkirimScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Filter dan tampilkan data yang sudah terkirim terlebih dahulu
-                    val syncedData = allPanenData.filter { it.isSynced }
-                    if (syncedData.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "Sudah Terkirim (${syncedData.size})",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        }
-                        items(syncedData) { panenItem ->
+                    items(filteredData) { panenItem ->
+                        if (panenItem.isSynced) {
                             DataTerkirimCard(panenItem = panenItem)
-                        }
-                    }
-
-                    // Tambahkan pemisah
-                    val unsyncedData = allPanenData.filter { !it.isSynced }
-                    if (syncedData.isNotEmpty() && unsyncedData.isNotEmpty()) {
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Divider()
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                    }
-
-                    // Filter dan tampilkan data yang belum terkirim
-                    if (unsyncedData.isNotEmpty()) {
-                        item {
-                            Text(
-                                text = "Belum Terkirim (${unsyncedData.size})",
-                                style = MaterialTheme.typography.titleLarge,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(bottom = 8.dp)
-                            )
-                        }
-                        items(unsyncedData) { panenItem ->
+                        } else {
                             DataBelumTerkirimCard(panenItem = panenItem)
                         }
                     }

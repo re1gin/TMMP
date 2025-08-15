@@ -89,7 +89,7 @@ fun StatistikPanenScreen(
                 StatistikSection(
                     title = "Total Buah per Pemanen",
                     data = statistikPerPemanen,
-                    barColor = MaterialTheme.colorScheme.primary
+                    barColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -98,7 +98,7 @@ fun StatistikPanenScreen(
                 StatistikSection(
                     title = "Total Buah per Blok",
                     data = statistikPerBlok,
-                    barColor = MaterialTheme.colorScheme.primary
+                    barColor = MaterialTheme.colorScheme.onPrimary
                 )
             }
 

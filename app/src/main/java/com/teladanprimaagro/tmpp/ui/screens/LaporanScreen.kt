@@ -43,11 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
+// Menambahkan parameter 'titleColor' agar bisa menerima warna dari MainScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
-    pengirimanViewModel: PengirimanViewModel = viewModel()
+    pengirimanViewModel: PengirimanViewModel = viewModel(),
+    titleColor: Color // Parameter baru untuk warna teks
 ) {
     val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()
     val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
@@ -62,7 +64,7 @@ fun LaporanScreen(
                     Text(
                         text = "Laporan Pengiriman",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color.White // Menggunakan warna putih
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -84,7 +86,7 @@ fun LaporanScreen(
                     text = "Ringkasan Statistik Utama",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.White // Menggunakan warna putih
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 MainStatsColumn(
@@ -98,7 +100,8 @@ fun LaporanScreen(
                 ReportStatistikSection(
                     title = "Total Buah per Blok",
                     data = blokSummary.associate { it.blok to it.totalBuah },
-                    barColor = MaterialTheme.colorScheme.secondary // Menggunakan warna tema
+                    barColor = MaterialTheme.colorScheme.onPrimary,
+                    titleColor = Color.White // Meneruskan warna putih
                 )
             }
 
@@ -106,7 +109,8 @@ fun LaporanScreen(
                 ReportStatistikSection(
                     title = "Total Buah per Supir",
                     data = supirSummary.associate { it.namaSupir to it.totalBuah },
-                    barColor = MaterialTheme.colorScheme.tertiary // Menggunakan warna tema
+                    barColor = MaterialTheme.colorScheme.onPrimary,
+                    titleColor = Color.White // Meneruskan warna putih
                 )
             }
         }
@@ -124,11 +128,11 @@ fun MainStatsColumn(totalBuah: Int, totalScanned: Int, totalFinalized: Int) {
             )
             .padding(16.dp)
     ) {
-        StatistikItem("Total Buah", totalBuah.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+        StatistikItem("Total Buah", totalBuah.toString(), Color.White) // Menggunakan warna putih
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Scan", totalScanned.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+        StatistikItem("Data Scan", totalScanned.toString(), Color.White) // Menggunakan warna putih
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Masuk", totalFinalized.toString(), MaterialTheme.colorScheme.onSurfaceVariant)
+        StatistikItem("Data Masuk", totalFinalized.toString(), Color.White) // Menggunakan warna putih
     }
 }
 
@@ -153,8 +157,14 @@ fun StatistikItem(label: String, value: String, color: Color) {
     }
 }
 
+// Menambahkan parameter 'titleColor' di sini
 @Composable
-fun ReportStatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
+fun ReportStatistikSection(
+    title: String,
+    data: Map<String, Int>,
+    barColor: Color,
+    titleColor: Color
+) {
     val maxValue = data.values.maxOrNull()?.toFloat() ?: 0f
 
     Column(
@@ -167,7 +177,7 @@ fun ReportStatistikSection(title: String, data: Map<String, Int>, barColor: Colo
             text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = titleColor // Menggunakan parameter yang baru
         )
         HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
@@ -175,7 +185,7 @@ fun ReportStatistikSection(title: String, data: Map<String, Int>, barColor: Colo
             Text(
                 text = "Belum ada data.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                color = titleColor.copy(alpha = 0.8f), // Menggunakan parameter yang baru
                 modifier = Modifier.padding(top = 8.dp)
             )
         } else {
@@ -222,7 +232,7 @@ fun ReportBarChartItem(
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White // Menggunakan warna putih
         )
         Spacer(modifier = Modifier.width(8.dp))
         Box(
@@ -245,7 +255,7 @@ fun ReportBarChartItem(
             text = "$value",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = Color.White, // Menggunakan warna putih
             modifier = Modifier.width(40.dp)
         )
     }

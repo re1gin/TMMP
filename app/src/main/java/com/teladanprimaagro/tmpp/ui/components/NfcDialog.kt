@@ -12,6 +12,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
+import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 
 @Composable
 fun SuccessDialog(onDismiss: () -> Unit) {
@@ -30,7 +31,14 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 )
             }
         },
-        text = {},
+        text = {
+            Text(
+                text = "Berhasil menambahkan data ke-NFC",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White
+            )
+        },
         confirmButton = {
             Box(
                 modifier = Modifier.fillMaxWidth(),
@@ -39,7 +47,7 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64DD17)) // Warna hijau kustom
+                    colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen) // Warna hijau kustom
                 ) {
                     Text("Ya", color = Color.Black)
                 }
@@ -83,7 +91,7 @@ fun FailureDialog(message: String, onDismiss: () -> Unit) {
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828)) // Warna merah kustom
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed) // Warna merah kustom
                 ) {
                     Text("Tutup", color = Color.White)
                 }
@@ -111,7 +119,7 @@ fun DuplicateScanDialog(
                     text = "Peringatan ⚠️",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = WarningYellow
                 )
             }
         },
@@ -131,9 +139,9 @@ fun DuplicateScanDialog(
                 Button(
                     onClick = onDismissRequest,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFC62828))
+                    colors = ButtonDefaults.buttonColors(containerColor = WarningYellow)
                 ) {
-                    Text("Tutup", color = Color.White)
+                    Text("Tutup", color = Color.Black)
                 }
             }
         },
@@ -157,9 +165,17 @@ fun SuccessScanDialog(
                     text = "Scan Berhasil ✓",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = SuccessGreen
                 )
             }
+        },
+        text = {
+            Text(
+                text = "Tag NFC telah berhasil di-scan.",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White
+            )
         },
         confirmButton = {
             Box(
@@ -169,13 +185,13 @@ fun SuccessScanDialog(
                 Button(
                     onClick = onDismissRequest,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF64DD17))
+                    colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)
                 ) {
                     Text("Selesai", color = Color.Black)
                 }
             }
         },
-        containerColor = Color(0xFF333333),
+        containerColor = MaterialTheme.colorScheme.background,
         shape = RoundedCornerShape(16.dp)
     )
 }

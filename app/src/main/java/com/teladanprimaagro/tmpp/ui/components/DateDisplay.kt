@@ -43,13 +43,13 @@ fun FullDateCard(title: String, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .height(230.dp),
-        shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onBackground)
+        shape = RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary.copy(0.5f))
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.primary.copy(0.6f), RoundedCornerShape(bottomStart = 30.dp, bottomEnd = 30.dp)),
+                .background(MaterialTheme.colorScheme.primary.copy(0.7f), RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceEvenly
         ) {

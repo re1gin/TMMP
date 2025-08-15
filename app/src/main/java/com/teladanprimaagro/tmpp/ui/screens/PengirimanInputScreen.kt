@@ -343,7 +343,7 @@ fun TableRow(no: Int, noUnik: String, blok: String, totalBuah: Int) {
 fun TableItemText(text: String, modifier: Modifier = Modifier) {
     Text(
         text = text,
-        color = MaterialTheme.colorScheme.onSurface,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier,
         maxLines = 1,
         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,

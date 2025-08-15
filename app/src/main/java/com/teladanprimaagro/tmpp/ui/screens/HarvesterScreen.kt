@@ -30,7 +30,7 @@ fun HarvesterContent(
         Spacer(modifier = Modifier.height(0.dp))
         FullDateCard(title = "Hai, Harvester!")
 
-        Spacer(modifier = Modifier.height(70.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         Column(
             modifier = Modifier

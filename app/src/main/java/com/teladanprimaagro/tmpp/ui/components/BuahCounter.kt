@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -60,12 +59,11 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     // Menggunakan onPrimary sebagai warna background lingkaran
-                    .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
                     contentDescription = "Kurang",
-                    // Menggunakan primary sebagai warna ikon agar kontras
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -111,7 +109,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     // Menggunakan onPrimary sebagai warna background lingkaran
-                    .background(MaterialTheme.colorScheme.onPrimary, CircleShape)
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
