@@ -116,7 +116,8 @@ fun RekapPanenScreen(
                 title = {
                     Text(
                         text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Panen",
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.primary
                     )
                 },

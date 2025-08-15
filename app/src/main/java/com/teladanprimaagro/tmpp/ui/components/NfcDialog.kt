@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
@@ -53,7 +54,7 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 }
             }
         },
-        containerColor = Color(0xFF333333),
+        containerColor = BackgroundDarkGrey,
         shape = RoundedCornerShape(16.dp)
     )
 }
@@ -97,7 +98,7 @@ fun FailureDialog(message: String, onDismiss: () -> Unit) {
                 }
             }
         },
-        containerColor = Color(0xFF333333), // Warna latar belakang dialog
+        containerColor = BackgroundDarkGrey, // Warna latar belakang dialog
         shape = RoundedCornerShape(16.dp)
     )
 }
@@ -145,7 +146,7 @@ fun DuplicateScanDialog(
                 }
             }
         },
-        containerColor = Color(0xFF333333),
+        containerColor = BackgroundDarkGrey,
         shape = RoundedCornerShape(16.dp)
     )
 }
@@ -191,7 +192,7 @@ fun SuccessScanDialog(
                 }
             }
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = BackgroundDarkGrey,
         shape = RoundedCornerShape(16.dp)
     )
 }

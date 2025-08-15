@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
@@ -63,7 +64,8 @@ fun LaporanScreen(
                 title = {
                     Text(
                         text = "Laporan Pengiriman",
-                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
                         color = Color.White // Menggunakan warna putih
                     )
                 },

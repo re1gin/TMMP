@@ -54,7 +54,7 @@ private val YellowNeonColorPalette = lightColorScheme(
     onSecondary = Orange,
 
     background = Black,
-    onBackground = DarkBrown2,
+    onBackground = OliveGreen,
 
     surface = DarkBrown1,
     onSurface = Black,

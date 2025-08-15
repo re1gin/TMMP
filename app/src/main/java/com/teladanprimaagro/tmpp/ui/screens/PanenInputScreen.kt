@@ -116,7 +116,6 @@ fun getLocation(
     }
 }
 
-// --- Komponen Composable Utama ---
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -377,28 +376,21 @@ fun PanenInputScreen(
                 .background(MaterialTheme.colorScheme.onPrimary)
                 .padding(horizontal = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.Start
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.surfaceContainer
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
             Text(
                 text = if (isEditing) "Edit Panen" else "Panen",
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold
             )
-            IconButton(onClick = { /* TODO: Masih Belum Siap */ }) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = "Pengaturan",
-                    tint = MaterialTheme.colorScheme.surfaceContainer
-                )
-            }
         }
 
         Column(

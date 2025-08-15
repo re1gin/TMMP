@@ -45,7 +45,7 @@ fun PengaturanScreen(
                     Text(
                         text = "Pengaturan",
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 },

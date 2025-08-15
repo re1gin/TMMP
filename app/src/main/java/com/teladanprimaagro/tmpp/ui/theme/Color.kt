@@ -10,10 +10,8 @@ val DarkBlueTeal = Color(0xFF00181E)
 
 
 //---Yellow Neon---
-// color.kt
 val Orange = Color(0xFFFFAE00)
 val DarkBrown1 = Color(0xFF141200)
-val DarkBrown2 = Color(0xFF141200)
 val OliveGreen = Color(0xFF403600)
 val Brown = Color(0xFF312400)
 
@@ -26,5 +24,5 @@ val InfoBlue = Color(0xFF0090FF)
 
 val TextGrey = Color(0xFFDCDCDC)
 val BackgroundDarkGrey = Color(0xFF2F2F2F)
-val Black = Color(0xFF000A0C)
+val Black = Color(0xFF151515)
 val White = Color(0xFFFFFFFF)

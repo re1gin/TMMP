@@ -42,8 +42,8 @@ fun KelolaPemanenScreen(
                     Text(
                         text = "Kelola Pemanen",
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {

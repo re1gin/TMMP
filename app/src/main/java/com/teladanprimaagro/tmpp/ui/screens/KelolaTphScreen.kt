@@ -39,8 +39,8 @@ fun KelolaTphScreen(
                     Text(
                         text = "Kelola No. TPH",
                         color = MaterialTheme.colorScheme.onPrimary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {

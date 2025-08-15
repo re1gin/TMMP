@@ -11,7 +11,15 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.os.Build
 import android.util.Log
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -22,13 +30,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.InfoBlue
 import com.teladanprimaagro.tmpp.ui.theme.TextGrey
+import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
@@ -200,19 +215,42 @@ fun NfcReadDialog(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text("Status Pemindaian NFC", color = TextGrey) },
-        text = { Text(nfcReadStatusMessage, color = Color.White) },
-        containerColor = BackgroundDarkGrey,
-        confirmButton = {
-            TextButton(onClick = onDismissRequest) {
+        title = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
-                    text = when (nfcState) {
-                        is NfcOperationState.ReadSuccess, is NfcOperationState.ReadError -> "Oke"
-                        else -> "Batal"
-                    },
-                    color = Color.White
+                    text = "Memindai Tag NFC!",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = InfoBlue
                 )
             }
-        }
+        },
+        text = {
+            Text(
+                text = nfcReadStatusMessage,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.White
+            )
+        },
+        confirmButton = {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(
+                    onClick = onDismissRequest,
+                    modifier = Modifier.width(120.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = InfoBlue)
+                ) {
+                    Text("Batal", color = Color.Black)
+                }
+            }
+        },
+        containerColor = BackgroundDarkGrey,
+        shape = RoundedCornerShape(16.dp)
     )
 }

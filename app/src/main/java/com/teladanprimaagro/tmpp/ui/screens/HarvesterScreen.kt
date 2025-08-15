@@ -27,7 +27,6 @@ fun HarvesterContent(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(0.dp))
         FullDateCard(title = "Hai, Harvester!")
 
         Spacer(modifier = Modifier.height(50.dp))

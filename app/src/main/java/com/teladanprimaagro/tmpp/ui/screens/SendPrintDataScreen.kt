@@ -80,6 +80,7 @@ fun SendPrintDataScreen(
                 title = {
                     Text(
                         text = "Kirim & Cetak Data",
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

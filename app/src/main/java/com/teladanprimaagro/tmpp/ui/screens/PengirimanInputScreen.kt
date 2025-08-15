@@ -100,8 +100,8 @@ fun PengirimanInputScreen(
                     Text(
                         text = "Pengiriman",
                         color = MaterialTheme.colorScheme.primary,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold
                     )
                 },
                 navigationIcon = {

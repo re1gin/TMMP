@@ -122,7 +122,7 @@ fun DateDisplay(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = label,
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 textAlign = TextAlign.Center
             )
