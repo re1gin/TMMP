@@ -22,7 +22,6 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.navigation.AppNavigation
 import com.teladanprimaagro.tmpp.navigation.AppWrapper
-import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.workers.PanenCleanupWorker
@@ -31,8 +30,6 @@ import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
-    // A mutable state to hold the NFC intent, which is observed by the UI.
-    // This allows Jetpack Compose to react to new NFC tags.
     internal var _nfcIntent: MutableState<Intent?> = mutableStateOf(null)
     val nfcIntent: State<Intent?> = _nfcIntent
     private val pengirimanViewModel: PengirimanViewModel by viewModels()
@@ -45,9 +42,7 @@ class MainActivity : ComponentActivity() {
         // Schedule the daily cleanup tasks for Panen and Pengiriman data.
         scheduleDailyCleanupWorkers(application)
 
-        // Set up the Jetpack Compose UI.
         setContent {
-            // Use AppWrapper to wrap the main application content.
             AppWrapper {
                 Surface(
                     modifier = Modifier.fillMaxSize(),

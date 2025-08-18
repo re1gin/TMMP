@@ -26,11 +26,11 @@ fun OfflineMapView(
     onLocationClick: (PanenData) -> Unit,
     onMapReady: (MapView) -> Unit,
     pemanenColors: Map<String, Int>,
-    currentLocation: GeoPoint? // Parameter baru untuk lokasi pengguna saat ini
+    currentLocation: GeoPoint? // Lokasi user
 ) {
     val context = LocalContext.current
 
-    // Konfigurasi osmdroid (dilakukan hanya sekali)
+    // Konfigurasi osmdroid (sekali saja)
     remember {
         val osmdroidConfig = Configuration.getInstance()
         osmdroidConfig.userAgentValue = context.packageName
@@ -46,16 +46,14 @@ fun OfflineMapView(
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
 
-                // Atur posisi awal peta
+                // Lokasi awal
                 val initialLocation = currentLocation
-                    ?: if (panenLocations.isNotEmpty()) {
-                        val firstPanen = panenLocations.first()
-                        val lat = firstPanen.locationPart1.toDoubleOrNull()
-                        val lon = firstPanen.locationPart2.toDoubleOrNull()
+                    ?: panenLocations.firstOrNull()?.let { panen ->
+                        val lat = panen.locationPart1.toDoubleOrNull()
+                        val lon = panen.locationPart2.toDoubleOrNull()
                         if (lat != null && lon != null) GeoPoint(lat, lon) else GeoPoint(-0.0, 102.0)
-                    } else {
-                        GeoPoint(-0.0, 102.0)
-                    }
+                    } ?: GeoPoint(-0.0, 102.0)
+
                 controller.setCenter(initialLocation)
                 controller.setZoom(17.0)
                 onMapReady(this)
@@ -64,46 +62,49 @@ fun OfflineMapView(
         update = { mapView ->
             mapView.overlays.clear()
 
+            // Compass
             val compassOverlay = CompassOverlay(context, mapView)
             compassOverlay.enableCompass()
             mapView.overlays.add(compassOverlay)
 
-            val humanIconDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_mylocation)
+            // Ikon marker panen (manusia) → gunakan ikon kustom
+            val humanIconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_human_marker)
 
+            // Tambah marker panen
             panenLocations.forEach { panen ->
-                val marker = Marker(mapView)
                 val lat = panen.locationPart1.toDoubleOrNull()
                 val lon = panen.locationPart2.toDoubleOrNull()
 
                 if (lat != null && lon != null) {
-                    marker.position = GeoPoint(lat, lon)
-                    marker.title = "Pemanen: ${panen.namaPemanen}"
-                    marker.snippet = "Blok: ${panen.blok}, Total Buah: ${panen.totalBuah}"
+                    val marker = Marker(mapView).apply {
+                        position = GeoPoint(lat, lon)
+                        title = "Pemanen: ${panen.namaPemanen}"
+                        snippet = "Blok: ${panen.blok}, Total Buah: ${panen.totalBuah}"
 
-                    val color = pemanenColors[panen.namaPemanen]
-                    humanIconDrawable?.let {
-                        val wrappedDrawable = DrawableCompat.wrap(it).mutate()
-                        if (color != null) {
-                            DrawableCompat.setTint(wrappedDrawable, color)
+                        humanIconDrawable?.let {
+                            val wrappedDrawable = DrawableCompat.wrap(it).mutate()
+                            pemanenColors[panen.namaPemanen]?.let { color ->
+                                DrawableCompat.setTint(wrappedDrawable, color)
+                            }
+                            icon = wrappedDrawable
                         }
-                        marker.icon = wrappedDrawable
-                    }
 
-                    marker.setOnMarkerClickListener { _, _ ->
-                        onLocationClick(panen)
-                        true
+                        setOnMarkerClickListener { _, _ ->
+                            onLocationClick(panen)
+                            true
+                        }
                     }
                     mapView.overlays.add(marker)
                 }
             }
 
-            // Tambahkan penanda lokasi pengguna saat ini jika ada
+            // Marker lokasi user → ikon berbeda (misalnya lingkaran biru)
             currentLocation?.let { location ->
-                val userMarker = Marker(mapView)
-                userMarker.position = location
-                userMarker.title = "Lokasi Anda"
-                val userIcon = ContextCompat.getDrawable(context, org.osmdroid.library.R.drawable.marker_default) // Gunakan ikon kustom jika ada
-                userMarker.icon = userIcon
+                val userMarker = Marker(mapView).apply {
+                    position = location
+                    title = "Lokasi Anda"
+                    icon = ContextCompat.getDrawable(context, R.drawable.ic_user_location)
+                }
                 mapView.overlays.add(userMarker)
             }
 

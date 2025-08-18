@@ -278,23 +278,15 @@ fun RekapPanenScreen(
                                 focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                                 disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                errorTextColor = MaterialTheme.colorScheme.error,
 
                                 // Warna container
                                 focusedContainerColor = MaterialTheme.colorScheme.secondary,
                                 unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
                                 disabledContainerColor = MaterialTheme.colorScheme.secondary,
-                                errorContainerColor = MaterialTheme.colorScheme.error,
 
                                 // Warna cursor
                                 cursorColor = MaterialTheme.colorScheme.onPrimary,
                                 errorCursorColor = MaterialTheme.colorScheme.error,
-
-                                // Hilangkan garis bawah
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = MaterialTheme.colorScheme.error,
 
                                 // Warna label
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,

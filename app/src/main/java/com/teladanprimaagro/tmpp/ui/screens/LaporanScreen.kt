@@ -44,13 +44,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
-// Menambahkan parameter 'titleColor' agar bisa menerima warna dari MainScreen
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LaporanScreen(
     pengirimanViewModel: PengirimanViewModel = viewModel(),
-    titleColor: Color // Parameter baru untuk warna teks
 ) {
     val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()
     val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
@@ -62,12 +60,17 @@ fun LaporanScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Laporan Pengiriman",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White // Menggunakan warna putih
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Laporan Pengiriman",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary
@@ -90,7 +93,7 @@ fun LaporanScreen(
                     fontWeight = FontWeight.Bold,
                     color = Color.White // Menggunakan warna putih
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 MainStatsColumn(
                     totalBuah = totalSemuaBuah,
                     totalScanned = totalSuccessfulScans,

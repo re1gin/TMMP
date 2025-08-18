@@ -33,8 +33,8 @@ fun PanenDetailDialog(
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth(0.9f) // Mengisi 90% lebar layar
-                .fillMaxHeight(0.8f) // Mengisi 80% tinggi layar
+                .fillMaxWidth()
+                .fillMaxHeight(0.8f)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)

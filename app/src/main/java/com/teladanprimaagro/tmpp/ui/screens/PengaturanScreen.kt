@@ -42,12 +42,17 @@ fun PengaturanScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Pengaturan",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Pengaturan",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary

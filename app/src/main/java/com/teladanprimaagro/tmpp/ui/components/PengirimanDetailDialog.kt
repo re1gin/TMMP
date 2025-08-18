@@ -7,7 +7,9 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Print
@@ -74,17 +76,18 @@ fun PengirimanDetailDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.9f)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant) // Menggunakan warna dari tema
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer) // Menggunakan warna dari tema
         ) {
             Column(
                 modifier = Modifier
                     .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Header Dialog: Teks dan Tombol Tutup
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -92,7 +95,7 @@ fun PengirimanDetailDialog(
                         text = "Data Lengkap",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.align(Alignment.Center)
                     )
                     IconButton(
@@ -102,7 +105,7 @@ fun PengirimanDetailDialog(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Tutup",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -212,7 +215,7 @@ fun PengirimanDetailDialog(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary) // Menggunakan warna primary dari tema
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimary.copy(0.7f)) // Menggunakan warna primary dari tema
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -221,14 +224,14 @@ fun PengirimanDetailDialog(
                         Icon(
                             imageVector = Icons.Default.Print,
                             contentDescription = "Kirim/Cetak Data",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = "Kirim & Cetak Data",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
