@@ -59,7 +59,6 @@ fun MainScreen(
             }
             composable("laporan_screen") {
                 LaporanScreen(
-                    titleColor = Color.White
                 )
             }
         }

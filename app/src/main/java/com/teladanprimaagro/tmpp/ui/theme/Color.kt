@@ -11,8 +11,8 @@ val DarkBlueTeal = Color(0xFF00181E)
 
 //---Yellow Neon---
 val Orange = Color(0xFFFFAE00)
-val DarkBrown1 = Color(0xFF382C00)
-val OliveGreen = Color(0xFF4D4100)
+val DarkBrown1 = Color(0xFF342600)
+val OliveGreen = Color(0xFF4D3C00)
 val Brown = Color(0xFF312400)
 
 
