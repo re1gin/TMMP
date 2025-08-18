@@ -16,10 +16,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +41,7 @@ fun KelolaKendaraanScreen(
                 title = {
                     Text(
                         text = "Kelola Kendaraan",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -48,12 +51,12 @@ fun KelolaKendaraanScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -64,8 +67,7 @@ fun KelolaKendaraanScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    color = BackgroundDarkGrey,
                 )
         ) {
             Column(
@@ -73,32 +75,35 @@ fun KelolaKendaraanScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        color = BackgroundDarkGrey,
                     )
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Input Field untuk Kendaraan Baru
                 OutlinedTextField(
                     value = newKendaraanName,
                     onValueChange = { newKendaraanName = it.uppercase() },
-                    label = { Text("Nomor Polisi Baru") },
+                    label = { Text("Nomor Polisi Baru", color = Color.White) },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.onPrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.White
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Tombol Tambah Kendaraan
                 Button(
                     onClick = {
                         if (newKendaraanName.isNotBlank()) {
@@ -111,8 +116,8 @@ fun KelolaKendaraanScreen(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = SuccessGreen,
+                        contentColor = Color.Black
                     )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah")
@@ -123,7 +128,7 @@ fun KelolaKendaraanScreen(
 
                 Text(
                     text = "Daftar Kendaraan:",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -132,6 +137,7 @@ fun KelolaKendaraanScreen(
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Daftar Kendaraan
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -143,19 +149,20 @@ fun KelolaKendaraanScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (editingKendaraan == kendaraan) {
+                                // Input Field untuk Edit Kendaraan
                                 OutlinedTextField(
                                     value = editedKendaraanName,
                                     onValueChange = { editedKendaraanName = it.uppercase() },
                                     singleLine = true,
                                     shape = RoundedCornerShape(8.dp),
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                                         cursorColor = MaterialTheme.colorScheme.primary,
-                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
                                     ),
                                     modifier = Modifier.weight(1f)
                                 )
@@ -177,7 +184,7 @@ fun KelolaKendaraanScreen(
                             } else {
                                 Text(
                                     text = kendaraan,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = Color.White,
                                     fontSize = 16.sp,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -186,7 +193,7 @@ fun KelolaKendaraanScreen(
                                     editingKendaraan = kendaraan
                                     editedKendaraanName = kendaraan
                                 }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                                 }
                                 IconButton(onClick = { settingsViewModel.removeKendaraan(kendaraan) }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)

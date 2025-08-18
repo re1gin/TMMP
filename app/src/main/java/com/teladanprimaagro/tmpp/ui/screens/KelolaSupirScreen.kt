@@ -16,10 +16,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +41,7 @@ fun KelolaSupirScreen(
                 title = {
                     Text(
                         text = "Kelola Supir",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primary, // Sesuai KelolaPemanenScreen
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -48,12 +51,12 @@ fun KelolaSupirScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary // Sesuai KelolaPemanenScreen
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary // Sesuai KelolaPemanenScreen
                 )
             )
         },
@@ -64,8 +67,7 @@ fun KelolaSupirScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    color = BackgroundDarkGrey // Menggunakan warna kustom
                 )
         ) {
             Column(
@@ -73,32 +75,35 @@ fun KelolaSupirScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        color = BackgroundDarkGrey, // Menggunakan warna kustom
                     )
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Input Field untuk Supir Baru
                 OutlinedTextField(
                     value = newSupirName,
                     onValueChange = { newSupirName = it.uppercase() },
-                    label = { Text("Nama Supir Baru") },
+                    label = { Text("Nama Supir Baru", color = Color.White) },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.onPrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.White
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Tombol Tambah Supir
                 Button(
                     onClick = {
                         if (newSupirName.isNotBlank()) {
@@ -111,8 +116,8 @@ fun KelolaSupirScreen(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = SuccessGreen, // Menggunakan warna kustom
+                        contentColor = Color.Black
                     )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah")
@@ -123,7 +128,7 @@ fun KelolaSupirScreen(
 
                 Text(
                     text = "Daftar Supir:",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -132,6 +137,7 @@ fun KelolaSupirScreen(
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Daftar Supir
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -143,19 +149,20 @@ fun KelolaSupirScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (editingSupir == supir) {
+                                // Input Field untuk Edit Supir
                                 OutlinedTextField(
                                     value = editedSupirName,
-                                    onValueChange = { editedSupirName = it.uppercase() },
+                                    onValueChange = { editedSupirName = it },
                                     singleLine = true,
                                     shape = RoundedCornerShape(8.dp),
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                                         cursorColor = MaterialTheme.colorScheme.primary,
-                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
                                     ),
                                     modifier = Modifier.weight(1f)
                                 )
@@ -177,7 +184,7 @@ fun KelolaSupirScreen(
                             } else {
                                 Text(
                                     text = supir,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = Color.White,
                                     fontSize = 16.sp,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -186,7 +193,7 @@ fun KelolaSupirScreen(
                                     editingSupir = supir
                                     editedSupirName = supir
                                 }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                                 }
                                 IconButton(onClick = { settingsViewModel.removeSupir(supir) }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)

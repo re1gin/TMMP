@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
 import androidx.compose.material.icons.filled.Menu
@@ -29,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.ui.components.OfflineMapView
@@ -38,11 +37,11 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PetaScreen(
-    navController: NavHostController,
     mapViewModel: MapViewModel = viewModel(),
     paddingValues: PaddingValues
 ) {
@@ -240,22 +239,34 @@ fun PetaScreen(
     selectedPanenData?.let { panenData ->
         AlertDialog(
             onDismissRequest = { selectedPanenData = null },
-            title = { Text("Detail Panen") },
+            title = { Text(
+                text = "Detail Panen",
+                color = MaterialTheme.colorScheme.onPrimary) },
             text = {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Pemanen: ${panenData.namaPemanen}")
-                    Text("Blok: ${panenData.blok}")
-                    Text("Total Buah: ${panenData.totalBuah}")
-                    Text("Waktu: ${panenData.tanggalWaktu}")
+                    Text(
+                        text = "Pemanen: ${panenData.namaPemanen}",
+                        color = Color.White)
+                    Text(
+                        text = "Blok: ${panenData.blok}",
+                        color = Color.White)
+                    Text(
+                        text = "Total Buah: ${panenData.totalBuah}",
+                        color = Color.White)
+                    Text(
+                        text = "Waktu: ${panenData.tanggalWaktu}",
+                        color = Color.White)
                 }
             },
             confirmButton = {
                 TextButton(onClick = { selectedPanenData = null }) {
-                    Text("Tutup")
+                    Text("Tutup", color = Color.White)
                 }
-            }
+            },
+            containerColor = BackgroundDarkGrey,
+            shape = RoundedCornerShape(16.dp)
         )
     }
 }

@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +41,7 @@ fun KelolaKemandoranScreen(
                 title = {
                     Text(
                         text = "Kelola Kemandoran",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -49,24 +51,23 @@ fun KelolaKemandoranScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface // Menggunakan surface sebagai background utama
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    color = BackgroundDarkGrey,
                 )
         ) {
             Column(
@@ -74,32 +75,35 @@ fun KelolaKemandoranScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        color = BackgroundDarkGrey,
                     )
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Input Field untuk Mandor Baru
                 OutlinedTextField(
                     value = newMandorName,
                     onValueChange = { newMandorName = it.uppercase() },
-                    label = { Text("Nama Mandor Baru") },
+                    label = { Text("Nama Mandor Baru", color = Color.White) },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.onPrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.White
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Tombol Tambah Mandor
                 Button(
                     onClick = {
                         if (newMandorName.isNotBlank()) {
@@ -112,8 +116,8 @@ fun KelolaKemandoranScreen(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = SuccessGreen,
+                        contentColor = Color.Black
                     )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah")
@@ -124,7 +128,7 @@ fun KelolaKemandoranScreen(
 
                 Text(
                     text = "Daftar Mandor:",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -133,6 +137,7 @@ fun KelolaKemandoranScreen(
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Daftar Mandor
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -144,19 +149,20 @@ fun KelolaKemandoranScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (editingMandor == mandor) {
+                                // Input Field untuk Edit Mandor
                                 OutlinedTextField(
                                     value = editedMandorName,
                                     onValueChange = { editedMandorName = it },
                                     singleLine = true,
                                     shape = RoundedCornerShape(8.dp),
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                                         cursorColor = MaterialTheme.colorScheme.primary,
-                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
                                     ),
                                     modifier = Modifier.weight(1f)
                                 )
@@ -168,7 +174,7 @@ fun KelolaKemandoranScreen(
                                         }
                                         editingMandor = null
                                     },
-                                    enabled = editedMandorName.isNotBlank()
+                                    enabled = editedMandorName.isNotBlank() && editedMandorName.trim() != mandor
                                 ) {
                                     Icon(Icons.Default.Done, contentDescription = "Simpan", tint = MaterialTheme.colorScheme.primary)
                                 }
@@ -178,7 +184,7 @@ fun KelolaKemandoranScreen(
                             } else {
                                 Text(
                                     text = mandor,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = Color.White,
                                     fontSize = 16.sp,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -187,7 +193,7 @@ fun KelolaKemandoranScreen(
                                     editingMandor = mandor
                                     editedMandorName = mandor
                                 }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                                 }
                                 IconButton(onClick = { settingsViewModel.removeMandor(mandor) }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)

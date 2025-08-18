@@ -45,7 +45,6 @@ fun MainScreen(
             }
             composable("peta_screen") {
                 PetaScreen(
-                    navController = mainNavController,
                     mapViewModel = mapViewModel,
                     paddingValues = paddingValues
                 )

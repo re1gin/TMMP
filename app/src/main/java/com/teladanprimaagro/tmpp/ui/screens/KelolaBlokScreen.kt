@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -39,7 +41,7 @@ fun KelolaBlokScreen(
                 title = {
                     Text(
                         text = "Kelola Blok",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MaterialTheme.colorScheme.primary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -49,24 +51,23 @@ fun KelolaBlokScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.surface // Menggunakan surface sebagai background utama
+        containerColor = MaterialTheme.colorScheme.surface
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
                 .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                    color = BackgroundDarkGrey,
                 )
         ) {
             Column(
@@ -74,32 +75,35 @@ fun KelolaBlokScreen(
                     .fillMaxWidth()
                     .weight(1f)
                     .background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+                        color = BackgroundDarkGrey,
                     )
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
+                // Input Field untuk Blok Baru
                 OutlinedTextField(
                     value = newBlokName,
                     onValueChange = { newBlokName = it },
-                    label = { Text("Nama Blok Baru") },
+                    label = { Text("Nama Blok Baru", color = Color.White) },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        cursorColor = MaterialTheme.colorScheme.onPrimary,
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = Color.White
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Tombol Tambah Blok
                 Button(
                     onClick = {
                         if (newBlokName.isNotBlank()) {
@@ -112,8 +116,8 @@ fun KelolaBlokScreen(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = SuccessGreen,
+                        contentColor = Color.Black
                     )
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Tambah")
@@ -124,7 +128,7 @@ fun KelolaBlokScreen(
 
                 Text(
                     text = "Daftar Blok:",
-                    color = MaterialTheme.colorScheme.onSurface,
+                    color = Color.White,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -133,6 +137,7 @@ fun KelolaBlokScreen(
                 HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outline)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Daftar Blok
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -144,19 +149,20 @@ fun KelolaBlokScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             if (editingBlok == blok) {
+                                // Input Field untuk Edit Blok
                                 OutlinedTextField(
                                     value = editedBlokName,
                                     onValueChange = { editedBlokName = it },
                                     singleLine = true,
                                     shape = RoundedCornerShape(8.dp),
                                     colors = OutlinedTextFieldDefaults.colors(
-                                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White,
                                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                                         cursorColor = MaterialTheme.colorScheme.primary,
-                                        focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
                                     ),
                                     modifier = Modifier.weight(1f)
                                 )
@@ -168,7 +174,7 @@ fun KelolaBlokScreen(
                                         }
                                         editingBlok = null
                                     },
-                                    enabled = editedBlokName.isNotBlank()
+                                    enabled = editedBlokName.isNotBlank() && editedBlokName.trim() != blok
                                 ) {
                                     Icon(Icons.Default.Done, contentDescription = "Simpan", tint = MaterialTheme.colorScheme.primary)
                                 }
@@ -178,7 +184,7 @@ fun KelolaBlokScreen(
                             } else {
                                 Text(
                                     text = blok,
-                                    color = MaterialTheme.colorScheme.onSurface,
+                                    color = Color.White,
                                     fontSize = 16.sp,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -187,7 +193,7 @@ fun KelolaBlokScreen(
                                     editingBlok = blok
                                     editedBlokName = blok
                                 }) {
-                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.White)
                                 }
                                 IconButton(onClick = { settingsViewModel.removeBlok(blok) }) {
                                     Icon(Icons.Default.Delete, contentDescription = "Hapus", tint = MaterialTheme.colorScheme.error)
