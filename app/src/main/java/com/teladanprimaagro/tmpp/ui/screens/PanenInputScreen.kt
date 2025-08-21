@@ -1,6 +1,9 @@
+@file:Suppress("DEPRECATION")
+
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -8,6 +11,7 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.nfc.NfcAdapter
 import android.os.Build
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
@@ -19,19 +23,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -39,24 +31,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,15 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.ui.components.BuahCounter
-import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
-import com.teladanprimaagro.tmpp.ui.components.FailureDialog
-import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
-import com.teladanprimaagro.tmpp.ui.components.TextInputField
+import com.teladanprimaagro.tmpp.ui.components.*
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -87,32 +59,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.Exception
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-fun getLocation(
-    fusedLocationClient: FusedLocationProviderClient,
-    context: Context,
-    onLocationReceived: (String, String) -> Unit
-) {
-    if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-    ) {
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    onLocationReceived(location.latitude.toString(), location.longitude.toString())
-                    Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(context, "Tidak dapat menemukan lokasi. Pastikan GPS aktif.", Toast.LENGTH_LONG).show()
-                }
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(context, "Gagal mendapatkan lokasi: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-    }
-}
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,7 +70,7 @@ fun getLocation(
 fun PanenInputScreen(
     navController: NavController,
     panenViewModel: PanenViewModel,
-    settingsViewModel: SettingsViewModel,
+    settingsViewModel: SettingsViewModel = viewModel(),
     nfcIntentFromActivity: State<Intent?>,
     panenDataToEdit: PanenData? = null
 ) {
@@ -177,19 +127,16 @@ fun PanenInputScreen(
 
     LaunchedEffect(imageUri) {
         imageBitmap = null
-
         if (imageUri != null) {
             var attempts = 0
             val maxAttempts = 5
             val retryDelayMs = 750L
             var lastException: Exception? = null
-
             while (attempts < maxAttempts) {
                 try {
                     if (attempts > 0) {
                         delay(retryDelayMs)
                     }
-
                     context.contentResolver.openInputStream(imageUri!!)?.use { inputStream ->
                         val bitmap = BitmapFactory.decodeStream(inputStream)
                         if (bitmap != null) {
@@ -202,9 +149,7 @@ fun PanenInputScreen(
                 }
                 attempts++
             }
-
             imageBitmap = null
-
             if (lastException != null) {
                 Log.e("PanenInputScreen", "Final Error loading image from URI: ${lastException.message}", lastException)
                 if (isEditing) {
@@ -223,35 +168,52 @@ fun PanenInputScreen(
     val nfcAdapter: NfcAdapter? = remember { NfcAdapter.getDefaultAdapter(context) }
     val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
+    // --- KODE LOKASI BARU ---
+    var isFindingLocation by remember { mutableStateOf(false) }
+
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { location ->
+                    locationPart1 = location.latitude.toString()
+                    locationPart2 = location.longitude.toString()
+                    Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
+
+                    // Setelah mendapatkan lokasi, hentikan pembaruan
+                    fusedLocationClient.removeLocationUpdates(this)
+                    isFindingLocation = false
+                }
+            }
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    val startLocationUpdates = {
+        isFindingLocation = true
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 1000L // Coba ambil lokasi setiap 1 detik
+            numUpdates = 1 // Hanya ambil 1 pembaruan, lalu berhenti
+        }
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    }
+    // --- AKHIR KODE LOKASI BARU ---
+
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showFailureDialog by remember { mutableStateOf(false) }
     var failureMessage by remember { mutableStateOf("") }
 
     val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            when {
-                permissions.getOrDefault(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    false
-                ) -> {
-                    getLocation(fusedLocationClient, context) { lat, lon ->
-                        locationPart1 = lat
-                        locationPart2 = lon
-                    }
-                }
-                permissions.getOrDefault(
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    false
-                ) -> {
-                    getLocation(fusedLocationClient, context) { lat, lon ->
-                        locationPart1 = lat
-                        locationPart2 = lon
-                    }
-                }
-                else -> {
-                    Toast.makeText(context, "Izin lokasi ditolak.", Toast.LENGTH_SHORT).show()
-                }
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                startLocationUpdates()
+            } else {
+                Toast.makeText(context, "Izin lokasi ditolak.", Toast.LENGTH_SHORT).show()
             }
         }
     )
@@ -268,7 +230,6 @@ fun PanenInputScreen(
         val formattedTime = dateTime.format(timeFormatter)
         val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
         val formattedBuah = totalBuah.toString().padStart(3, '0')
-
         return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
     }
 
@@ -286,7 +247,6 @@ fun PanenInputScreen(
     fun createImageUri(context: Context): Uri {
         val photosDir = File(context.cacheDir, "panen_photos")
         photosDir.mkdirs()
-
         val newFile = File(photosDir, "IMG_${System.currentTimeMillis()}.jpg")
         val uri = FileProvider.getUriForFile(
             context,
@@ -298,7 +258,6 @@ fun PanenInputScreen(
             uri,
             Intent.FLAG_GRANT_READ_URI_PERMISSION
         )
-
         imageUri = uri
         return uri
     }
@@ -311,7 +270,6 @@ fun PanenInputScreen(
                 if (capturedUri != null) {
                     CoroutineScope(Dispatchers.Main).launch {
                         delay(100)
-
                         try {
                             context.contentResolver.openInputStream(capturedUri)?.use { inputStream ->
                                 val bitmap = BitmapFactory.decodeStream(inputStream)
@@ -322,7 +280,6 @@ fun PanenInputScreen(
                         } catch (e: Exception) {
                             Toast.makeText(context, "Gagal memuat gambar: ${e.message}", Toast.LENGTH_LONG).show()
                         }
-
                         imageUri = capturedUri
                     }
                 }
@@ -390,7 +347,6 @@ fun PanenInputScreen(
                 fontWeight = FontWeight.SemiBold
             )
         }
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -445,20 +401,19 @@ fun PanenInputScreen(
                 IconButton(
                     onClick = {
                         if (!isEditing) {
-                            locationPermissionLauncher.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
-                            )
+                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                startLocationUpdates()
+                            } else {
+                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            }
                         }
                     },
-                    enabled = !isEditing,
+                    enabled = !isEditing && !isFindingLocation, // Nonaktifkan saat mencari lokasi
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .fillMaxHeight()
                         .background(
-                            color = if (isEditing) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onPrimary,
+                            color = if (isEditing || isFindingLocation) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onPrimary,
                             shape = RoundedCornerShape(10.dp)
                         )
                 ) {
@@ -559,17 +514,13 @@ fun PanenInputScreen(
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        // Warna teks di dalam TextField
                         focusedTextColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
                         disabledTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-                        // Warna border
                         focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                         disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        // Warna background container
                         disabledContainerColor = MaterialTheme.colorScheme.secondary,
-                        // Warna cursor (tidak terlihat karena readOnly)
                         cursorColor = MaterialTheme.colorScheme.onPrimary
                     ),
                     modifier = Modifier.width(120.dp)
@@ -632,7 +583,6 @@ fun PanenInputScreen(
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
@@ -644,7 +594,6 @@ fun PanenInputScreen(
                         ).show()
                         return@Button
                     }
-
                     if (totalBuah <= 0) {
                         Toast.makeText(
                             context,
@@ -666,7 +615,6 @@ fun PanenInputScreen(
                             .show()
                         return@Button
                     }
-
                     if (nfcAdapter == null || !nfcAdapter.isEnabled) {
                         val message = if (nfcAdapter == null) {
                             "NFC tidak tersedia di perangkat ini. Data tidak dapat disimpan."
@@ -676,7 +624,6 @@ fun PanenInputScreen(
                         Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                         return@Button
                     }
-
                     val panenDataFinal = PanenData(
                         id = panenDataToEdit?.id ?: 0,
                         tanggalWaktu = dateTimeDisplay,
@@ -698,7 +645,6 @@ fun PanenInputScreen(
                         firebaseImageUrl = null,
                         isSynced = false
                     )
-
                     nfcDataToPass = panenDataFinal.copy(id = 0)
                     showNfcWriteDialog = true
                 },
@@ -713,9 +659,7 @@ fun PanenInputScreen(
             ) {
                 Text(if (isEditing) "Simpan Perubahan" else "Kirim", fontWeight = FontWeight.Bold)
             }
-
             Spacer(modifier = Modifier.height(16.dp))
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -733,7 +677,6 @@ fun PanenInputScreen(
                     if (it < 2) Spacer(modifier = Modifier.width(8.dp))
                 }
             }
-
             NfcWriteDialog(
                 showDialog = showNfcWriteDialog,
                 onDismissRequest = {
@@ -744,11 +687,9 @@ fun PanenInputScreen(
                 onWriteComplete = { success, message ->
                     showNfcWriteDialog = false
                     nfcDataToPass = null
-
                     if (success) {
                         showSuccessDialog = true
                         vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-
                         val panenData = PanenData(
                             id = panenDataToEdit?.id ?: 0,
                             tanggalWaktu = dateTimeDisplay,
@@ -770,15 +711,11 @@ fun PanenInputScreen(
                             firebaseImageUrl = panenDataToEdit?.firebaseImageUrl,
                             isSynced = false
                         )
-
-                        // --- PERUBAHAN DI SINI ---
-                        // Menggunakan fungsi compressImageAndSavePanen yang baru
                         if (isEditing) {
                             panenViewModel.updatePanenData(panenData)
                         } else {
                             panenViewModel.compressImageAndSavePanen(panenData, imageUri)
                         }
-                        // --- AKHIR PERUBAHAN ---
                     } else {
                         failureMessage = message
                         showFailureDialog = true
@@ -787,7 +724,6 @@ fun PanenInputScreen(
                 },
                 nfcIntentFromActivity = nfcIntentFromActivity
             )
-
             if (showSuccessDialog) {
                 SuccessDialog(
                     onDismiss = {
@@ -799,7 +735,6 @@ fun PanenInputScreen(
                     }
                 )
             }
-
             if (showFailureDialog) {
                 FailureDialog(
                     message = failureMessage,

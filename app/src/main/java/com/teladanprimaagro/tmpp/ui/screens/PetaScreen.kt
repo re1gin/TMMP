@@ -271,7 +271,6 @@ fun PetaScreen(
     }
 }
 
-// Fungsi untuk memeriksa dan meminta izin lokasi
 private fun checkAndRequestLocation(
     context: Context,
     onPermissionGranted: () -> Unit,
