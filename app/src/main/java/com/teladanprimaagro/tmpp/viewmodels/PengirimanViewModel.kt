@@ -354,8 +354,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         )
     }
 
-    // --- Fungsi yang Disempurnakan untuk Menghapus Data ---
-
     fun clearAllPengirimanData() {
         viewModelScope.launch {
             try {

@@ -50,7 +50,7 @@ fun PanenDetailDialog(
                     text = "Detail Data Panen",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
 

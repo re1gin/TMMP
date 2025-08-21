@@ -7,7 +7,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,10 +19,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,17 +35,16 @@ fun DataTerkirimScreen(
     navController: NavController,
     panenViewModel: PanenViewModel = viewModel()
 ) {
-    // Mengambil semua data panen
+    val context = LocalContext.current
+
     val allPanenData by panenViewModel.panenList.collectAsState()
 
-    // Mengambil status sinkronisasi
-    val isSyncing by panenViewModel.isSyncing.collectAsState()
+    val workInfos = WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkLiveData("sync_panen_work")
+        .observeAsState()
 
-    // Mengambil progres sinkronisasi
-    val syncProgress by panenViewModel.syncProgress.collectAsState()
-    val totalItemsToSync by panenViewModel.totalItemsToSync.collectAsState()
+    val syncingWorkInfo = workInfos.value?.firstOrNull { it.state == WorkInfo.State.RUNNING }
 
-    // State untuk mengontrol filter data
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
 
     Scaffold(
@@ -75,19 +78,22 @@ fun DataTerkirimScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            // Tampilkan indikator loading dan persentase jika sedang melakukan sinkronisasi
-            if (isSyncing) {
+            if (syncingWorkInfo != null) {
+                val progress = syncingWorkInfo.progress.getFloat("progress", 0.0f)
+                val total = syncingWorkInfo.progress.getInt("total", 1)
+                val current = (progress * total).toInt()
+
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     LinearProgressIndicator(
-                        progress = syncProgress,
+                        progress = progress,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "Mensinkronkan ${(syncProgress * totalItemsToSync).toInt()} dari $totalItemsToSync...",
+                        text = "Mensinkronkan $current dari $total...",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -96,6 +102,9 @@ fun DataTerkirimScreen(
 
             @OptIn(ExperimentalMaterial3Api::class)
             if (allPanenData.isNotEmpty()) {
+                val syncedCount = allPanenData.count { it.isSynced }
+                val unsyncedCount = allPanenData.count { !it.isSynced }
+
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -108,13 +117,13 @@ fun DataTerkirimScreen(
                         colors = SegmentedButtonDefaults.colors(
                             activeContainerColor = SuccessGreen,
                             activeContentColor = Color.White,
-                            activeBorderColor = Color.Transparent, // border saat aktif
+                            activeBorderColor = Color.Transparent,
                             inactiveContainerColor = Color.White,
                             inactiveContentColor = MaterialTheme.colorScheme.onSurface,
-                            inactiveBorderColor = Color.Transparent // border saat nonaktif
+                            inactiveBorderColor = Color.Transparent
                         )
                     ) {
-                        Text("Sudah Terkirim")
+                        Text("Sudah Terkirim ($syncedCount)")
                     }
 
                     SegmentedButton(
@@ -130,12 +139,11 @@ fun DataTerkirimScreen(
                             inactiveBorderColor = Color.Transparent
                         )
                     ) {
-                        Text("Belum Terkirim")
+                        Text("Belum Terkirim ($unsyncedCount)")
                     }
                 }
             }
 
-            // Tentukan data yang akan ditampilkan berdasarkan filter yang dipilih
             val filteredData = when (selectedFilter) {
                 "Sudah Terkirim" -> allPanenData.filter { it.isSynced }
                 "Belum Terkirim" -> allPanenData.filter { !it.isSynced }
@@ -177,7 +185,7 @@ fun DataTerkirimScreen(
 fun DataTerkirimCard(panenItem: PanenData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -192,7 +200,7 @@ fun DataTerkirimCard(panenItem: PanenData) {
                 Text(
                     text = "Terkirim: ${panenItem.tanggalWaktu}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.White
                 )
                 Text(
                     text = "Status: Terkirim",
@@ -219,7 +227,7 @@ fun DataTerkirimCard(panenItem: PanenData) {
 fun DataBelumTerkirimCard(panenItem: PanenData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -234,7 +242,7 @@ fun DataBelumTerkirimCard(panenItem: PanenData) {
                 Text(
                     text = "Ditambahkan: ${panenItem.tanggalWaktu}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.White
                 )
                 Text(
                     text = "Status: Menunggu",

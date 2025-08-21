@@ -38,7 +38,6 @@ interface PengirimanDao {
     @Query("DELETE FROM pengiriman_entries WHERE id IN (:ids)")
     suspend fun deleteMultiplePengiriman(ids: List<Int>)
 
-    // --- Fungsi-fungsi baru untuk tabel finalized_unique_nos ---
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFinalizedUniqueNo(uniqueNoEntity: FinalizedUniqueNoEntity)
 

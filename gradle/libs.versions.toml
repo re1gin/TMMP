@@ -16,6 +16,7 @@ osmdroidAndroid = "6.1.20"
 playServicesLocation = "21.3.0"
 room = "2.7.2"
 runtimeAndroid = "1.8.3"
+runtimeLivedata = "1.9.0"
 supabase = "3.2.2"
 supabaseKt = " 3.2.2"
 tvMaterial = "1.0.1"
@@ -30,6 +31,7 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "runtimeLivedata" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 ktor-client-android = { module = "io.ktor:ktor-client-android", version.ref = "ktor" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroidAndroid" }

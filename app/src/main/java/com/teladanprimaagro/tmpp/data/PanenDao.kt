@@ -33,8 +33,5 @@ interface PanenDao {
     suspend fun deleteMultiplePanen(ids: List<Int>)
 
     @Query("SELECT * FROM panen_entries WHERE isSynced = 0")
-    fun getUnsyncedPanenDataFlow(): Flow<List<PanenData>>
-
-    @Update
-    suspend fun updateMultiplePanen(panenList: List<PanenData>)
+    suspend fun getUnsyncedPanenData(): List<PanenData>
 }

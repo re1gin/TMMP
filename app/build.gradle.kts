@@ -66,6 +66,7 @@ dependencies {
     testImplementation(libs.junit)
     implementation (libs.room.runtime)
     implementation(libs.osmdroid.android)
+    implementation(libs.androidx.runtime.livedata)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     androidTestImplementation(libs.androidx.junit)

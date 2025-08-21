@@ -17,8 +17,9 @@ class PengirimanCleanupWorker(
             try {
                 val pengirimanDao = AppDatabase.getDatabase(applicationContext).pengirimanDao()
                 pengirimanDao.clearAllPengiriman()
+                pengirimanDao.clearAllFinalizedUniqueNos()
                 Result.success()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 Result.failure()
             }
         }

@@ -39,7 +39,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,7 +60,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -82,9 +80,9 @@ import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.components.FailureDialog
 import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
+import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
-import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -286,7 +284,7 @@ fun PanenInputScreen(
     }
 
     fun createImageUri(context: Context): Uri {
-        val photosDir = File(context.filesDir, "panen_photos")
+        val photosDir = File(context.cacheDir, "panen_photos")
         photosDir.mkdirs()
 
         val newFile = File(photosDir, "IMG_${System.currentTimeMillis()}.jpg")

@@ -62,7 +62,7 @@ private val YellowNeonColorPalette = lightColorScheme(
     onSurfaceVariant = White,
 
     outline = Orange,
-    surfaceContainer = TextGrey,
+    surfaceContainer = BackgroundDarkGrey,
     surfaceBright = Brown,
 )
 

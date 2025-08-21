@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -97,8 +99,11 @@ fun StatusPengirimanScreen(
                 }
             }
 
-            // Tambahkan tombol segmentasi di sini
+            // Perubahan dimulai di sini untuk menambahkan jumlah data
             if (allPengirimanData.isNotEmpty()) {
+                val sentCount = allPengirimanData.count { it.isUploaded }
+                val unsentCount = allPengirimanData.count { !it.isUploaded }
+
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -107,19 +112,36 @@ fun StatusPengirimanScreen(
                     SegmentedButton(
                         selected = selectedFilter == "Sudah Terkirim",
                         onClick = { selectedFilter = "Sudah Terkirim" },
-                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = SuccessGreen,
+                            activeContentColor = Color.White,
+                            activeBorderColor = Color.Transparent,
+                            inactiveContainerColor = Color.White,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurface,
+                            inactiveBorderColor = Color.Transparent
+                        )
                     ) {
-                        Text("Sudah Terkirim")
+                        Text("Sudah Terkirim ($sentCount)")
                     }
                     SegmentedButton(
                         selected = selectedFilter == "Belum Terkirim",
                         onClick = { selectedFilter = "Belum Terkirim" },
-                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                        colors = SegmentedButtonDefaults.colors(
+                            activeContainerColor = DangerRed,
+                            activeContentColor = Color.White,
+                            activeBorderColor = Color.Transparent,
+                            inactiveContainerColor = Color.White,
+                            inactiveContentColor = MaterialTheme.colorScheme.onSurface,
+                            inactiveBorderColor = Color.Transparent
+                        )
                     ) {
-                        Text("Belum Terkirim")
+                        Text("Belum Terkirim ($unsentCount)")
                     }
                 }
             }
+            // Perubahan berakhir di sini
 
             // Tentukan data yang akan ditampilkan berdasarkan filter yang dipilih
             val filteredData = when (selectedFilter) {
@@ -163,7 +185,7 @@ fun StatusPengirimanScreen(
 fun PengirimanTerkirimCard(pengirimanItem: PengirimanData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -178,7 +200,7 @@ fun PengirimanTerkirimCard(pengirimanItem: PengirimanData) {
                 Text(
                     text = "Terkirim: ${pengirimanItem.waktuPengiriman}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.White
                 )
                 Text(
                     text = "Status: Terkirim",
@@ -205,7 +227,7 @@ fun PengirimanTerkirimCard(pengirimanItem: PengirimanData) {
 fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier
@@ -220,7 +242,7 @@ fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData) {
                 Text(
                     text = "Ditambahkan: ${pengirimanItem.waktuPengiriman}",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = Color.White
                 )
                 Text(
                     text = "Status: Menunggu",

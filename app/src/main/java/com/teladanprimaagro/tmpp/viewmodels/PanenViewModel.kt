@@ -4,23 +4,27 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
+import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
 import com.teladanprimaagro.tmpp.data.AppDatabase
 import com.teladanprimaagro.tmpp.data.PanenDao
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.util.ConnectivityObserver
+import com.teladanprimaagro.tmpp.workers.SyncPanenWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -38,7 +42,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
     private val panenDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("panenEntries")
     private val storage = FirebaseStorage.getInstance()
-    private val storageRef: StorageReference = storage.reference.child("images")
     private val context = application.applicationContext
 
     // ==================== UI State and Filters ====================
@@ -57,27 +60,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
-    // ==================== Syncing State ====================
-    private val _syncProgress = MutableStateFlow(0f)
-    val syncProgress: StateFlow<Float> = _syncProgress.asStateFlow()
-
-    private val _totalItemsToSync = MutableStateFlow(0)
-    val totalItemsToSync: StateFlow<Int> = _totalItemsToSync.asStateFlow()
-
-    private val _isSyncing = MutableStateFlow(false)
-    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
-
-    private val connectivityObserver = ConnectivityObserver(application)
-    val isConnected: StateFlow<Boolean> = connectivityObserver.isConnected.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5000),
-        initialValue = false
-    )
-
     // ==================== Data Flows ====================
-    val unsyncedPanenList: StateFlow<List<PanenData>> = panenDao.getUnsyncedPanenDataFlow()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     val panenList: StateFlow<List<PanenData>> =
         panenDao.getAllPanen()
             .combine(_sortBy) { list, sortBy -> sortPanenList(list, sortBy) }
@@ -126,21 +109,21 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    // ==================== Initialization Block ====================
-    init {
-        viewModelScope.launch {
-            combine(unsyncedPanenList, isConnected) { data, connected ->
-                data.isNotEmpty() && connected && !_isSyncing.value
-            }.collect { shouldSync ->
-                if (shouldSync) {
-                    syncDataToServer()
-                }
-            }
-        }
+    // ==================== WorkManager Trigger ====================
+    private fun startSyncWorker() {
+        Log.d("PanenViewModel", "Enqueuing SyncPanenWorker...")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPanenWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
     }
 
-    suspend fun getPanenByIds(ids: List<Int>): List<PanenData> = panenDao.getPanenByIds(ids)
-
+    // ==================== CRUD Operations ====================
     fun compressImageAndSavePanen(panenData: PanenData, imageUri: Uri?) {
         viewModelScope.launch {
             if (imageUri == null) {
@@ -154,7 +137,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     isSynced = false
                 )
                 savePanenData(panenDataWithCompressedImage)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Error during image compression", e)
                 savePanenData(panenData.copy(localImageUri = null))
             }
         }
@@ -164,11 +148,9 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 panenDao.insertPanen(panenData)
-                if (isConnected.value) {
-                    syncDataToServer()
-                }
-            } catch (_: Exception) {
-                // Handle exception
+                startSyncWorker() // Memanggil WorkManager setelah data disimpan
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Error saving panen data to local DB", e)
             }
         }
     }
@@ -177,60 +159,52 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
-                val bitmap = BitmapFactory.decodeStream(inputStream)
-                if (bitmap == null) {
+                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                if (originalBitmap == null) {
                     continuation.resume(uri)
                     return@launch
                 }
+
+                // --- Peningkatan: Resizing gambar sebelum kompresi ---
+                val targetWidth = 1024
+                val targetHeight = 768
+
+                val originalWidth = originalBitmap.width
+                val originalHeight = originalBitmap.height
+
+                val scaleFactor = minOf(
+                    targetWidth.toFloat() / originalWidth.toFloat(),
+                    targetHeight.toFloat() / originalHeight.toFloat()
+                )
+
+                val resizedBitmap = if (scaleFactor < 1) {
+                    val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
+                    Bitmap.createBitmap(originalBitmap, 0, 0, originalWidth, originalHeight, matrix, true)
+                } else {
+                    originalBitmap
+                }
+                // ----------------------------------------------------
+
                 val compressedImageFile = File(context.cacheDir, "compressed_image_${UUID.randomUUID()}.jpg")
                 val outputStream = FileOutputStream(compressedImageFile)
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+
+                // Peningkatan: Gunakan kualitas kompresi 75%
+                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
+
                 outputStream.flush()
                 outputStream.close()
+
+                // Daur ulang bitmap untuk menghemat memori
+                originalBitmap.recycle()
+                if (originalBitmap != resizedBitmap) {
+                    resizedBitmap.recycle()
+                }
+
                 val compressedUri = compressedImageFile.toUri()
                 continuation.resume(compressedUri)
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Error compressing image: ${e.message}", e)
                 continuation.resume(uri)
-            }
-        }
-    }
-
-    fun syncDataToServer() {
-        viewModelScope.launch {
-            _isSyncing.value = true
-            try {
-                val unsyncedDataList = panenDao.getUnsyncedPanenDataFlow().first()
-                _totalItemsToSync.value = unsyncedDataList.size
-                _syncProgress.value = 0f
-                if (unsyncedDataList.isNotEmpty()) {
-                    for ((index, panenData) in unsyncedDataList.withIndex()) {
-                        try {
-                            var firebaseImageUrl: String? = panenData.firebaseImageUrl
-                            if (panenData.localImageUri != null && panenData.firebaseImageUrl.isNullOrEmpty()) {
-                                val imageUri = panenData.localImageUri.toUri()
-                                val imageName = UUID.randomUUID().toString()
-                                val imageRef = storageRef.child("$imageName.jpg")
-                                imageRef.putFile(imageUri).await()
-                                firebaseImageUrl = imageRef.downloadUrl.await().toString()
-                            }
-                            val updatedData = panenData.copy(
-                                firebaseImageUrl = firebaseImageUrl,
-                                isSynced = true
-                            )
-                            panenDao.updatePanen(updatedData)
-                            panenDbRef.child(updatedData.uniqueNo).setValue(updatedData).await()
-                            _syncProgress.value = (index + 1).toFloat() / unsyncedDataList.size.toFloat()
-                        } catch (_: Exception) {
-                            // Handle exception
-                        }
-                    }
-                }
-            } catch (_: Exception) {
-                // Handle exception
-            } finally {
-                _isSyncing.value = false
-                _syncProgress.value = 0f
-                _totalItemsToSync.value = 0
             }
         }
     }
@@ -238,9 +212,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
             panenDao.updatePanen(panen)
-            if (isConnected.value) {
-                syncDataToServer()
-            }
+            startSyncWorker() // Memanggil WorkManager setelah data diperbarui
         }
     }
 
@@ -261,8 +233,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         try {
             val imageRef = storage.getReferenceFromUrl(imageUrl)
             imageRef.delete().await()
-        } catch (_: Exception) {
-            // Handle exception
+        } catch (e: Exception) {
+            Log.e("PanenViewModel", "Error deleting image from Firebase Storage", e)
         }
     }
 
@@ -274,26 +246,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 allPanen.forEach { panen ->
                     deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
                 }
-            } catch (_: Exception) {
-                // Handle exception
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Error clearing all panen data", e)
             } finally {
                 panenDao.clearAllPanen()
-            }
-        }
-    }
-
-    fun deletePanenDataById(id: Int) {
-        viewModelScope.launch {
-            val panenData = panenDao.getPanenById(id)
-            if (panenData != null) {
-                try {
-                    deleteImageFromFirebaseStorage(panenData.firebaseImageUrl)
-                    panenDbRef.child(panenData.uniqueNo).removeValue().await()
-                } catch (_: Exception) {
-                    // Handle exception
-                } finally {
-                    panenDao.deletePanenById(id)
-                }
             }
         }
     }
@@ -303,10 +259,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             val dataToDelete = panenDao.getPanenByIds(ids)
             dataToDelete.forEach { panen ->
                 try {
-                    deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
                     panenDbRef.child(panen.uniqueNo).removeValue().await()
-                } catch (_: Exception) {
-                    // Handle exception
+                    deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
+                } catch (e: Exception) {
+                    Log.e("PanenViewModel", "Error deleting selected panen data", e)
                 }
             }
             panenDao.deleteMultiplePanen(ids)
