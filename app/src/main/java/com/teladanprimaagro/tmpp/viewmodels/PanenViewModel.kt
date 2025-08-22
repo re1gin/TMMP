@@ -20,6 +20,7 @@ import com.teladanprimaagro.tmpp.data.AppDatabase
 import com.teladanprimaagro.tmpp.data.PanenDao
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.workers.SyncPanenWorker
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -156,56 +157,73 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun compressImage(uri: Uri): Uri = suspendCoroutine { continuation ->
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) { // Gunakan Dispatchers.IO untuk operasi file
             try {
-                val inputStream = context.contentResolver.openInputStream(uri)
-                val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                val originalBitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
                 if (originalBitmap == null) {
                     continuation.resume(uri)
                     return@launch
                 }
 
-                // --- Peningkatan: Resizing gambar sebelum kompresi ---
-                val targetWidth = 1024
-                val targetHeight = 768
-
-                val originalWidth = originalBitmap.width
-                val originalHeight = originalBitmap.height
-
-                val scaleFactor = minOf(
-                    targetWidth.toFloat() / originalWidth.toFloat(),
-                    targetHeight.toFloat() / originalHeight.toFloat()
-                )
-
-                val resizedBitmap = if (scaleFactor < 1) {
-                    val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
-                    Bitmap.createBitmap(originalBitmap, 0, 0, originalWidth, originalHeight, matrix, true)
-                } else {
-                    originalBitmap
-                }
-                // ----------------------------------------------------
+                // Resizing gambar
+                val resizedBitmap = resizeBitmap(originalBitmap, 1200, 860)
 
                 val compressedImageFile = File(context.cacheDir, "compressed_image_${UUID.randomUUID()}.jpg")
-                val outputStream = FileOutputStream(compressedImageFile)
 
-                // Peningkatan: Gunakan kualitas kompresi 75%
-                resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 75, outputStream)
+                // Logika kompresi adaptif
+                var quality = 90
+                var finalUri: Uri? = null
 
-                outputStream.flush()
-                outputStream.close()
+                while (quality >= 50) {
+                    val outputStream = FileOutputStream(compressedImageFile)
+                    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
+                    outputStream.flush()
+                    outputStream.close()
 
-                // Daur ulang bitmap untuk menghemat memori
-                originalBitmap.recycle()
-                if (originalBitmap != resizedBitmap) {
-                    resizedBitmap.recycle()
+                    val fileSizeInKb = compressedImageFile.length() / 1024
+                    Log.d("CompressImage", "Quality: $quality, Size: ${fileSizeInKb}KB")
+
+                    if (fileSizeInKb <= 100) { // Target ukuran file 200KB
+                        finalUri = compressedImageFile.toUri()
+                        break
+                    }
+                    quality -= 5 // Turunkan kualitas 5%
                 }
 
-                val compressedUri = compressedImageFile.toUri()
-                continuation.resume(compressedUri)
+                if (finalUri != null) {
+                    continuation.resume(finalUri)
+                } else {
+                    // Jika tidak tercapai, gunakan kualitas terendah yang dicoba
+                    val outputStream = FileOutputStream(compressedImageFile)
+                    resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
+                    outputStream.flush()
+                    outputStream.close()
+                    continuation.resume(compressedImageFile.toUri())
+                }
+
+                originalBitmap.recycle()
+                if (originalBitmap != resizedBitmap) resizedBitmap.recycle()
+
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error compressing image: ${e.message}", e)
                 continuation.resume(uri)
             }
+        }
+    }
+
+    // Pisahkan fungsi resizing agar kode lebih bersih
+    private fun resizeBitmap(originalBitmap: Bitmap, targetWidth: Int, targetHeight: Int): Bitmap {
+        val originalWidth = originalBitmap.width
+        val originalHeight = originalBitmap.height
+        val scaleFactor = minOf(
+            targetWidth.toFloat() / originalWidth.toFloat(),
+            targetHeight.toFloat() / originalHeight.toFloat()
+        )
+        return if (scaleFactor < 1) {
+            val matrix = Matrix().apply { postScale(scaleFactor, scaleFactor) }
+            Bitmap.createBitmap(originalBitmap, 0, 0, originalWidth, originalHeight, matrix, true)
+        } else {
+            originalBitmap
         }
     }
 

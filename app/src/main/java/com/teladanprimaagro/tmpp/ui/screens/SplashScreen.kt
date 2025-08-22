@@ -24,7 +24,7 @@ fun SplashScreen(
     settingsViewModel: SettingsViewModel
 ) {
     LaunchedEffect(Unit) {
-        delay(3000)
+        delay(5000)
 
         val isLoggedIn = settingsViewModel.isUserLoggedIn()
         val userRole = settingsViewModel.getUserRole()
