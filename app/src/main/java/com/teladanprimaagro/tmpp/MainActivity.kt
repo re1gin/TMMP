@@ -87,7 +87,6 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         Log.d("MainActivity", "onNewIntent called with action: ${intent.action}")
-        // Update the NFC intent state when a new NFC tag is discovered while the app is running.
         _nfcIntent.value = intent
     }
 
@@ -96,7 +95,6 @@ class MainActivity : ComponentActivity() {
         if (intent != null && (intent.action == NfcAdapter.ACTION_NDEF_DISCOVERED || intent.action == NfcAdapter.ACTION_TAG_DISCOVERED)) {
             Log.d("MainActivity", "Initial NFC Intent detected in onCreate: ${intent.action}")
             _nfcIntent.value = intent
-            // Indicate that the app is in the process of writing to an NFC tag.
             sharedNfcViewModel.setWriting()
         }
     }
@@ -133,7 +131,6 @@ class MainActivity : ComponentActivity() {
             panenCleanupRequest
         )
 
-        // Create and enqueue the periodic work request for Pengiriman cleanup.
         val pengirimanCleanupRequest = PeriodicWorkRequestBuilder<PengirimanCleanupWorker>(
             1, TimeUnit.DAYS
         )

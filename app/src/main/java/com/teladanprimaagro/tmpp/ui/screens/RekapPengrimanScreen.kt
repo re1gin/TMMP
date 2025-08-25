@@ -1,16 +1,14 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
+
 import android.os.Build
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,14 +23,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -51,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -59,8 +55,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
 import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
+import com.teladanprimaagro.tmpp.ui.components.PengirimanTableRow
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
+import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
+import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -70,6 +73,7 @@ fun RekapPengirimanScreen(
     navController: NavController,
     pengirimanViewModel: PengirimanViewModel = viewModel()
 ) {
+    val context = LocalContext.current
 
     val pengirimanList by pengirimanViewModel.pengirimanList.collectAsState()
     val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
@@ -77,10 +81,12 @@ fun RekapPengirimanScreen(
 
     var showDetailDialog by remember { mutableStateOf(false) }
     var selectedPengirimanData by remember { mutableStateOf<PengirimanData?>(null) }
-    var showDeleteAllDialog by remember { mutableStateOf(false) }
 
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedItems by remember { mutableStateOf(setOf<Int>()) }
+
+    var showPasswordDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -106,28 +112,6 @@ fun RekapPengirimanScreen(
                             imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
                             tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                actions = {
-                    if (!isSelectionMode) {
-                        IconButton(onClick = { showDeleteAllDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteForever,
-                                contentDescription = "Hapus Semua",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    } else {
-                        Checkbox(
-                            checked = pengirimanList.isNotEmpty() && selectedItems.size == pengirimanList.size,
-                            onCheckedChange = { isChecked ->
-                                selectedItems = if (isChecked) {
-                                    pengirimanList.map { it.id }.toSet()
-                                } else {
-                                    emptySet()
-                                }
-                            }
                         )
                     }
                 },
@@ -250,9 +234,7 @@ fun RekapPengirimanScreen(
 
                     Button(
                         onClick = {
-                            pengirimanViewModel.deleteSelectedPengirimanData(selectedItems.toList())
-                            isSelectionMode = false
-                            selectedItems = emptySet()
+                            showPasswordDialog = true // Trigger dialog sandi
                         },
                         enabled = selectedItems.isNotEmpty(),
                         modifier = Modifier
@@ -299,13 +281,30 @@ fun RekapPengirimanScreen(
         )
     }
 
-    if (showDeleteAllDialog) {
-        Dialog(onDismissRequest = { showDeleteAllDialog = false }) {
+    // Dialog untuk validasi sandi
+    if (showPasswordDialog) {
+        PasswordConfirmationDialog(
+            onDismissRequest = { showPasswordDialog = false },
+            onConfirm = { password ->
+                val correctPassword = "123" // GANTI DENGAN SANDI YANG BENAR
+                if (password == correctPassword) {
+                    showDeleteConfirmationDialog = true
+                } else {
+                    Toast.makeText(context, "Sandi salah!", Toast.LENGTH_SHORT).show()
+                }
+                showPasswordDialog = false
+            }
+        )
+    }
+
+    // Dialog konfirmasi penghapusan (muncul setelah sandi benar)
+    if (showDeleteConfirmationDialog) {
+        Dialog(onDismissRequest = { showDeleteConfirmationDialog = false }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                colors = CardDefaults.cardColors(containerColor = BackgroundDarkGrey),
                 shape = RoundedCornerShape(16.dp),
             ) {
                 Column(
@@ -314,116 +313,65 @@ fun RekapPengirimanScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Hapus Semua Data?",
-                        color = MaterialTheme.colorScheme.onSurface,
+                        text = "Hapus Data Terpilih?",
+                        color = WarningYellow,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 10.dp)
                     )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
                     Text(
-                        text = "Yakin hapus semua data? Aksi ini tidak dapat di batalkan!",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        text = "Yakin hapus ${selectedItems.size} data? Aksi ini tidak dapat di batalkan!",
+                        color = Color.White.copy(alpha = 0.9f),
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
 
+                    Spacer(modifier = Modifier.height(10.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceAround,
                     ) {
                         Button(
-                            onClick = { showDeleteAllDialog = false },
+                            onClick = { showDeleteConfirmationDialog = false },
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(end = 10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.error,
-                                contentColor = MaterialTheme.colorScheme.onError
+                                containerColor = SuccessGreen,
+                                contentColor = Color.Black
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Tidak", fontWeight = FontWeight.Bold)
+                            Text("Batal", fontWeight = FontWeight.Bold)
                         }
 
                         Button(
                             onClick = {
-                                pengirimanViewModel.clearAllPengirimanData()
-                                showDeleteAllDialog = false
+                                pengirimanViewModel.deleteSelectedPengirimanData(selectedItems.toList())
+                                isSelectionMode = false
+                                selectedItems = emptySet()
+                                showDeleteConfirmationDialog = false
                             },
                             modifier = Modifier
                                 .weight(1f)
                                 .padding(start = 10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.tertiary,
-                                contentColor = MaterialTheme.colorScheme.onTertiary
+                                containerColor = DangerRed,
+                                contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(8.dp)
                         ) {
-                            Text("Ya", fontWeight = FontWeight.Bold)
+                            Text("Hapus", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun PengirimanTableRow(
-    data: PengirimanData,
-    isSelectionMode: Boolean,
-    isSelected: Boolean,
-    onToggleSelection: (Int) -> Unit,
-    onLongPress: (PengirimanData) -> Unit,
-    onDetailClick: (PengirimanData) -> Unit,
-) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection(data.id)
-                    } else {
-                        onDetailClick(data)
-                    }
-                },
-                onLongClick = { onLongPress(data) }
-            )
-            .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (isSelectionMode) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onToggleSelection(data.id) },
-                modifier = Modifier.padding(end = 8.dp)
-            )
-        } else {
-            Spacer(modifier = Modifier.size(24.dp))
-        }
-
-        TableCellText(text = data.waktuPengiriman, weight = 0.20f)
-        TableCellText(text = data.spbNumber, weight = 0.35f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.20f)
-
-        if (!isSelectionMode) {
-            Box(modifier = Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Detail",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onDetailClick(data) }
-                )
             }
         }
     }

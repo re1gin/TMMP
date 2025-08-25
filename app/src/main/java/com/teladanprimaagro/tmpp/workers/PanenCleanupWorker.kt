@@ -18,7 +18,7 @@ class PanenCleanupWorker(
                 val panenDao = AppDatabase.getDatabase(applicationContext).panenDao()
                 panenDao.clearAllPanen()
                 Result.success()
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 Result.failure()
             }
         }

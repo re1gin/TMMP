@@ -1,15 +1,10 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,9 +22,6 @@ import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -68,7 +60,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.components.PanenDetailDialog
+import com.teladanprimaagro.tmpp.ui.components.PanenTableRow
+import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
+import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
@@ -110,6 +105,9 @@ fun RekapPanenScreen(
     var pemanenDropdownExpanded by remember { mutableStateOf(false) }
     var blokDropdownExpanded by remember { mutableStateOf(false) }
 
+    // State baru untuk dialog konfirmasi sandi
+    var showPasswordDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -135,17 +133,6 @@ fun RekapPanenScreen(
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
                             tint = MaterialTheme.colorScheme.primary
                         )
-                    }
-                },
-                actions = {
-                    if (!isSelectionMode) {
-                        IconButton(onClick = { showDeleteAllDialog = true }) {
-                            Icon(
-                                imageVector = Icons.Default.DeleteForever,
-                                contentDescription = "Hapus Semua",
-                                tint = Color.Red
-                            )
-                        }
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -451,7 +438,7 @@ fun RekapPanenScreen(
                 } else {
                     items(panenList, key = { it.id }) { data ->
                         val isSelected = selectedItems.contains(data.id)
-                        TableRow(
+                        PanenTableRow(
                             data = data,
                             isSelectionMode = isSelectionMode,
                             isSelected = isSelected,
@@ -517,9 +504,7 @@ fun RekapPanenScreen(
 
                     Button(
                         onClick = {
-                            panenViewModel.deleteSelectedPanenData(selectedItems.toList())
-                            isSelectionMode = false
-                            selectedItems = emptySet()
+                            showPasswordDialog = true // Panggil dialog sandi saat tombol Hapus diklik
                         },
                         enabled = selectedItems.isNotEmpty(),
                         modifier = Modifier
@@ -561,6 +546,22 @@ fun RekapPanenScreen(
         )
     }
 
+    // Dialog untuk konfirmasi sandi
+    if (showPasswordDialog) {
+        PasswordConfirmationDialog(
+            onDismissRequest = { showPasswordDialog = false },
+            onConfirm = { password ->
+                val correctPassword = "123"
+
+                if (password == correctPassword) {
+                    showDeleteAllDialog = true
+                }
+                showPasswordDialog = false
+            }
+        )
+    }
+
+    // Dialog untuk konfirmasi penghapusan (setelah sandi benar)
     if (showDeleteAllDialog) {
         Dialog(onDismissRequest = { showDeleteAllDialog = false }) {
             Card(
@@ -576,7 +577,7 @@ fun RekapPanenScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "Hapus Semua Data?",
+                        text = "Hapus Data Terpilih?",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -584,7 +585,7 @@ fun RekapPanenScreen(
                         modifier = Modifier.padding(bottom = 10.dp)
                     )
                     Text(
-                        text = "Yakin hapus semua data? Aksi ini tidak dapat di batalkan!",
+                        text = "Yakin hapus ${selectedItems.size} data? Aksi ini tidak dapat di batalkan!",
                         color = Color.White.copy(alpha = 0.7f),
                         fontWeight = FontWeight.Medium,
                         fontSize = 14.sp,
@@ -612,7 +613,9 @@ fun RekapPanenScreen(
 
                         Button(
                             onClick = {
-                                panenViewModel.clearAllPanenData()
+                                panenViewModel.deleteSelectedPanenData(selectedItems.toList())
+                                isSelectionMode = false
+                                selectedItems = emptySet()
                                 showDeleteAllDialog = false
                             },
                             modifier = Modifier
@@ -631,98 +634,5 @@ fun RekapPanenScreen(
             }
         }
     }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun TableRow(
-    data: PanenData,
-    isSelectionMode: Boolean,
-    isSelected: Boolean,
-    onToggleSelection: (Int) -> Unit,
-    onLongPress: (PanenData) -> Unit,
-    onDetailClick: (PanenData) -> Unit,
-    onEditClick: (PanenData) -> Unit
-) {
-    val backgroundColor = if (isSelected) Gray.copy(alpha = 0.5f) else Color.Transparent
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = {
-                    if (isSelectionMode) {
-                        onToggleSelection(data.id)
-                    } else {
-                        onDetailClick(data)
-                    }
-                },
-                onLongClick = { onLongPress(data) }
-            )
-            .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 1.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (isSelectionMode) {
-            Checkbox(
-                checked = isSelected,
-                onCheckedChange = { onToggleSelection(data.id) },
-                modifier = Modifier.padding(end = 1.dp)
-            )
-        } else {
-            Spacer(modifier = Modifier.size(10.dp))
-        }
-
-        TableCellText(text = data.tanggalWaktu, weight = 0.25f)
-        TableCellText(text = data.namaPemanen, weight = 0.25f)
-        TableCellText(text = data.blok, weight = 0.10f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.10f)
-
-        if (!isSelectionMode) {
-            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit",
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onEditClick(data) }
-                )
-            }
-            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Detail",
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onDetailClick(data) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RowScope.TableHeaderText(text: String, weight: Float) {
-    Text(
-        text = text,
-        color = Color.Black,
-        fontWeight = FontWeight.Bold,
-        fontSize = 12.sp,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.weight(weight)
-    )
-}
-
-@Composable
-fun RowScope.TableCellText(text: String, weight: Float) {
-    Text(
-        text = text,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontSize = 12.sp,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.weight(weight)
-    )
 }
 

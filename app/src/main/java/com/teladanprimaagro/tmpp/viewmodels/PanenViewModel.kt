@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -253,22 +252,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             imageRef.delete().await()
         } catch (e: Exception) {
             Log.e("PanenViewModel", "Error deleting image from Firebase Storage", e)
-        }
-    }
-
-    fun clearAllPanenData() {
-        viewModelScope.launch {
-            try {
-                val allPanen = panenDao.getAllPanen().firstOrNull() ?: emptyList()
-                panenDbRef.removeValue().await()
-                allPanen.forEach { panen ->
-                    deleteImageFromFirebaseStorage(panen.firebaseImageUrl)
-                }
-            } catch (e: Exception) {
-                Log.e("PanenViewModel", "Error clearing all panen data", e)
-            } finally {
-                panenDao.clearAllPanen()
-            }
         }
     }
 

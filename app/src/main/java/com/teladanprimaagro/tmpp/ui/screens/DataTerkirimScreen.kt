@@ -49,7 +49,7 @@ fun DataTerkirimScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Status Data Panen",
@@ -67,7 +67,7 @@ fun DataTerkirimScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )

@@ -49,7 +49,7 @@ fun StatusPengirimanScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Status Data Pengiriman",
@@ -67,7 +67,7 @@ fun StatusPengirimanScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
@@ -78,7 +78,6 @@ fun StatusPengirimanScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            // Tampilkan indikator loading dan persentase jika sedang melakukan sinkronisasi
             if (isSyncing) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

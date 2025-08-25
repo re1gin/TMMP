@@ -39,7 +39,6 @@ fun LoginScreen(
 
     val onPrimaryColor = Color(0xFFFFFFFF) // Putih
     val errorColor = Color(0xFFE57373) // Merah untuk error
-    val primaryColor = Color(0xFF6A994E) // Hijau terang
 
     Column(
         modifier = Modifier
@@ -89,6 +88,7 @@ fun LoginScreen(
                 focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                 unfocusedBorderColor = onPrimaryColor.copy(alpha = 0.38f),
                 errorBorderColor = errorColor,
+                errorTextColor = errorColor,
                 focusedLabelColor = onPrimaryColor,
                 unfocusedLabelColor = onPrimaryColor.copy(alpha = 0.6f),
                 focusedTextColor = onPrimaryColor,
@@ -126,6 +126,7 @@ fun LoginScreen(
                 focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
                 unfocusedBorderColor = onPrimaryColor.copy(alpha = 0.38f),
                 errorBorderColor = errorColor,
+                errorTextColor = errorColor,
                 focusedLabelColor = onPrimaryColor,
                 unfocusedLabelColor = onPrimaryColor.copy(alpha = 0.6f),
                 focusedTextColor = onPrimaryColor,

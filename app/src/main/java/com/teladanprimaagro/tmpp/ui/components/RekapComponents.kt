@@ -1,13 +1,23 @@
 package com.teladanprimaagro.tmpp.ui.components
 
-import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Gray
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -22,16 +33,142 @@ import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.data.PengirimanData
 
-// Menggunakan warna dari tema
-val primaryColor: Color @Composable get() = MaterialTheme.colorScheme.primary
-val onPrimaryColor: Color @Composable get() = MaterialTheme.colorScheme.onPrimary
-val onSurfaceColor: Color @Composable get() = MaterialTheme.colorScheme.onSurface
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PanenTableRow(
+    data: PanenData,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onToggleSelection: (Int) -> Unit,
+    onLongPress: (PanenData) -> Unit,
+    onDetailClick: (PanenData) -> Unit,
+    onEditClick: (PanenData) -> Unit
+) {
+    val backgroundColor = if (isSelected) Gray.copy(alpha = 0.5f) else Color.Transparent
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) {
+                        onToggleSelection(data.id)
+                    } else {
+                        onDetailClick(data)
+                    }
+                },
+                onLongClick = { onLongPress(data) }
+            )
+            .background(backgroundColor)
+            .padding(vertical = 8.dp, horizontal = 1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isSelectionMode) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onToggleSelection(data.id) },
+                modifier = Modifier.padding(end = 1.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(10.dp))
+        }
+
+        TableCellText(text = data.tanggalWaktu, weight = 0.25f)
+        TableCellText(text = data.namaPemanen, weight = 0.25f)
+        TableCellText(text = data.blok, weight = 0.10f)
+        TableCellText(text = data.totalBuah.toString(), weight = 0.10f)
+
+        if (!isSelectionMode) {
+            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onEditClick(data) }
+                )
+            }
+            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Detail",
+                    tint = MaterialTheme.colorScheme.onSecondary,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onDetailClick(data) }
+                )
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun PengirimanTableRow(
+    data: PengirimanData,
+    isSelectionMode: Boolean,
+    isSelected: Boolean,
+    onToggleSelection: (Int) -> Unit,
+    onLongPress: (PengirimanData) -> Unit,
+    onDetailClick: (PengirimanData) -> Unit,
+) {
+    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (isSelectionMode) {
+                        onToggleSelection(data.id)
+                    } else {
+                        onDetailClick(data)
+                    }
+                },
+                onLongClick = { onLongPress(data) }
+            )
+            .background(backgroundColor)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (isSelectionMode) {
+            Checkbox(
+                checked = isSelected,
+                onCheckedChange = { onToggleSelection(data.id) },
+                modifier = Modifier.padding(end = 8.dp)
+            )
+        } else {
+            Spacer(modifier = Modifier.size(24.dp))
+        }
+
+        TableCellText(text = data.waktuPengiriman, weight = 0.20f)
+        TableCellText(text = data.spbNumber, weight = 0.35f)
+        TableCellText(text = data.totalBuah.toString(), weight = 0.20f)
+
+        if (!isSelectionMode) {
+            Box(modifier = Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = "Detail",
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onDetailClick(data) }
+                )
+            }
+        }
+    }
+}
+
 
 @Composable
 fun RowScope.TableHeaderText(text: String, weight: Float) {
     Text(
         text = text,
-        color = onPrimaryColor,
+        color = Color.Black,
         fontWeight = FontWeight.Bold,
         fontSize = 12.sp,
         textAlign = TextAlign.Center,
@@ -40,93 +177,14 @@ fun RowScope.TableHeaderText(text: String, weight: Float) {
 }
 
 @Composable
-fun PanenTableRow(
-    data: PanenData,
-    onDetailClick: (PanenData) -> Unit,
-    onEditClick: (PanenData) -> Unit
-) {
-    Log.d("RekapPanenDebug", "Nama Pemanen: ${data.namaPemanen}, Blok: ${data.blok}")
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TableCellText(text = data.tanggalWaktu, weight = 0.2f)
-        TableCellText(text = data.namaPemanen, weight = 0.25f)
-        TableCellText(text = data.blok, weight = 0.15f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.2f)
-        ActionIcons(
-            onEditClick = { onEditClick(data) },
-            onDetailClick = { onDetailClick(data) }
-        )
-    }
-}
-
-@Composable
-fun PengirimanTableRow(
-    data: PengirimanData,
-    onDetailClick: (PengirimanData) -> Unit,
-    onEditClick: (PengirimanData) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        TableCellText(text = data.waktuPengiriman, weight = 0.20f)
-        TableCellText(text = data.spbNumber, weight = 0.35f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.20f)
-        ActionIcons(
-            onEditClick = { onEditClick(data) },
-            onDetailClick = { onDetailClick(data) }
-        )
-    }
-}
-
-@Composable
 fun RowScope.TableCellText(text: String, weight: Float) {
     Text(
         text = text,
-        color = onSurfaceColor,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         fontSize = 12.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier.weight(weight)
     )
-}
-
-@Composable
-fun RowScope.ActionIcons(
-    onEditClick: () -> Unit,
-    onDetailClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .weight(0.1f)
-            .clickable { onEditClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = "Edit",
-            tint = primaryColor,
-            modifier = Modifier.size(20.dp)
-        )
-    }
-    Box(
-        modifier = Modifier
-            .weight(0.1f)
-            .clickable { onDetailClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = "Detail",
-            tint = primaryColor,
-            modifier = Modifier.size(20.dp)
-        )
-    }
 }
 
 @Composable

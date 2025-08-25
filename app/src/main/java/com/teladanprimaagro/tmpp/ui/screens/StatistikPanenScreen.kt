@@ -47,7 +47,7 @@ fun StatistikPanenScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Statistik Panen",
@@ -65,7 +65,7 @@ fun StatistikPanenScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
