@@ -354,26 +354,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         )
     }
 
-    fun clearAllPengirimanData() {
-        viewModelScope.launch {
-            try {
-                // Hapus semua data dari Firebase
-                pengirimanDbRef.removeValue().await()
-                finalizedUniqueNoDbRef.removeValue().await()
-                Log.d("PengirimanViewModel", "FIREBASE: All data successfully removed from Firebase.")
-            } catch (e: Exception) {
-                Log.e("PengirimanViewModel", "Failed to delete all data from Firebase: ${e.message}", e)
-            } finally {
-                // Hapus semua data dari Room
-                pengirimanDao.clearAllPengiriman()
-                scannedItemDao.deleteAllScannedItems()
-                pengirimanDao.clearAllFinalizedUniqueNos()
-                Log.d("PengirimanViewModel", "ROOM: All data cleared from local DB.")
-                resetUiState()
-            }
-        }
-    }
-
     fun deleteSelectedPengirimanData(ids: List<Int>) {
         viewModelScope.launch {
             try {
@@ -403,17 +383,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     fun resetScanStatus() {
-        _scanStatus.value = ScanStatus.Idle
-    }
-
-    private fun resetUiState() {
-        uniqueNoDisplay.value = "Scan NFC"
-        dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
-        totalBuahCalculated.intValue = 0
-        viewModelScope.launch {
-            val mandor = settingsViewModel.selectedMandorLoading.first()
-            generateSpbNumber(mandor)
-        }
         _scanStatus.value = ScanStatus.Idle
     }
 }
