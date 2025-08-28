@@ -229,7 +229,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
             panenDao.updatePanen(panen)
-            startSyncWorker() // Memanggil WorkManager setelah data diperbarui
+            startSyncWorker()
         }
     }
 

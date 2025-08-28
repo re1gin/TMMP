@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.compose.material3.*
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.R
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import kotlinx.coroutines.delay
 
 @Composable
@@ -44,7 +45,7 @@ fun SplashScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.background),
+            .background(color = MainBackground),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

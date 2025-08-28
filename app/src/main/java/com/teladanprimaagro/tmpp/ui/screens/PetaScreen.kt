@@ -42,8 +42,7 @@ import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PetaScreen(
-    mapViewModel: MapViewModel = viewModel(),
-    paddingValues: PaddingValues
+    mapViewModel: MapViewModel = viewModel()
 ) {
     val panenLocations by mapViewModel.panenLocations.collectAsState()
     var selectedPanenData by remember { mutableStateOf<PanenData?>(null) }
@@ -146,7 +145,6 @@ fun PetaScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
         ) {
             OfflineMapView(
                 modifier = Modifier.fillMaxSize(),

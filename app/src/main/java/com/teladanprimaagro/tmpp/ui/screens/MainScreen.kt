@@ -4,14 +4,12 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.components.AppBottomBar
-import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -19,16 +17,15 @@ import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 fun MainScreen(
     mainNavController: NavHostController,
     userRole: UserRole,
-    settingsViewModel: SettingsViewModel,
-    mapViewModel: MapViewModel
+    settingsViewModel: SettingsViewModel
 ) {
     val bottomNavController = rememberNavController()
 
     Scaffold(
         bottomBar = {
+            // Memastikan Bottom Bar hanya menampilkan Home dan Pengaturan
             AppBottomBar(
-                navController = bottomNavController,
-                userRole = userRole
+                navController = bottomNavController
             )
         }
     ) { paddingValues ->
@@ -43,22 +40,13 @@ fun MainScreen(
                     paddingValues = paddingValues,
                 )
             }
-            composable("peta_screen") {
-                PetaScreen(
-                    mapViewModel = mapViewModel,
-                    paddingValues = paddingValues
-                )
-            }
+            // Hapus composable "peta_screen" dan "laporan_screen"
             composable("pengaturan_screen") {
                 PengaturanScreen(
                     navController = mainNavController,
                     settingsViewModel = settingsViewModel,
                     userRole = userRole,
                     paddingValues = paddingValues
-                )
-            }
-            composable("laporan_screen") {
-                LaporanScreen(
                 )
             }
         }

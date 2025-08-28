@@ -14,13 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,28 +30,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @Composable
-fun AppBottomBar(navController: NavController, userRole: UserRole) {
-
+fun AppBottomBar(navController: NavController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    val navItems = mutableListOf(
+    // Mendefinisikan item navigasi
+    val navItems = listOf(
         NavigationItem("Home", Icons.Default.Home, "home_screen"),
+        NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen")
     )
-    if (userRole == UserRole.HARVESTER) {
-        navItems.add(NavigationItem("Lokasi", Icons.Default.LocationOn, "peta_screen"))
-    }
-    if (userRole == UserRole.DRIVER) {
-        navItems.add(NavigationItem("Laporan", Icons.Default.Description, "laporan_screen"))
-    }
-    navItems.add(NavigationItem("Pengaturan", Icons.Default.Settings, "pengaturan_screen"))
 
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.primary,
-        contentColor = MaterialTheme.colorScheme.onPrimary,
+        containerColor = MainBackground,
+        contentColor = Color.White,
+        modifier = Modifier
+            .height(80.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -64,19 +62,10 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
             navItems.forEach { item ->
                 val isSelected = currentRoute == item.route
 
-                // Warna untuk ikon dan teks
-                val selectedColor = MaterialTheme.colorScheme.onPrimary
-                val unselectedColor = Color.White
-                val iconColor = if (isSelected) Color.Black else unselectedColor
-                val textColor = if (isSelected) selectedColor else unselectedColor
-
                 BottomNavItem(
                     icon = item.icon,
                     label = item.label,
-                    iconColor = iconColor,
-                    textColor = textColor,
                     isSelected = isSelected,
-                    selectedIconBackgroundColor = selectedColor,
                     onClick = {
                         navController.navigate(item.route) {
                             navController.graph.startDestinationRoute?.let { startDestination ->
@@ -98,41 +87,36 @@ fun AppBottomBar(navController: NavController, userRole: UserRole) {
 private fun RowScope.BottomNavItem(
     icon: ImageVector,
     label: String,
-    iconColor: Color,
-    textColor: Color,
     isSelected: Boolean,
-    selectedIconBackgroundColor: Color,
     onClick: () -> Unit
 ) {
-    val iconBackgroundColor = if (isSelected) selectedIconBackgroundColor else Color.Transparent
-
     Column(
         modifier = Modifier
-            .weight(2f)
+            .weight(1f)
             .clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // Box ini yang akan memiliki background lingkaran
+        // Lingkaran ikon
         Box(
             modifier = Modifier
-                .size(48.dp)
-                .background(color = iconBackgroundColor, shape = CircleShape)
-                .padding(4.dp),
+                .size(40.dp)
+                .background(if (isSelected) MainColor else OldGrey, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 modifier = Modifier.size(30.dp),
-                tint = iconColor
+                tint = if (isSelected) OldGrey else White
             )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = label,
-            fontSize = 10.sp,
+            fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
-            color = textColor
+            color = if (isSelected) MainColor else Color.White
         )
     }
 }

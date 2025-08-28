@@ -25,6 +25,10 @@ import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,13 +41,11 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var loginError by remember { mutableStateOf(false) }
 
-    val onPrimaryColor = Color(0xFFFFFFFF) // Putih
-    val errorColor = Color(0xFFE57373) // Merah untuk error
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundDarkGrey),
+            .background(MainBackground),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -58,7 +60,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Teladan Prima Agro",
-                color = onPrimaryColor,
+                color = White,
                 style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold)
             )
         }
@@ -80,19 +82,19 @@ fun LoginScreen(
                 Icon(
                     imageVector = Icons.Filled.Person,
                     contentDescription = "Username Icon",
-                    tint = MaterialTheme.colorScheme.onPrimary.copy(0.8f),
+                    tint = MainColor.copy(0.8f),
                 )
             },
             isError = loginError,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                unfocusedBorderColor = onPrimaryColor.copy(alpha = 0.38f),
-                errorBorderColor = errorColor,
-                errorTextColor = errorColor,
-                focusedLabelColor = onPrimaryColor,
-                unfocusedLabelColor = onPrimaryColor.copy(alpha = 0.6f),
-                focusedTextColor = onPrimaryColor,
-                unfocusedTextColor = onPrimaryColor
+                focusedBorderColor = MainColor,
+                unfocusedBorderColor = White.copy(alpha = 0.38f),
+                errorBorderColor = DangerRed,
+                errorTextColor = DangerRed,
+                focusedLabelColor = White,
+                unfocusedLabelColor = White.copy(alpha = 0.6f),
+                focusedTextColor = White,
+                unfocusedTextColor = White
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -117,20 +119,20 @@ fun LoginScreen(
                     Icon(
                         imageVector = image,
                         contentDescription = description,
-                        tint = MaterialTheme.colorScheme.onPrimary.copy(0.8f),
+                        tint = MainColor.copy(0.8f),
                     )
                 }
             },
             isError = loginError,
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                unfocusedBorderColor = onPrimaryColor.copy(alpha = 0.38f),
-                errorBorderColor = errorColor,
-                errorTextColor = errorColor,
-                focusedLabelColor = onPrimaryColor,
-                unfocusedLabelColor = onPrimaryColor.copy(alpha = 0.6f),
-                focusedTextColor = onPrimaryColor,
-                unfocusedTextColor = onPrimaryColor
+                focusedBorderColor = MainColor,
+                unfocusedBorderColor = White.copy(alpha = 0.38f),
+                errorBorderColor = DangerRed,
+                errorTextColor = DangerRed,
+                focusedLabelColor = White,
+                unfocusedLabelColor = White.copy(alpha = 0.6f),
+                focusedTextColor = White,
+                unfocusedTextColor = White
             )
         )
 
@@ -138,7 +140,7 @@ fun LoginScreen(
         if (loginError) {
             Text(
                 text = "Username atau password salah",
-                color = errorColor,
+                color = DangerRed,
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -169,8 +171,8 @@ fun LoginScreen(
                 .height(48.dp),
             shape = RoundedCornerShape(8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary.copy(0.7f),
-                contentColor = onPrimaryColor
+                containerColor = MainColor.copy(0.7f),
+                contentColor = White
             )
         ) {
             Text("LOGIN", fontWeight = FontWeight.Bold)

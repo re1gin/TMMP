@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -25,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -44,7 +46,7 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(paddingValues)
-            .padding(horizontal = 0.dp, vertical = 0.dp),
+            .background(MainBackground),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AnimatedVisibility(

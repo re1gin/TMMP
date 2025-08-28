@@ -22,10 +22,12 @@ import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
+import com.teladanprimaagro.tmpp.ui.screens.LaporanScreen
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.MainScreen
 import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.PetaScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
@@ -75,8 +77,7 @@ fun AppNavigation(
             MainScreen(
                 mainNavController = navController,
                 userRole = userRole,
-                settingsViewModel = settingsViewModel,
-                mapViewModel = mapViewModel
+                settingsViewModel = settingsViewModel
             )
         }
 
@@ -211,6 +212,14 @@ fun AppNavigation(
                 navController = navController,
                 settingsViewModel = settingsViewModel
             )
+        }
+        composable("peta_screen") {
+            PetaScreen(
+                mapViewModel = mapViewModel
+            )
+        }
+        composable("laporan_screen") {
+            LaporanScreen()
         }
     }
 }
