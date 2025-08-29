@@ -54,6 +54,13 @@ import androidx.navigation.NavController
 import com.google.android.gms.location.*
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.components.*
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -65,6 +72,7 @@ import kotlin.Exception
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -194,8 +202,8 @@ fun PanenInputScreen(
         isFindingLocation = true
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 1000L // Coba ambil lokasi setiap 1 detik
-            numUpdates = 1 // Hanya ambil 1 pembaruan, lalu berhenti
+            interval = 1000L
+            numUpdates = 1
         }
         fusedLocationClient.requestLocationUpdates(
             locationRequest,
@@ -203,7 +211,6 @@ fun PanenInputScreen(
             Looper.getMainLooper()
         )
     }
-    // --- AKHIR KODE LOKASI BARU ---
 
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showFailureDialog by remember { mutableStateOf(false) }
@@ -323,29 +330,27 @@ fun PanenInputScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .imePadding()
+            .background(MainBackground)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .background(MaterialTheme.colorScheme.onPrimary)
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 16.dp)
+                .height(60.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = White
                 )
             }
 
             Text(
                 text = if (isEditing) "Edit Panen" else "Panen",
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 18.sp,
+                color = White,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
@@ -354,14 +359,9 @@ fun PanenInputScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
-                .background(
-                    color = Color.Transparent,
-                )
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
                 .verticalScroll(scrollState)
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
             TextInputField(
                 label = "No. Unik",
                 value = uniqueNo,
@@ -412,12 +412,12 @@ fun PanenInputScreen(
                             }
                         }
                     },
-                    enabled = !isEditing && !isFindingLocation, // Nonaktifkan saat mencari lokasi
+                    enabled = !isEditing && !isFindingLocation,
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .fillMaxHeight()
                         .background(
-                            color = if (isEditing || isFindingLocation) Color.Gray.copy(alpha = 0.5f) else MaterialTheme.colorScheme.onPrimary,
+                            color = if (isEditing || isFindingLocation) OldGrey.copy(alpha = 0.5f) else MainColor,
                             shape = RoundedCornerShape(10.dp)
                         )
                 ) {
@@ -476,14 +476,16 @@ fun PanenInputScreen(
                         .padding(start = 8.dp),
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+
+            Spacer(modifier = Modifier.height(20.dp))
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
                 thickness = 1.dp,
-                color = MaterialTheme.colorScheme.primary
-            )
+                color = White)
+            Spacer(modifier = Modifier.height(20.dp))
+
             BuahCounter(label = "Buah N", count = buahN, onCountChange = { buahN = it })
             Spacer(modifier = Modifier.height(10.dp))
             BuahCounter(label = "Buah A", count = buahA, onCountChange = { buahA = it })
@@ -494,50 +496,25 @@ fun PanenInputScreen(
             Spacer(modifier = Modifier.height(10.dp))
             BuahCounter(label = "Buah AB", count = buahAB, onCountChange = { buahAB = it })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(
-                label = "Berondolan Lepas",
-                count = buahBL,
-                onCountChange = { buahBL = it }
-            )
+            BuahCounter(label = "Berondolan Lepas", count = buahBL, onCountChange = { buahBL = it })
             Spacer(modifier = Modifier.height(20.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "Total Buah",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                OutlinedTextField(
-                    value = totalBuah.toString(),
-                    onValueChange = {},
-                    readOnly = true,
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-                        focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledBorderColor = MaterialTheme.colorScheme.outline,
-                        disabledContainerColor = MaterialTheme.colorScheme.secondary,
-                        cursorColor = MaterialTheme.colorScheme.onPrimary
-                    ),
-                    modifier = Modifier.width(120.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
+            TotalBuahDisplay(value = totalBuah)
+
+            Spacer(modifier = Modifier.height(20.dp))
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                thickness = 1.dp,
+                color = White)
+            Spacer(modifier = Modifier.height(20.dp))
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(180.dp)
-                    .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
-                    .clip(RoundedCornerShape(8.dp))
+                    .background(Grey, RoundedCornerShape(10.dp))
+                    .clip(RoundedCornerShape(10.dp))
                     .clickable {
                         if (ContextCompat.checkSelfPermission(
                                 context,
@@ -562,7 +539,7 @@ fun PanenInputScreen(
                     )
                     Text(
                         text = "*Tekan untuk ambil gambar baru",
-                        color = Color.White,
+                        color = White,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier
@@ -574,13 +551,13 @@ fun PanenInputScreen(
                         Icon(
                             imageVector = Icons.Default.CameraAlt,
                             contentDescription = "Ambil Gambar",
-                            tint = MaterialTheme.colorScheme.onPrimary,
+                            tint = Black,
                             modifier = Modifier.size(64.dp)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
                         Text(
                             text = "Ambil Gambar",
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = Black,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Medium
                         )

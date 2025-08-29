@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,6 +65,13 @@ import com.teladanprimaagro.tmpp.ui.components.PanenTableRow
 import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
@@ -87,7 +95,7 @@ fun RekapPanenScreen(
     var isSelectionMode by remember { mutableStateOf(false) }
     var selectedItems by remember { mutableStateOf(setOf<Int>()) }
 
-    val sortOptions = listOf("Nama", "Blok")
+    val sortOptions = listOf("Nama", "Blok", "Waktu")
     val selectedSortBy by panenViewModel.sortBy.collectAsState()
     val sortOrderAscending by panenViewModel.sortOrderAscending.collectAsState()
     var sortDropdownExpanded by remember { mutableStateOf(false) }
@@ -114,9 +122,9 @@ fun RekapPanenScreen(
                 title = {
                     Text(
                         text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Panen",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -131,12 +139,12 @@ fun RekapPanenScreen(
                         Icon(
                             imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MainBackground
                 )
             )
         }
@@ -145,15 +153,14 @@ fun RekapPanenScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MainBackground)
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -174,16 +181,18 @@ fun RekapPanenScreen(
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
                                 errorTextColor = MaterialTheme.colorScheme.error,
 
                                 // Warna container
-                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                focusedContainerColor = OldGrey,
+                                unfocusedContainerColor = OldGrey,
+                                disabledContainerColor = OldGrey,
                                 errorContainerColor = MaterialTheme.colorScheme.error,
 
                                 // Warna cursor
@@ -200,18 +209,22 @@ fun RekapPanenScreen(
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
-                                errorLabelColor = MaterialTheme.colorScheme.error,
+                                errorLabelColor = MaterialTheme.colorScheme.error
                             )
                         )
 
                         ExposedDropdownMenu(
                             expanded = sortDropdownExpanded,
                             onDismissRequest = { sortDropdownExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                            modifier = Modifier.background(OldGrey.copy(0.5f))
                         ) {
                             sortOptions.forEach { sortCriteria ->
                                 DropdownMenuItem(
-                                    text = { Text(sortCriteria, color = MaterialTheme.colorScheme.onSecondary)},
+                                    text = {
+                                        Text(
+                                            text = sortCriteria,
+                                            color = White,
+                                            fontSize = 15.sp)},
                                     onClick = {
                                         panenViewModel.setSortBy(sortCriteria)
                                         sortDropdownExpanded = false
@@ -221,25 +234,20 @@ fun RekapPanenScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
 
                     OutlinedButton(
                         onClick = { panenViewModel.toggleSortOrder() },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSecondary,
-                            containerColor = MaterialTheme.colorScheme.surface
-                        ),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        modifier = Modifier.wrapContentWidth()
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(containerColor = MainColor),
+                        modifier = Modifier.size(55.dp),
+                        contentPadding = PaddingValues(0.dp)
                     ) {
                         Icon(
                             imageVector = if (sortOrderAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                             contentDescription = if (sortOrderAscending) "Urutkan Menaik" else "Urutkan Menurun",
-                            tint = MaterialTheme.colorScheme.onSecondary
+                            tint = Black,
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(if (sortOrderAscending) "Asc" else "Desc")
                     }
                 }
 
@@ -261,19 +269,29 @@ fun RekapPanenScreen(
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
+                                errorTextColor = MaterialTheme.colorScheme.error,
 
                                 // Warna container
-                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                focusedContainerColor = OldGrey,
+                                unfocusedContainerColor = OldGrey,
+                                disabledContainerColor = OldGrey,
+                                errorContainerColor = MaterialTheme.colorScheme.error,
 
                                 // Warna cursor
                                 cursorColor = MaterialTheme.colorScheme.onPrimary,
                                 errorCursorColor = MaterialTheme.colorScheme.error,
+
+                                // Hilangkan garis bawah
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = MaterialTheme.colorScheme.error,
 
                                 // Warna label
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
@@ -290,7 +308,11 @@ fun RekapPanenScreen(
                         ) {
                             pemanenFilterOptions.value.forEach { pemanen ->
                                 DropdownMenuItem(
-                                    text = { Text(pemanen, color = MaterialTheme.colorScheme.onSecondary) },
+                                    text = {
+                                        Text(
+                                            text = pemanen,
+                                            color = White,
+                                            fontSize = 15.sp) },
                                     onClick = {
                                         panenViewModel.setPemanenFilter(pemanen)
                                         pemanenDropdownExpanded = false
@@ -316,16 +338,18 @@ fun RekapPanenScreen(
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth(),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                                focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = White,
+                                unfocusedTextColor = White,
                                 errorTextColor = MaterialTheme.colorScheme.error,
 
                                 // Warna container
-                                focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-                                disabledContainerColor = MaterialTheme.colorScheme.secondary,
+                                focusedContainerColor = OldGrey,
+                                unfocusedContainerColor = OldGrey,
+                                disabledContainerColor = OldGrey,
                                 errorContainerColor = MaterialTheme.colorScheme.error,
 
                                 // Warna cursor
@@ -349,11 +373,15 @@ fun RekapPanenScreen(
                         ExposedDropdownMenu(
                             expanded = blokDropdownExpanded,
                             onDismissRequest = { blokDropdownExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                            modifier = Modifier.background(OldGrey.copy(0.5f))
                         ) {
                             blokFilterOptions.value.forEach { blok ->
                                 DropdownMenuItem(
-                                    text = { Text(blok, color = MaterialTheme.colorScheme.onSecondary) },
+                                    text = {
+                                        Text(
+                                            text = blok,
+                                            color = White,
+                                            fontSize = 15.sp) },
                                     onClick = {
                                         panenViewModel.setBlokFilter(blok)
                                         blokDropdownExpanded = false
@@ -363,7 +391,6 @@ fun RekapPanenScreen(
                         }
                     }
                 }
-
                 OutlinedButton(
                     onClick = { panenViewModel.clearFilters() },
                     shape = RoundedCornerShape(8.dp),
@@ -382,157 +409,142 @@ fun RekapPanenScreen(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Clear Filter")
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (isSelectionMode) {
-                    Checkbox(
-                        checked = panenList.isNotEmpty() && selectedItems.size == panenList.size,
-                        onCheckedChange = { isChecked ->
-                            selectedItems = if (isChecked) {
-                                panenList.map { it.id }.toSet()
-                            } else {
-                                emptySet()
-                            }
-                        }
-                    )
-                } else {
-                    Spacer(modifier = Modifier.size(24.dp))
-                }
-                TableHeaderText(text = "Tanggal", weight = 0.20f)
-                TableHeaderText(text = "Nama", weight = 0.25f)
-                TableHeaderText(text = "Blok", weight = 0.10f)
-                TableHeaderText(text = "Total", weight = 0.10f)
-                if (!isSelectionMode) {
-                    TableHeaderText(text = "Edit", weight = 0.1f)
-                    TableHeaderText(text = "Detail", weight = 0.1f)
-                }
-            }
+                Spacer(modifier = Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp)
-                    .background(Gray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
-            ) {
-                if (panenList.isEmpty()) {
-                    item {
-                        Text(
-                            text = "Belum ada data panen yang sesuai filter.",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            color = Gray
-                        )
-                    }
-                } else {
-                    items(panenList, key = { it.id }) { data ->
-                        val isSelected = selectedItems.contains(data.id)
-                        PanenTableRow(
-                            data = data,
-                            isSelectionMode = isSelectionMode,
-                            isSelected = isSelected,
-                            onToggleSelection = { itemId ->
-                                selectedItems = if (selectedItems.contains(itemId)) {
-                                    selectedItems - itemId
-                                } else {
-                                    selectedItems + itemId
-                                }
-                            },
-                            onLongPress = {
-                                isSelectionMode = true
-                                selectedItems = selectedItems + it.id
-                            },
-                            onDetailClick = { clickedData ->
-                                selectedPanenData = clickedData
-                                showDetailDialog = true
-                            },
-                            onEditClick = { editedData ->
-                                navController.navigate("panenInputScreen/${editedData.id}")
-                            }
-                        )
-                        HorizontalDivider(thickness = 0.5.dp, color = Gray.copy(alpha = 0.5f))
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (!isSelectionMode) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                        .background(MainColor)
+                        .padding(vertical = 10.dp, horizontal = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    SummaryBox(label = "Data Masuk", value = totalDataMasuk.toString())
-                    SummaryBox(label = "Total Buah", value = totalSemuaBuah.toString())
+                    if (isSelectionMode) {
+                        Checkbox(
+                            checked = panenList.isNotEmpty() && selectedItems.size == panenList.size,
+                            onCheckedChange = { isChecked ->
+                                selectedItems = if (isChecked) {
+                                    panenList.map { it.id }.toSet()
+                                } else {
+                                    emptySet()
+                                }
+                            }
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.size(24.dp))
+                    }
+                    TableHeaderText(text = "Tanggal", weight = 0.20f)
+                    TableHeaderText(text = "Nama", weight = 0.25f)
+                    TableHeaderText(text = "Blok", weight = 0.10f)
+                    TableHeaderText(text = "Total", weight = 0.10f)
+                    if (!isSelectionMode) {
+                        TableHeaderText(text = "Edit", weight = 0.10f)
+                    }
                 }
-            } else {
-                Row(
+
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
+                        .weight(1f)
+                        .background(Gray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
                 ) {
-                    Button(
-                        onClick = {
-                            isSelectionMode = false
-                            selectedItems = emptySet()
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(end = 8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Batal", fontWeight = FontWeight.Bold)
+                    if (panenList.isEmpty()) {
+                        item {
+                            Text(
+                                text = "Belum ada data panen yang sesuai filter.",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                color = Gray
+                            )
+                        }
+                    } else {
+                        items(panenList, key = { it.id }) { data ->
+                            val isSelected = selectedItems.contains(data.id)
+                            PanenTableRow(
+                                data = data,
+                                isSelectionMode = isSelectionMode,
+                                isSelected = isSelected,
+                                onToggleSelection = { itemId ->
+                                    selectedItems = if (selectedItems.contains(itemId)) {
+                                        selectedItems - itemId
+                                    } else {
+                                        selectedItems + itemId
+                                    }
+                                },
+                                onLongPress = {
+                                    isSelectionMode = true
+                                    selectedItems = selectedItems + it.id
+                                },
+                                onDetailClick = { clickedData ->
+                                    selectedPanenData = clickedData
+                                    showDetailDialog = true
+                                },
+                                onEditClick = { editedData ->
+                                    navController.navigate("panenInputScreen/${editedData.id}")
+                                }
+                            )
+                            HorizontalDivider(thickness = 0.5.dp, color = Gray.copy(alpha = 0.5f))
+                        }
                     }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = {
-                            showPasswordDialog = true // Panggil dialog sandi saat tombol Hapus diklik
-                        },
-                        enabled = selectedItems.isNotEmpty(),
+                if (!isSelectionMode) {
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .padding(start = 8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.error,
-                            contentColor = MaterialTheme.colorScheme.onError
-                        ),
-                        shape = RoundedCornerShape(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Hapus (${selectedItems.size})", fontWeight = FontWeight.Bold)
+                        SummaryBox(label = "Data Masuk", value = totalDataMasuk.toString())
+                        SummaryBox(label = "Total Buah", value = totalSemuaBuah.toString())
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Button(
+                            onClick = {
+                                isSelectionMode = false
+                                selectedItems = emptySet()
+                            },
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(end = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Batal", fontWeight = FontWeight.Bold)
+                        }
+
+                        Button(
+                            onClick = {
+                                showPasswordDialog = true // Panggil dialog sandi saat tombol Hapus diklik
+                            },
+                            enabled = selectedItems.isNotEmpty(),
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(start = 8.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.error,
+                                contentColor = MaterialTheme.colorScheme.onError
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Hapus")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Hapus (${selectedItems.size})", fontWeight = FontWeight.Bold)
+                        }
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "*Data akan di reset setiap pukul 00.00",
-                color = Gray,
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
-            )
         }
     }
 
@@ -635,4 +647,3 @@ fun RekapPanenScreen(
         }
     }
 }
-

@@ -15,6 +15,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.DataTerkirimScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
@@ -25,7 +26,6 @@ import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
 import com.teladanprimaagro.tmpp.ui.screens.LaporanScreen
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.MainScreen
-import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PetaScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen

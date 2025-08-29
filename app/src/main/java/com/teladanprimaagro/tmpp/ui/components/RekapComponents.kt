@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -193,18 +196,18 @@ fun SummaryBox(label: String, value: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .width(110.dp)
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+            .background(OldGrey, RoundedCornerShape(10.dp))
             .padding(vertical = 8.dp, horizontal = 10.dp)
     ) {
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = White,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
         )
         Text(
             text = value,
-            color = MaterialTheme.colorScheme.onPrimary,
+            color = White,
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )

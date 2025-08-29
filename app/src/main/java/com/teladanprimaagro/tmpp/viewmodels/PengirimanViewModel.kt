@@ -117,7 +117,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     val unuploadedPengirimanList: StateFlow<List<PengirimanData>> = pengirimanDao.getUnuploadedPengirimanDataFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // --- State untuk Sinkronisasi & Status Scan ---
     private val _scanStatus = MutableStateFlow<ScanStatus>(ScanStatus.Idle)
     val scanStatus: StateFlow<ScanStatus> = _scanStatus.asStateFlow()
 
@@ -171,7 +170,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         }
     }
 
-    // --- Business Logic Functions ---
     private fun getRomanMonth(month: Month): String = when (month) {
         Month.JANUARY -> "I"
         Month.FEBRUARY -> "II"

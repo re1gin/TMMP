@@ -25,11 +25,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,9 +47,8 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
     ) {
         Text(
             text = label,
-            // Menggunakan onPrimary untuk teks utama
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = 16.sp,
+            fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
         )
@@ -68,7 +72,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 )
             }
 
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             OutlinedTextField(
                 value = count.toString(),
@@ -82,27 +86,24 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true,
-                shape = RoundedCornerShape(8.dp),
+                shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    // Warna teks di dalam TextField
-                    focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                    // Warna border saat aktif
-                    focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                    // Warna cursor
+                    focusedTextColor = Black,
+                    unfocusedTextColor = White,
+                    focusedContainerColor = Grey,
+                    unfocusedContainerColor = Grey.copy(0.7f),
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.onPrimary,
-                    // Warna background container
-                    focusedContainerColor = MaterialTheme.colorScheme.secondary,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
                 ),
                 modifier = Modifier.width(100.dp),
                 textStyle = LocalTextStyle.current.copy(
                     fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     textAlign = TextAlign.Center
                 )
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             IconButton(
                 onClick = { onCountChange(count + 1) },
@@ -118,5 +119,42 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun TotalBuahDisplay(value: Int) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "Total Buah",
+            color = White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Medium
+        )
+        OutlinedTextField(
+            value = value.toString(),
+            onValueChange = {},
+            readOnly = true,
+            singleLine = true,
+            shape = RoundedCornerShape(10.dp),
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = White.copy(0.5f),
+                unfocusedTextColor = White,
+                focusedContainerColor = Grey,
+                unfocusedContainerColor = Grey.copy(0.7f),
+                focusedBorderColor = Color.Transparent,
+                unfocusedBorderColor = Color.Transparent
+            ),
+            textStyle = LocalTextStyle.current.copy(
+                fontSize = 15.sp,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier.width(120.dp)
+        )
     }
 }

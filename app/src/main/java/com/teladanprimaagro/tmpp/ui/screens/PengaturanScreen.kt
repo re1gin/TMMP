@@ -36,7 +36,7 @@ fun PengaturanScreen(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
     val adminPassword = "supersawit2025"
-    var showThemeDialog by remember { mutableStateOf(false) } // State baru untuk dialog tema
+    var showThemeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -65,10 +65,6 @@ fun PengaturanScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                )
         ) {
             Column(
                 modifier = Modifier
@@ -212,7 +208,7 @@ fun PengaturanScreen(
                     }
                 }
             },
-            confirmButton = {} // Tidak perlu tombol konfirmasi
+            confirmButton = {}
         )
     }
 }

@@ -34,6 +34,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,18 +53,23 @@ import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
+import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HarvesterContent(
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    panenViewModel: PanenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     Scaffold(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp),
+            .padding(horizontal = 16.dp),
         topBar = {
             TopAppBar(
                 title = {
@@ -134,7 +142,7 @@ fun HarvesterContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Mandor Panen",
+                        text = "Krani Panen",
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Light,
                         color = Black
@@ -144,7 +152,8 @@ fun HarvesterContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            DashboardCard(navController) // NavController passed here
+            // Correct way to pass the viewModel instance
+            DashboardCard(navController = navController, panenViewModel = panenViewModel)
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -152,8 +161,8 @@ fun HarvesterContent(
             Text(
                 text = "Aksi Utama",
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Light,
-                color = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                color = White,
                 modifier = Modifier.align(Alignment.Start)
             )
 
@@ -187,7 +196,7 @@ fun HarvesterContent(
             Text(
                 text = "Menu lain",
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = Color.White,
                 modifier = Modifier.align(Alignment.Start)
             )
@@ -227,10 +236,18 @@ fun HarvesterContent(
 }
 
 @Composable
-fun DashboardCard(navController: NavController) {
+fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) {
+    val totalDataMasuk by panenViewModel.totalDataMasuk.collectAsState()
+    val totalSemuaBuah by panenViewModel.totalSemuaBuah.collectAsState()
+
+    // Get the current date
+    val currentDate = remember {
+        val formatter = SimpleDateFormat("EEEE, dd-MM-yyyy", Locale.getDefault())
+        formatter.format(Date())
+    }
+
     Card(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(10.dp),
         colors = CardDefaults.cardColors(containerColor = Grey)
     ) {
@@ -244,25 +261,31 @@ fun DashboardCard(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = "Data Panen", fontSize = 12.sp, color = Color.Black)
-                Text(text = "Senin, 21-07-2025", fontSize = 12.sp, color = Color.Black)
+                Text(text = currentDate, fontSize = 12.sp, color = Color.Black)
             }
 
-            // Judul tengah
             Text(
                 text = "Teladan Prima Agro",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.Black,
+                color = Black,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
-            // Row DataBox
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DataBox(title = "Data Masuk", value = "75 DATA", modifier = Modifier.weight(1f))
-                DataBox(title = "Total Janjang", value = "1235 JJ", modifier = Modifier.weight(1f))
+                DataBox(
+                    title = "Data Masuk",
+                    value = "$totalDataMasuk DATA",
+                    modifier = Modifier.weight(1f)
+                )
+                DataBox(
+                    title = "Total Janjang",
+                    value = "$totalSemuaBuah JJ",
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             // Bagian bawah
@@ -274,20 +297,20 @@ fun DashboardCard(navController: NavController) {
                 Text(
                     text = "“Lihat Statistik” untuk detail",
                     fontSize = 10.sp,
-                    color = Color.Black
+                    color = Black
                 )
 
                 Button(
                     onClick = { navController.navigate("statistik_panen_screen") },
                     shape = RoundedCornerShape(50),
                     colors = ButtonDefaults.buttonColors(containerColor = OldGrey),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp), // ruang dalam tombol
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 3.dp),
                     modifier = Modifier.wrapContentWidth()
                 ) {
                     Text(
                         text = "Lihat Statistik",
                         fontSize = 12.sp,
-                        color = Color.White
+                        color = White
                     )
                 }
             }

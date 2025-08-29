@@ -21,7 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -42,8 +41,6 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.InfoBlue
-import com.teladanprimaagro.tmpp.ui.theme.TextGrey
-import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel

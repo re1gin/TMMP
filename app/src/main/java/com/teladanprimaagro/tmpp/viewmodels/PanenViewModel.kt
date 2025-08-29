@@ -296,25 +296,27 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return when (sortBy) {
             "Nama" -> list.sortedBy { it.namaPemanen }
             "Blok" -> list.sortedBy { it.blok }
+            "Waktu" -> list.sortedBy { it.tanggalWaktu } // Add this line
             else -> list
         }
     }
 
     private fun sortPanenListByOrder(list: List<PanenData>, isAscending: Boolean): List<PanenData> {
-        val sortedList = if (isAscending) {
+        return if (isAscending) {
             when (_sortBy.value) {
                 "Nama" -> list.sortedBy { it.namaPemanen }
                 "Blok" -> list.sortedBy { it.blok }
+                "Waktu" -> list.sortedBy { it.tanggalWaktu } // Add this line
                 else -> list
             }
         } else {
             when (_sortBy.value) {
                 "Nama" -> list.sortedByDescending { it.namaPemanen }
                 "Blok" -> list.sortedByDescending { it.blok }
+                "Waktu" -> list.sortedByDescending { it.tanggalWaktu } // Add this line
                 else -> list
             }
         }
-        return sortedList
     }
 
     private fun filterByPemanen(list: List<PanenData>, pemanenFilter: String): List<PanenData> {

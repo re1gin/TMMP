@@ -12,8 +12,16 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,39 +36,40 @@ fun TextInputField(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = {
+            Text(
+                text = label,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+        },
         singleLine = true,
         readOnly = readOnly,
-        shape = RoundedCornerShape(8.dp),
-        modifier = modifier.heightIn(min = 56.dp),
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier.heightIn(min = 55.dp),
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+        textStyle = MaterialTheme.typography.bodyMedium.copy(
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium
+        ),
         colors = TextFieldDefaults.colors(
             // Warna teks
-            focusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            unfocusedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+            focusedTextColor = Black.copy(0.5f),
+            unfocusedTextColor = White,
             errorTextColor = MaterialTheme.colorScheme.error,
 
             // Warna container (background TextField)
-            focusedContainerColor = MaterialTheme.colorScheme.secondary,
-            unfocusedContainerColor = MaterialTheme.colorScheme.secondary,
-            disabledContainerColor = MaterialTheme.colorScheme.secondary,
+            focusedContainerColor = LightGrey,
+            unfocusedContainerColor = Grey.copy(0.7f),
             errorContainerColor = MaterialTheme.colorScheme.error,
-
-            // Warna cursor
-            cursorColor = MaterialTheme.colorScheme.onPrimary,
-            errorCursorColor = MaterialTheme.colorScheme.error,
 
             // Warna indicator (garis bawah, kita buat transparan)
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            errorIndicatorColor = MaterialTheme.colorScheme.error,
 
             // Warna label
-            focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-            unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-            disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
+            focusedLabelColor = Black,
+            unfocusedLabelColor = MainColor,
             errorLabelColor = MaterialTheme.colorScheme.error,
         )
     )
