@@ -152,7 +152,6 @@ fun HarvesterContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Correct way to pass the viewModel instance
             DashboardCard(navController = navController, panenViewModel = panenViewModel)
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -353,17 +352,16 @@ fun MenuButton(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Lingkaran dengan ikon di tengah
             Box(
                 modifier = Modifier
                     .size(56.dp) // ukuran lingkaran
-                    .background(White.copy(0.5f), CircleShape),
+                    .background(White.copy(0.7f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = text,
-                    tint = Black,
+                    tint = Black.copy(0.8f),
                     modifier = Modifier.size(46.dp)
                 )
             }

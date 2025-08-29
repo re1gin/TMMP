@@ -50,6 +50,11 @@ fun PanenTableRow(
 ) {
     val backgroundColor = if (isSelected) Gray.copy(alpha = 0.5f) else Color.Transparent
 
+    val displayTime = if (data.tanggalWaktu.length >= 5) {
+        data.tanggalWaktu.substring(data.tanggalWaktu.length - 5)
+    } else {
+        data.tanggalWaktu }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -63,27 +68,27 @@ fun PanenTableRow(
                 },
                 onLongClick = { onLongPress(data) }
             )
-            .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 1.dp),
+            .background(Grey.copy(0.5f))
+            .padding(vertical = 5.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isSelectionMode) {
             Checkbox(
                 checked = isSelected,
                 onCheckedChange = { onToggleSelection(data.id) },
-                modifier = Modifier.padding(end = 1.dp)
             )
+            Spacer(modifier = Modifier.size(10.dp))
         } else {
             Spacer(modifier = Modifier.size(10.dp))
         }
 
-        TableCellText(text = data.tanggalWaktu, weight = 0.25f)
-        TableCellText(text = data.namaPemanen, weight = 0.25f)
-        TableCellText(text = data.blok, weight = 0.10f)
-        TableCellText(text = data.totalBuah.toString(), weight = 0.10f)
+        TableCellText(text = displayTime, weight = 0.10f)
+        TableCellText(text = data.namaPemanen, weight = 0.20f)
+        TableCellText(text = data.blok, weight = 0.15f)
+        TableCellText(text = data.totalBuah.toString(), weight = 0.15f)
 
         if (!isSelectionMode) {
-            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
+            Box(modifier = Modifier.weight(0.10f), contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.Edit,
                     contentDescription = "Edit",
@@ -91,16 +96,6 @@ fun PanenTableRow(
                     modifier = Modifier
                         .size(20.dp)
                         .clickable { onEditClick(data) }
-                )
-            }
-            Box(modifier = Modifier.weight(0.1f), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Detail",
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onDetailClick(data) }
                 )
             }
         }
@@ -172,8 +167,8 @@ fun RowScope.TableHeaderText(text: String, weight: Float) {
     Text(
         text = text,
         color = Color.Black,
-        fontWeight = FontWeight.Bold,
-        fontSize = 12.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 14.sp,
         textAlign = TextAlign.Center,
         modifier = Modifier.weight(weight)
     )

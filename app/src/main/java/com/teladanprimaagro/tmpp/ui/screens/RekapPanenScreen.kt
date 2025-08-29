@@ -66,6 +66,7 @@ import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.Grey
 import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
@@ -144,7 +145,7 @@ fun RekapPanenScreen(
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MainBackground
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -152,8 +153,8 @@ fun RekapPanenScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(MainBackground)
+                .padding(paddingValues)
         ) {
 
             Column(
@@ -395,28 +396,29 @@ fun RekapPanenScreen(
                     onClick = { panenViewModel.clearFilters() },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        containerColor = Color.Transparent
+                        contentColor = DangerRed.copy(0.7f),
+                        containerColor = DangerRed.copy(0.1f)
                     ),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
+                    border = BorderStroke(1.dp, DangerRed),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear Filter",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
+                        tint = White
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Clear Filter")
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text("Clear Filter", color = White)
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(MainColor)
-                        .padding(vertical = 10.dp, horizontal = 5.dp),
+                        .padding(vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (isSelectionMode) {
@@ -430,13 +432,13 @@ fun RekapPanenScreen(
                                 }
                             }
                         )
-                    } else {
-                        Spacer(modifier = Modifier.size(24.dp))
                     }
-                    TableHeaderText(text = "Tanggal", weight = 0.20f)
-                    TableHeaderText(text = "Nama", weight = 0.25f)
-                    TableHeaderText(text = "Blok", weight = 0.10f)
-                    TableHeaderText(text = "Total", weight = 0.10f)
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    TableHeaderText(text = "Jam", weight = 0.10f)
+                    TableHeaderText(text = "Nama", weight = 0.20f)
+                    TableHeaderText(text = "Blok", weight = 0.15f)
+                    TableHeaderText(text = "Total", weight = 0.15f)
                     if (!isSelectionMode) {
                         TableHeaderText(text = "Edit", weight = 0.10f)
                     }
@@ -453,8 +455,7 @@ fun RekapPanenScreen(
                             Text(
                                 text = "Belum ada data panen yang sesuai filter.",
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
+                                    .fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 color = Gray
                             )
@@ -462,6 +463,7 @@ fun RekapPanenScreen(
                     } else {
                         items(panenList, key = { it.id }) { data ->
                             val isSelected = selectedItems.contains(data.id)
+
                             PanenTableRow(
                                 data = data,
                                 isSelectionMode = isSelectionMode,

@@ -91,8 +91,7 @@ fun PanenInputScreen(
 
     val currentDateTime = remember { LocalDateTime.now() }
     val formatter = remember { DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") }
-    val dateTimeDisplay =
-        remember { panenDataToEdit?.tanggalWaktu ?: currentDateTime.format(formatter) }
+    val dateTimeDisplay = remember { panenDataToEdit?.tanggalWaktu ?: currentDateTime.format(formatter) }
 
     var locationPart1 by remember(panenDataToEdit) { mutableStateOf(panenDataToEdit?.locationPart1 ?: "") }
     var locationPart2 by remember(panenDataToEdit) { mutableStateOf(panenDataToEdit?.locationPart2 ?: "") }
@@ -390,7 +389,7 @@ fun PanenInputScreen(
                         .weight(0.5f)
                         .padding(end = 8.dp),
                     keyboardType = KeyboardType.Decimal,
-                    readOnly = isEditing
+                    readOnly = true
                 )
                 TextInputField(
                     label = "Longitude",
@@ -400,7 +399,7 @@ fun PanenInputScreen(
                         .weight(0.5f)
                         .padding(start = 8.dp),
                     keyboardType = KeyboardType.Decimal,
-                    readOnly = isEditing
+                    readOnly = true
                 )
                 IconButton(
                     onClick = {
