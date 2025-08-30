@@ -2,6 +2,7 @@ package com.teladanprimaagro.tmpp.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 
 @Entity(tableName = "pengiriman_entries")
 data class PengirimanData(
@@ -11,13 +12,15 @@ data class PengirimanData(
     val namaSupir: String,
     val noPolisi: String,
     val totalBuah: Int,
-    val uniqueNo: String, // Dari NFC
-    val tanggalNfc: String, // Dari NFC
-    val blok: String, // Dari NFC
-    val detailScannedItemsJson: String, // Menyimpan daftar ScannedItem dalam format JSON
-    val mandorLoading: String, // Kolom baru: Mandor Loading
-    val isUploaded: Boolean = false, // Status upload
-    val isFinalized: Boolean = false // Kolom baru untuk statistik finalisasi
-
+    val uniqueNo: String,
+    val tanggalNfc: String,
+    val blok: String,
+    val detailScannedItemsJson: String,
+    val mandorLoading: String,
+    val isUploaded: Boolean = false,
+    val isFinalized: Boolean = false,
+    val workerId: String? = null,
+    @Exclude
+    val isSelected: Boolean = false
 )
 

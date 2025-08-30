@@ -2,6 +2,7 @@ package com.teladanprimaagro.tmpp.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.firebase.database.Exclude
 
 @Entity(tableName = "panen_entries")
 data class PanenData(
@@ -24,5 +25,8 @@ data class PanenData(
     val buahBL: Int,
     val localImageUri: String? = null,
     val firebaseImageUrl: String? = null,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val workerId: String? = null,
+    @Exclude
+    val isSelected: Boolean = false
 )

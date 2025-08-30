@@ -215,6 +215,7 @@ fun AppNavigation(
         }
         composable("peta_screen") {
             PetaScreen(
+                navController = navController,
                 mapViewModel = mapViewModel
             )
         }

@@ -46,16 +46,10 @@ fun OfflineMapView(
                 setTileSource(TileSourceFactory.MAPNIK)
                 setMultiTouchControls(true)
 
-                // Lokasi awal
-                val initialLocation = currentLocation
-                    ?: panenLocations.firstOrNull()?.let { panen ->
-                        val lat = panen.locationPart1.toDoubleOrNull()
-                        val lon = panen.locationPart2.toDoubleOrNull()
-                        if (lat != null && lon != null) GeoPoint(lat, lon) else GeoPoint(-0.0, 102.0)
-                    } ?: GeoPoint(-0.0, 102.0)
-
-                controller.setCenter(initialLocation)
-                controller.setZoom(17.0)
+                val initialCenter = GeoPoint(1.349672, 118.5097795)
+                controller.setCenter(initialCenter)
+                controller.setZoom(15)
+                minZoomLevel = 13.5
                 onMapReady(this)
             }
         },
@@ -67,8 +61,6 @@ fun OfflineMapView(
             compassOverlay.enableCompass()
             mapView.overlays.add(compassOverlay)
 
-            // Ikon marker panen (manusia) → gunakan ikon kustom
-            val humanIconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_human_marker)
 
             // Tambah marker panen
             panenLocations.forEach { panen ->
@@ -81,7 +73,9 @@ fun OfflineMapView(
                         title = "Pemanen: ${panen.namaPemanen}"
                         snippet = "Blok: ${panen.blok}, Total Buah: ${panen.totalBuah}"
 
-                        humanIconDrawable?.let {
+                        // Ikon marker panen → Buat ikon baru di setiap iterasi agar warnanya unik
+                        val harvesterIconDrawable = ContextCompat.getDrawable(context, R.drawable.ic_map)
+                        harvesterIconDrawable?.let {
                             val wrappedDrawable = DrawableCompat.wrap(it).mutate()
                             pemanenColors[panen.namaPemanen]?.let { color ->
                                 DrawableCompat.setTint(wrappedDrawable, color)

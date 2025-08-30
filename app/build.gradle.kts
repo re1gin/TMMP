@@ -65,9 +65,13 @@ dependencies {
     implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     implementation (libs.room.runtime)
+
     implementation(libs.osmdroid.android)
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.20")
+
     implementation(libs.androidx.runtime.livedata)
     kapt(libs.androidx.room.compiler)
+
     implementation(libs.androidx.room.ktx)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

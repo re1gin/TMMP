@@ -12,13 +12,13 @@ import androidx.room.RoomDatabase
         ScannedItemEntity::class,
         FinalizedUniqueNoEntity::class
     ],
-    version = 15,
+    version = 18,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun panenDao(): PanenDao
     abstract fun pengirimanDao(): PengirimanDao
-    abstract fun scannedItemDao(): ScannedItemDao // Ini sudah benar
+    abstract fun scannedItemDao(): ScannedItemDao
 
     companion object {
         @Volatile

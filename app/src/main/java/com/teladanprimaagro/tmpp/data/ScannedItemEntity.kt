@@ -14,7 +14,6 @@ data class ScannedItemEntity(
 
 @Entity(tableName = "finalized_unique_nos")
 data class FinalizedUniqueNoEntity(
-    @PrimaryKey(autoGenerate = false)
-    val uniqueNo: String,
-    val finalizedAt: Long = System.currentTimeMillis()
+    @PrimaryKey val uniqueNo: String,
+    val isUploaded: Boolean = false
 )

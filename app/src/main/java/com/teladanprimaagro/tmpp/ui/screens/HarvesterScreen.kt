@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -223,8 +224,8 @@ fun HarvesterContent(
                     backgroundColor = LightGrey
                 )
                 CustomMenuButton(
-                    text = "Lokasi",
-                    icon = Icons.Default.Settings,
+                    text = "Peta",
+                    icon = Icons.Default.Map,
                     onClick = { navController.navigate("peta_screen") },
                     modifier = Modifier.weight(1f),
                     backgroundColor = LightGrey

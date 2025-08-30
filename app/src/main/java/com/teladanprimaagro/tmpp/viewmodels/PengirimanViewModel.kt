@@ -8,6 +8,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.teladanprimaagro.tmpp.data.AppDatabase
@@ -17,6 +21,7 @@ import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.ScannedItemDao
 import com.teladanprimaagro.tmpp.data.ScannedItemEntity
 import com.teladanprimaagro.tmpp.util.ConnectivityObserver
+import com.teladanprimaagro.tmpp.workers.SyncPengirimanWorker // Impor Worker baru
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -32,7 +37,7 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// Data Classes
+// Data Classes (tetap sama)
 data class ScannedItem(
     val uniqueNo: String,
     val tanggal: String,
@@ -117,6 +122,9 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     val unuploadedPengirimanList: StateFlow<List<PengirimanData>> = pengirimanDao.getUnuploadedPengirimanDataFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    private val unuploadedFinalizedUniqueNos: StateFlow<List<FinalizedUniqueNoEntity>> = pengirimanDao.getUnuploadedFinalizedUniqueNosFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val _scanStatus = MutableStateFlow<ScanStatus>(ScanStatus.Idle)
     val scanStatus: StateFlow<ScanStatus> = _scanStatus.asStateFlow()
 
@@ -158,13 +166,14 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
 
+        // --- Perubahan Utama: Pemicu WorkManager ---
         viewModelScope.launch {
-            combine(unuploadedPengirimanList, isConnected) { data, connected ->
-                data.isNotEmpty() && connected && !_isSyncing.value
+            combine(unuploadedPengirimanList, unuploadedFinalizedUniqueNos, isConnected) { pengirimanData, finalizedData, connected ->
+                (pengirimanData.isNotEmpty() || finalizedData.isNotEmpty()) && connected
             }.collect { shouldSync ->
                 if (shouldSync) {
-                    Log.d("PengirimanViewModel", "Triggering automatic sync.")
-                    syncDataToServer()
+                    Log.d("PengirimanViewModel", "Triggering automatic sync via WorkManager.")
+                    startSyncWorker()
                 }
             }
         }
@@ -186,7 +195,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     }
 
     suspend fun getPengirimanById(id: Int): PengirimanData? = pengirimanDao.getPengirimanById(id)
-
 
     fun generateSpbNumber(selectedMandorLoading: String) {
         val currentDateTime = LocalDateTime.now()
@@ -223,7 +231,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             Log.d("PengirimanViewModel", "ADD_ITEM: Starting check for uniqueNo -> ${item.uniqueNo}")
 
             val isDuplicateInSession = scannedItems.first().any { it.uniqueNo == item.uniqueNo }
-            val isAlreadyFinalized = allFinalizedUniqueNos.first().contains(item.uniqueNo)
+            val isAlreadyFinalized = allFinalizedUniqueNos.first().any { it.uniqueNo == item.uniqueNo }
 
             if (isDuplicateInSession || isAlreadyFinalized) {
                 _scanStatus.value = ScanStatus.Duplicate(item.uniqueNo)
@@ -275,81 +283,15 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             pengirimanDao.insertPengiriman(newPengiriman)
 
             scannedItemsFromDb.forEach { item ->
-                val finalizedEntity = FinalizedUniqueNoEntity(uniqueNo = item.uniqueNo)
+                val finalizedEntity = FinalizedUniqueNoEntity(uniqueNo = item.uniqueNo, isUploaded = false)
                 pengirimanDao.insertFinalizedUniqueNo(finalizedEntity)
-
-                if (isConnected.value) {
-                    viewModelScope.launch {
-                        try {
-                            finalizedUniqueNoDbRef.child(item.uniqueNo).setValue(finalizedEntity).await()
-                            Log.d("PengirimanViewModel", "FIREBASE: Finalized uniqueNo ${item.uniqueNo} uploaded.")
-                        } catch (e: Exception) {
-                            Log.e("PengirimanViewModel", "Failed to upload finalized uniqueNo ${item.uniqueNo}: ${e.message}")
-                        }
-                    }
-                }
             }
             scannedItemDao.deleteAllScannedItems()
 
             Log.d("PengirimanViewModel", "FINALIZE: Finalization complete. Temporary items deleted.")
             _scanStatus.value = ScanStatus.Finalized
+            startSyncWorker() // Panggil worker setelah data baru disimpan
         }
-    }
-
-    fun syncDataToServer() {
-        viewModelScope.launch {
-            _isSyncing.value = true
-            try {
-                val unuploadedDataList = unuploadedPengirimanList.value
-                _totalItemsToSync.value = unuploadedDataList.size
-                _syncProgress.value = 0f
-
-                if (unuploadedDataList.isNotEmpty()) {
-                    for ((index, pengirimanData) in unuploadedDataList.withIndex()) {
-                        try {
-                            val simplePengirimanData = mapToSimplePengirimanData(pengirimanData)
-                            val finalPengirimanData = pengirimanData.copy(isUploaded = true)
-
-                            // Gunakan spbNumber langsung sebagai kunci
-                            val firebaseKey = finalPengirimanData.spbNumber.replace('/', '-')
-                            pengirimanDbRef.child(firebaseKey).setValue(simplePengirimanData).await()
-
-                            pengirimanDao.updatePengiriman(finalPengirimanData)
-
-                            _syncProgress.value = (index + 1).toFloat() / unuploadedDataList.size.toFloat()
-
-                        } catch (e: Exception) {
-                            Log.e("PengirimanViewModel", "Failed to upload item with SPB ${pengirimanData.spbNumber}: ${e.message}", e)
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("PengirimanViewModel", "Failed to sync data: ${e.message}", e)
-            } finally {
-                _isSyncing.value = false
-                _syncProgress.value = 0f
-                _totalItemsToSync.value = 0
-            }
-        }
-    }
-
-    private fun mapToSimplePengirimanData(pengirimanData: PengirimanData): SimplePengirimanData {
-        val scannedItemsType = object : com.google.gson.reflect.TypeToken<List<ScannedItem>>() {}.type
-        val rawDetailScannedItems: List<ScannedItem> = gson.fromJson(pengirimanData.detailScannedItemsJson, scannedItemsType) ?: emptyList()
-
-        val ringkasanPerBlok = rawDetailScannedItems
-            .groupBy { it.blok }
-            .mapValues { (_, items) -> items.sumOf { it.totalBuah } }
-
-        return SimplePengirimanData(
-            spbNumber = pengirimanData.spbNumber,
-            waktuPengiriman = pengirimanData.waktuPengiriman,
-            namaSupir = pengirimanData.namaSupir,
-            noPolisi = pengirimanData.noPolisi,
-            mandorLoading = pengirimanData.mandorLoading,
-            totalBuah = pengirimanData.totalBuah,
-            ringkasanPerBlok = ringkasanPerBlok
-        )
     }
 
     fun deleteSelectedPengirimanData(ids: List<Int>) {
@@ -373,7 +315,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             } catch (e: Exception) {
                 Log.e("PengirimanViewModel", "Failed to delete multiple data from Firebase: ${e.message}")
             } finally {
-                // Hapus data dari Room
                 pengirimanDao.deleteMultiplePengiriman(ids)
                 Log.d("PengirimanViewModel", "ROOM: Deleted multiple pengiriman data with IDs: $ids")
             }
@@ -382,5 +323,19 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     fun resetScanStatus() {
         _scanStatus.value = ScanStatus.Idle
+    }
+
+    // --- Fungsi WorkManager yang Baru ---
+    private fun startSyncWorker() {
+        Log.d("PengirimanViewModel", "Enqueuing SyncPengirimanWorker...")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPengirimanWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
     }
 }

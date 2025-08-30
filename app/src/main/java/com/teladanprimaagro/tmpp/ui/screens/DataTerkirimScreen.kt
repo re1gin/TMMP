@@ -78,28 +78,6 @@ fun DataTerkirimScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (syncingWorkInfo != null) {
-                val progress = syncingWorkInfo.progress.getFloat("progress", 0.0f)
-                val total = syncingWorkInfo.progress.getInt("total", 1)
-                val current = (progress * total).toInt()
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    LinearProgressIndicator(
-                        progress = progress,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Mensinkronkan $current dari $total...",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-
             @OptIn(ExperimentalMaterial3Api::class)
             if (allPanenData.isNotEmpty()) {
                 val syncedCount = allPanenData.count { it.isSynced }
@@ -172,7 +150,12 @@ fun DataTerkirimScreen(
                         if (panenItem.isSynced) {
                             DataTerkirimCard(panenItem = panenItem)
                         } else {
-                            DataBelumTerkirimCard(panenItem = panenItem)
+                            val progress = if (syncingWorkInfo != null && syncingWorkInfo.id.toString() == panenItem.workerId) {
+                                syncingWorkInfo.progress.getFloat("progress", 0.0f)
+                            } else {
+                                0.0f
+                            }
+                            DataBelumTerkirimCard(panenItem = panenItem, syncProgress = progress)
                         }
                     }
                 }
@@ -224,7 +207,7 @@ fun DataTerkirimCard(panenItem: PanenData) {
 }
 
 @Composable
-fun DataBelumTerkirimCard(panenItem: PanenData) {
+fun DataBelumTerkirimCard(panenItem: PanenData, syncProgress: Float) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -244,12 +227,28 @@ fun DataBelumTerkirimCard(panenItem: PanenData) {
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
-                Text(
-                    text = "Status: Menunggu",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
-                )
+                if (syncProgress > 0) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            progress = syncProgress,
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${(syncProgress * 100).toInt()}%",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "Status: Menunggu",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(

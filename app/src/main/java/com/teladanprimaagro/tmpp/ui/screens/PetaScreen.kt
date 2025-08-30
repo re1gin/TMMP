@@ -8,17 +8,48 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.LocationSearching
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,31 +60,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.ui.components.OfflineMapView
-import kotlinx.coroutines.launch
+import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.White
+import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PetaScreen(
-    mapViewModel: MapViewModel = viewModel()
+fun PetaScreen(navController: NavController,
+               mapViewModel: MapViewModel = viewModel()
 ) {
     val panenLocations by mapViewModel.panenLocations.collectAsState()
     var selectedPanenData by remember { mutableStateOf<PanenData?>(null) }
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val coroutineScope = rememberCoroutineScope()
     var mapViewInstance by remember { mutableStateOf<MapView?>(null) }
     val context = LocalContext.current
 
     // State untuk lokasi pengguna saat ini
     var currentLocation by remember { mutableStateOf<GeoPoint?>(null) }
     var showDeleteButton by remember { mutableStateOf(false) }
+
+    // State untuk mengontrol tampilan ModalBottomSheet
+    var showBottomSheet by remember { mutableStateOf(false) }
 
     // FusedLocationProviderClient untuk mendapatkan lokasi
     val fusedLocationClient: FusedLocationProviderClient = remember {
@@ -72,6 +106,11 @@ fun PetaScreen(
         }.toMap()
     }
 
+    // SheetState untuk ModalBottomSheet
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = false
+    )
+
     // Launcher untuk meminta izin lokasi
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -86,65 +125,37 @@ fun PetaScreen(
         }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        gesturesEnabled = false,
-        drawerContent = {
-            ModalDrawerSheet {
-                Column(
-                    modifier = Modifier
-                        .width(300.dp)
-                        .padding(16.dp)
-                ) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
                     Text(
-                        "Daftar Pemanen",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
+                        text = "Pengiriman",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = White
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-                    LazyColumn(
-                        modifier = Modifier.fillMaxHeight()
-                    ) {
-                        items(uniquePemanenNames) { pemanenName ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 8.dp)
-                                    .clickable {
-                                        val firstPanenLocation = panenLocations.firstOrNull { it.namaPemanen == pemanenName }
-                                        firstPanenLocation?.let { panen ->
-                                            val lat = panen.locationPart1.toDoubleOrNull()
-                                            val lon = panen.locationPart2.toDoubleOrNull()
-                                            if (lat != null && lon != null) {
-                                                mapViewInstance?.controller?.animateTo(GeoPoint(lat, lon))
-                                                mapViewInstance?.controller?.setZoom(17.0)
-                                            }
-                                        }
-                                        coroutineScope.launch { drawerState.close() }
-                                    }
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .background(
-                                            color = pemanenColors[pemanenName]?.let { Color(it) } ?: Color.Transparent,
-                                            shape = CircleShape
-                                        )
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(pemanenName)
-                            }
-                        }
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = White
+                        )
                     }
-                }
-            }
-        }
-    ) {
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MainBackground
+                )
+            )
+        },
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MainBackground)
+                .padding(paddingValues)
         ) {
             OfflineMapView(
                 modifier = Modifier.fillMaxSize(),
@@ -159,45 +170,33 @@ fun PetaScreen(
                 currentLocation = currentLocation
             )
 
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Lokasi Panen",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        coroutineScope.launch { drawerState.open() }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Daftar Pemanen",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
-                ),
-                modifier = Modifier.align(Alignment.TopCenter)
-            )
-
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.End
             ) {
+                // Tombol baru untuk menampilkan daftar pemanen
+                FloatingActionButton(
+                    onClick = { showBottomSheet = true },
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.List,
+                        contentDescription = "Tampilkan Daftar Pemanen",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+
                 if (showDeleteButton) {
                     FloatingActionButton(
                         onClick = {
                             currentLocation = null
                             showDeleteButton = false
                         },
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Icon(
                             imageVector = Icons.Default.LocationOn,
@@ -223,12 +222,99 @@ fun PetaScreen(
                                 locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                             }
                         )
-                    }
+                    },
+                    containerColor = MaterialTheme.colorScheme.primary
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocationSearching,
-                        contentDescription = "Tampilkan Posisiku"
+                        contentDescription = "Tampilkan Posisiku",
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
+                }
+            }
+        }
+    }
+
+    // ModalBottomSheet sekarang hanya ditampilkan ketika `showBottomSheet` bernilai true
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState,
+            dragHandle = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(4.dp)
+                            .background(Color.Gray, RoundedCornerShape(2.dp))
+                    )
+                }
+            },
+            containerColor = BackgroundDarkGrey,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .heightIn(min = 200.dp, max = 500.dp)
+            ) {
+                Text(
+                    "Daftar Pemanen",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider(color = Color.DarkGray, thickness = 1.dp)
+                LazyColumn(
+                    modifier = Modifier.fillMaxHeight()
+                ) {
+                    items(uniquePemanenNames) { pemanenName ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp)
+                                .clickable {
+                                    val firstPanenLocation = panenLocations.firstOrNull { it.namaPemanen == pemanenName }
+                                    firstPanenLocation?.let { panen ->
+                                        val lat = panen.locationPart1.toDoubleOrNull()
+                                        val lon = panen.locationPart2.toDoubleOrNull()
+                                        if (lat != null && lon != null) {
+                                            mapViewInstance?.controller?.animateTo(GeoPoint(lat, lon))
+                                            mapViewInstance?.controller?.setZoom(17.0)
+                                        }
+                                    }
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .background(
+                                        color = pemanenColors[pemanenName]?.let { Color(it) } ?: Color.Red,
+                                        shape = CircleShape
+                                    )
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text(pemanenName, color = Color.White)
+                            Spacer(Modifier.weight(1f))
+                            Text("Indikator", color = Color.White)
+                            Spacer(Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .background(
+                                        color = pemanenColors[pemanenName]?.let {Color(it) }?: Color.Red,
+                                        shape = CircleShape)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -287,7 +373,6 @@ private fun checkAndRequestLocation(
     }
 }
 
-// Fungsi untuk mendapatkan lokasi terakhir yang diketahui
 @SuppressLint("MissingPermission")
 private fun getCurrentLocation(
     fusedLocationClient: FusedLocationProviderClient,

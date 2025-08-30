@@ -41,12 +41,24 @@ interface PengirimanDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertFinalizedUniqueNo(uniqueNoEntity: FinalizedUniqueNoEntity)
 
-    @Query("SELECT uniqueNo FROM finalized_unique_nos")
-    fun getAllFinalizedUniqueNos(): Flow<List<String>>
+    @Query("SELECT * FROM finalized_unique_nos")
+    fun getAllFinalizedUniqueNos(): Flow<List<FinalizedUniqueNoEntity>>
+
+    @Query("SELECT * FROM finalized_unique_nos WHERE isUploaded = 0")
+    fun getUnuploadedFinalizedUniqueNosFlow(): Flow<List<FinalizedUniqueNoEntity>>
+
+    @Update
+    suspend fun updateFinalizedUniqueNo(finalizedUniqueNoEntity: FinalizedUniqueNoEntity)
 
     @Query("SELECT COUNT(*) FROM finalized_unique_nos")
     fun getTotalScanCount(): Flow<Int>
 
     @Query("DELETE FROM finalized_unique_nos")
     suspend fun clearAllFinalizedUniqueNos()
+
+    @Query("SELECT * FROM pengiriman_entries WHERE isUploaded = 0")
+    suspend fun getUnuploadedPengirimanData(): List<PengirimanData>
+
+    @Query("SELECT * FROM finalized_unique_nos WHERE isUploaded = 0")
+    suspend fun getUnuploadedFinalizedUniqueNos(): List<FinalizedUniqueNoEntity>
 }

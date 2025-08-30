@@ -26,6 +26,10 @@ import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
+import androidx.work.WorkInfo
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.work.WorkManager
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,15 +38,15 @@ fun StatusPengirimanScreen(
     navController: NavController,
     pengirimanViewModel: PengirimanViewModel = viewModel()
 ) {
-    // Mengambil semua data pengiriman
+    val context = LocalContext.current
+
+    // Mengambil semua data pengiriman dari ViewModel
     val allPengirimanData by pengirimanViewModel.pengirimanList.collectAsState()
 
-    // Mengambil status sinkronisasi
-    val isSyncing by pengirimanViewModel.isSyncing.collectAsState()
-
-    // Mengambil progres sinkronisasi
-    val syncProgress by pengirimanViewModel.syncProgress.collectAsState()
-    val totalItemsToSync by pengirimanViewModel.totalItemsToSync.collectAsState()
+    // Mengambil semua WorkInfo dari WorkManager. Ini akan diperbarui secara real-time.
+    val workInfos by WorkManager.getInstance(context)
+        .getWorkInfosForUniqueWorkLiveData("sync_pengiriman_work")
+        .observeAsState(emptyList())
 
     // State untuk mengontrol filter data
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
@@ -78,27 +82,9 @@ fun StatusPengirimanScreen(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            if (isSyncing) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    LinearProgressIndicator(
-                        progress = syncProgress,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Mensinkronkan ${(syncProgress * totalItemsToSync).toInt()} dari $totalItemsToSync...",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
+            // Bilah progres global di bagian atas dihapus karena sekarang
+            // setiap item akan memiliki indikator progresnya sendiri.
 
-            // Perubahan dimulai di sini untuk menambahkan jumlah data
             if (allPengirimanData.isNotEmpty()) {
                 val sentCount = allPengirimanData.count { it.isUploaded }
                 val unsentCount = allPengirimanData.count { !it.isUploaded }
@@ -140,9 +126,7 @@ fun StatusPengirimanScreen(
                     }
                 }
             }
-            // Perubahan berakhir di sini
 
-            // Tentukan data yang akan ditampilkan berdasarkan filter yang dipilih
             val filteredData = when (selectedFilter) {
                 "Sudah Terkirim" -> allPengirimanData.filter { it.isUploaded }
                 "Belum Terkirim" -> allPengirimanData.filter { !it.isUploaded }
@@ -171,7 +155,19 @@ fun StatusPengirimanScreen(
                         if (pengirimanItem.isUploaded) {
                             PengirimanTerkirimCard(pengirimanItem = pengirimanItem)
                         } else {
-                            PengirimanBelumTerkirimCard(pengirimanItem = pengirimanItem)
+                            // Mencari WorkInfo yang sesuai untuk item ini.
+                            // Asumsi pengirimanItem memiliki workerId yang unik.
+                            val syncingWorkInfo = workInfos.firstOrNull { it.id.toString() == pengirimanItem.workerId }
+                            val progress = syncingWorkInfo?.progress?.getFloat("progress", 0.0f) ?: 0.0f
+
+                            // Menggunakan WorkInfo untuk menentukan apakah proses sedang berjalan
+                            val isRunning = syncingWorkInfo?.state == WorkInfo.State.RUNNING
+
+                            PengirimanBelumTerkirimCard(
+                                pengirimanItem = pengirimanItem,
+                                syncProgress = progress,
+                                isSyncing = isRunning
+                            )
                         }
                     }
                 }
@@ -223,7 +219,7 @@ fun PengirimanTerkirimCard(pengirimanItem: PengirimanData) {
 }
 
 @Composable
-fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData) {
+fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData, syncProgress: Float, isSyncing: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -243,12 +239,29 @@ fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData) {
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
-                Text(
-                    text = "Status: Menunggu",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold
-                )
+                // Menampilkan indikator progres hanya jika item sedang disinkronkan.
+                if (isSyncing) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(
+                            progress = syncProgress,
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${(syncProgress * 100).toInt()}%",
+                            fontSize = 8.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                } else {
+                    Text(
+                        text = "Status: Menunggu",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
