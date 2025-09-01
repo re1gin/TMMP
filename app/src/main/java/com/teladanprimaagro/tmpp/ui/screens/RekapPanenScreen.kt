@@ -525,7 +525,7 @@ fun RekapPanenScreen(
 
                         Button(
                             onClick = {
-                                showPasswordDialog = true // Panggil dialog sandi saat tombol Hapus diklik
+                                showPasswordDialog = true
                             },
                             enabled = selectedItems.isNotEmpty(),
                             modifier = Modifier

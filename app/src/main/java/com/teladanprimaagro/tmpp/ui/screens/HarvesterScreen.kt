@@ -157,7 +157,6 @@ fun HarvesterContent(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Label "Aksi Utama"
             Text(
                 text = "Aksi Utama",
                 fontSize = 14.sp,
@@ -288,7 +287,6 @@ fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) 
                 )
             }
 
-            // Bagian bawah
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -327,7 +325,7 @@ fun DataBox(title: String, value: String, modifier: Modifier = Modifier) {
             .background(White, RoundedCornerShape(10.dp))
             .padding(12.dp)
     ) {
-        Text(text = title, fontSize = 14.sp, color = Color.Black)
+        Text(text = title, fontSize = 14.sp, color = Black)
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = value, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Black)
     }

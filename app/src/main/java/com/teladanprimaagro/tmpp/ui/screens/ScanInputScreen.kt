@@ -7,6 +7,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +36,11 @@ import com.teladanprimaagro.tmpp.ui.components.SuccessScanDialog
 import com.teladanprimaagro.tmpp.ui.components.DuplicateScanDialog
 import kotlinx.coroutines.launch
 import androidx.core.content.ContextCompat
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,13 +59,11 @@ fun ScanInputScreen(
     val nfcState by sharedNfcViewModel.nfcState.collectAsState()
     var showNfcReadDialog by remember { mutableStateOf(false) }
 
-    // Menggunakan scannedItems untuk SummaryBox, sesuai dengan alur yang sudah ada
     val scannedItems by pengirimanViewModel.scannedItems.collectAsState()
     val totalBuahCalculated by pengirimanViewModel.totalBuahCalculated
 
     val scanStatus by pengirimanViewModel.scanStatus.collectAsState()
 
-    // NEW: States to control custom dialogs
     var showDuplicateDialog by remember { mutableStateOf(false) }
     var showSuccessScanDialog by remember { mutableStateOf(false) }
 
@@ -80,7 +85,7 @@ fun ScanInputScreen(
     }
 
     LaunchedEffect(scanStatus) {
-        when(val status = scanStatus) {
+        when(scanStatus) {
             is ScanStatus.Success -> {
                 showSuccessScanDialog = true
                 if (vibrator != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -113,9 +118,9 @@ fun ScanInputScreen(
                 title = {
                     Text(
                         text = "Scan N-Tag",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -123,12 +128,12 @@ fun ScanInputScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -137,93 +142,74 @@ fun ScanInputScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 24.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+                .background(MainBackground)
+                .padding(16.dp)
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // SummaryBox tetap menggunakan data dari alur utama (pengiriman)
-                    SummaryBox(label = "Item Scan", value = scannedItems.size.toString())
-                    SummaryBox(label = "Total Buah", value = totalBuahCalculated.toString())
-                }
-            }
 
-            Spacer(modifier = Modifier.height(100.dp))
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                val nfcStatusText = (nfcState as? NfcOperationState.GeneralStatus)?.message
-                    ?: if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) "NFC tidak aktif." else "Siap untuk memindai."
-                val nfcIconColor = if ((nfcState as? NfcOperationState.GeneralStatus)?.isEnabled == false) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onPrimary
-                val nfcBgColor = nfcIconColor.copy(alpha = 0.2f)
-
-                Icon(
-                    imageVector = Icons.Default.Nfc,
-                    contentDescription = "NFC Icon",
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(nfcBgColor)
-                        .padding(20.dp),
-                    tint = nfcIconColor
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = nfcStatusText,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = nfcIconColor,
-                    textAlign = TextAlign.Center
-                )
-                if ((nfcState as? NfcOperationState.GeneralStatus)?.message?.contains("dinonaktifkan", ignoreCase = true) == true) {
-                    TextButton(onClick = {
-                        val intent = Intent(android.provider.Settings.ACTION_NFC_SETTINGS)
-                        context.startActivity(intent)
-                    }) {
-                        Text("Buka Pengaturan NFC")
-                    }
-                }
+                SummaryBox(label = "Item Scan", value = scannedItems.size.toString())
+                SummaryBox(label = "Total Buah", value = totalBuahCalculated.toString())
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Button(
-                onClick = {
-                    val adapter = NfcAdapter.getDefaultAdapter(context)
-                    if (adapter == null) {
-                        coroutineScope.launch { snackbarHostState.showSnackbar("NFC tidak tersedia di perangkat ini.") }
-                    } else if (!adapter.isEnabled) {
-                        coroutineScope.launch { snackbarHostState.showSnackbar("NFC dinonaktifkan. Harap aktifkan di pengaturan.") }
-                    } else {
-                        showNfcReadDialog = true
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                shape = MaterialTheme.shapes.medium
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
+                val nfcAdapter = NfcAdapter.getDefaultAdapter(context)
+                val isNfcEnabled = nfcAdapter != null && nfcAdapter.isEnabled
+                val iconColor = if (isNfcEnabled) Black else DangerRed
+                val textColor = if (isNfcEnabled) MainColor else DangerRed
+                val circleBackgroundColor = if (isNfcEnabled) MainColor else DangerRed.copy(0.4f)
+
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(CircleShape)
+                        .background(circleBackgroundColor)
+                        .clickable {
+                            if (nfcAdapter == null) {
+                                coroutineScope.launch { snackbarHostState.showSnackbar("NFC tidak tersedia di perangkat ini.") }
+                            } else if (!isNfcEnabled) {
+                                coroutineScope.launch { snackbarHostState.showSnackbar("NFC dinonaktifkan. Harap aktifkan di pengaturan.") }
+                            } else {
+                                showNfcReadDialog = true
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Nfc,
+                        contentDescription = "NFC Icon",
+                        modifier = Modifier.size(70.dp),
+                        tint = iconColor
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+                // Text below the circle
                 Text(
-                    "Mulai Scan NFC",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onTertiary
+                    text = "Tekan untuk Scan",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textColor
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Spacer(modifier = Modifier.weight(1f))
 
             Text(
                 text = "Setiap scan akan menambahkan item ke daftar pengiriman. Anda bisa scan beberapa tag sekaligus.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = White.copy(alpha = 0.8f),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 24.dp)
             )
@@ -237,14 +223,14 @@ fun ScanInputScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface),
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MainColor),
                 shape = MaterialTheme.shapes.medium
             ) {
                 Text(
                     "Selesai Scan dan Lanjutkan",
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = Black
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -257,7 +243,6 @@ fun ScanInputScreen(
                 sharedNfcViewModel.resetNfcState()
             },
             onReadComplete = { scannedItem ->
-                // Panggil addScannedItem, ViewModel akan menangani validasi dan penyimpanan
                 pengirimanViewModel.addScannedItem(scannedItem)
             },
             nfcIntentFromActivity = nfcIntentFromActivity,
@@ -269,7 +254,7 @@ fun ScanInputScreen(
         DuplicateScanDialog(
             onDismissRequest = {
                 showDuplicateDialog = false
-                pengirimanViewModel.resetScanStatus() // Reset status di ViewModel
+                pengirimanViewModel.resetScanStatus()
             },
             uniqueNo = (scanStatus as? ScanStatus.Duplicate)?.uniqueNo ?: ""
         )
@@ -279,7 +264,7 @@ fun ScanInputScreen(
         SuccessScanDialog(
             onDismissRequest = {
                 showSuccessScanDialog = false
-                pengirimanViewModel.resetScanStatus() // Reset status di ViewModel
+                pengirimanViewModel.resetScanStatus()
             }
         )
     }

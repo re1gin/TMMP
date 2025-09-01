@@ -58,6 +58,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
+import com.teladanprimaagro.tmpp.ui.components.TotalBuahDisplay
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import kotlinx.coroutines.launch
@@ -100,9 +106,9 @@ fun PengirimanInputScreen(
                 title = {
                     Text(
                         text = "Pengiriman",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -110,20 +116,20 @@ fun PengirimanInputScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MainBackground)
                 .padding(innerPadding)
                 .imePadding(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -176,70 +182,38 @@ fun PengirimanInputScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Total Buah",
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    OutlinedTextField(
-                        value = totalBuahCalculated.intValue.toString(),
-                        onValueChange = {},
-                        readOnly = true,
-                        singleLine = true,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            // Warna teks di dalam TextField
-                            focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onPrimary,
-                            disabledTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f),
-                            // Warna border
-                            focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-                            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                            disabledBorderColor = MaterialTheme.colorScheme.outline,
-                            // Warna background container
-                            disabledContainerColor = MaterialTheme.colorScheme.secondary,
-                            // Warna cursor (tidak terlihat karena readOnly)
-                            cursorColor = MaterialTheme.colorScheme.onPrimary
-                        ),
-                        modifier = Modifier.width(120.dp)
-                    )
-                }
+                TotalBuahDisplay(value = totalBuahCalculated.intValue)
+                Spacer(modifier = Modifier.height(12.dp))
+
                 HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 12.dp),
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outline
+                    color = White
                 )
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
-                            RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                        .padding(vertical = 8.dp),
+                            color = MainColor
+                        )
+                        .padding(vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    TableHeaderText(text = "No", color = MaterialTheme.colorScheme.onPrimary)
-                    TableHeaderText(text = "No. Unik", color = MaterialTheme.colorScheme.onPrimary)
-                    TableHeaderText(text = "Blok", color = MaterialTheme.colorScheme.onPrimary)
-                    TableHeaderText(text = "Total Buah", color = MaterialTheme.colorScheme.onPrimary)
+                    TableHeaderText(text = "No", color = Black)
+                    TableHeaderText(text = "No. Unik", color = Black)
+                    TableHeaderText(text = "Blok", color = Black)
+                    TableHeaderText(text = "Total Buah", color = Black)
                 }
 
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                        .background(OldGrey)
                 ) {
                     if (scannedItems.isEmpty()) {
                         item {
@@ -265,7 +239,7 @@ fun PengirimanInputScreen(
                                 blok = item.blok,
                                 totalBuah = item.totalBuah
                             )
-                            HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
+                            HorizontalDivider(thickness = 0.5.dp, color = White)
                         }
                     }
                 }
@@ -290,13 +264,22 @@ fun PengirimanInputScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .height(56.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MainColor,
+                    disabledContainerColor = MainColor.copy(0.4f)),
                 enabled = scannedItems.isNotEmpty() &&
                         selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
                         selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi"
             ) {
-                Text("Finalisasi Pengiriman", color = MaterialTheme.colorScheme.onPrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                val textColor = if (scannedItems.isNotEmpty() &&
+                    selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
+                    selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi") {
+                    Color.Black // Teks hitam saat aktif
+                } else {
+                    Color.White // Teks putih saat tidak aktif
+                }
+                Text("Finalisasi Pengiriman", color = textColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
@@ -337,6 +320,7 @@ fun TableItemText(text: String, modifier: Modifier = Modifier) {
         text = text,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier,
+        fontSize = 14.sp,
         maxLines = 1,
         overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
         textAlign = TextAlign.Center

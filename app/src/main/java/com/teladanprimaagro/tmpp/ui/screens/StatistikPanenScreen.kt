@@ -101,7 +101,6 @@ fun StatistikPanenScreen(
                 )
             )
         },
-        containerColor = Color.Black
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -171,14 +170,14 @@ fun StatistikPanenScreen(
                         StatistikSection(
                             title = "Buah per Pemanen",
                             data = statistikPerPemanen,
-                            barColor = Color(0xFFFF9800) // Orange color
+                            barColor = MainColor
                         )
                     }
                     item {
                         StatistikSection(
                             title = "Buah per Blok",
                             data = statistikPerBlok,
-                            barColor = Color(0xFFFF9800) // Orange color
+                            barColor = MainColor // Orange color
                         )
                     }
                 }
@@ -279,7 +278,7 @@ fun BarChartItem(
                 .weight(1f)
                 .height(24.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.2f))
+                .background(White.copy(alpha = 0.2f))
         ) {
             Box(
                 modifier = Modifier

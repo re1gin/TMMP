@@ -62,8 +62,10 @@ import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -94,9 +96,9 @@ fun RekapPengirimanScreen(
                 title = {
                     Text(
                         text = if (isSelectionMode) "${selectedItems.size} Terpilih" else "Rekap Evakuasi",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -111,12 +113,12 @@ fun RekapPengirimanScreen(
                         Icon(
                             imageVector = if (isSelectionMode) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = if (isSelectionMode) "Batal" else "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -126,15 +128,15 @@ fun RekapPengirimanScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .background(MaterialTheme.colorScheme.onPrimary, RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp))
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
+                    .background(MainColor)
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isSelectionMode) {
@@ -145,16 +147,12 @@ fun RekapPengirimanScreen(
                 TableHeaderText(text = "Tanggal", weight = 0.20f)
                 TableHeaderText(text = "No. SPB", weight = 0.35f)
                 TableHeaderText(text = "Total", weight = 0.20f)
-                if (!isSelectionMode) {
-                    TableHeaderText(text = "Detail", weight = 0.15f)
-                }
             }
 
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 16.dp)
                     .background(Gray.copy(alpha = 0.1f), RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
             ) {
                 if (pengirimanList.isEmpty()) {
@@ -191,7 +189,7 @@ fun RekapPengirimanScreen(
                                 showDetailDialog = true
                             },
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+                        HorizontalDivider(thickness = 0.5.dp, color = Gray.copy(alpha = 0.5f))
                     }
                 }
             }
@@ -234,7 +232,7 @@ fun RekapPengirimanScreen(
 
                     Button(
                         onClick = {
-                            showPasswordDialog = true // Trigger dialog sandi
+                            showPasswordDialog = true
                         },
                         enabled = selectedItems.isNotEmpty(),
                         modifier = Modifier
@@ -252,17 +250,7 @@ fun RekapPengirimanScreen(
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "*Data akan di reset setiap pukul 00.00",
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 
@@ -281,7 +269,6 @@ fun RekapPengirimanScreen(
         )
     }
 
-    // Dialog untuk validasi sandi
     if (showPasswordDialog) {
         PasswordConfirmationDialog(
             onDismissRequest = { showPasswordDialog = false },
@@ -297,7 +284,6 @@ fun RekapPengirimanScreen(
         )
     }
 
-    // Dialog konfirmasi penghapusan (muncul setelah sandi benar)
     if (showDeleteConfirmationDialog) {
         Dialog(onDismissRequest = { showDeleteConfirmationDialog = false }) {
             Card(

@@ -23,7 +23,7 @@ import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
-import com.teladanprimaagro.tmpp.ui.screens.LaporanScreen
+import com.teladanprimaagro.tmpp.ui.screens.StatistikPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.MainScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
@@ -37,7 +37,6 @@ import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatusPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
-import com.teladanprimaagro.tmpp.viewmodels.MapViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -54,7 +53,6 @@ fun AppNavigation(
 
     val panenViewModel: PanenViewModel = viewModel()
     val settingsViewModel: SettingsViewModel = viewModel() // This is the instance you need to pass
-    val mapViewModel: MapViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
@@ -216,11 +214,12 @@ fun AppNavigation(
         composable("peta_screen") {
             PetaScreen(
                 navController = navController,
-                mapViewModel = mapViewModel
             )
         }
-        composable("laporan_screen") {
-            LaporanScreen()
+        composable("statistik_pengiriman_screen") {
+            StatistikPengirimanScreen(
+                navController = navController,
+            )
         }
     }
 }

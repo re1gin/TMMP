@@ -2,12 +2,15 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +33,10 @@ import androidx.work.WorkInfo
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.platform.LocalContext
 import androidx.work.WorkManager
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,9 +64,9 @@ fun StatusPengirimanScreen(
                 title = {
                     Text(
                         text = "Status Data Pengiriman",
-                        fontSize = 18.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -67,24 +74,23 @@ fun StatusPengirimanScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
-        ) {
-            // Bilah progres global di bagian atas dihapus karena sekarang
-            // setiap item akan memiliki indikator progresnya sendiri.
+                .background(MainBackground)
+                .padding(paddingValues)
 
+        ) {
             if (allPengirimanData.isNotEmpty()) {
                 val sentCount = allPengirimanData.count { it.isUploaded }
                 val unsentCount = allPengirimanData.count { !it.isUploaded }
@@ -155,12 +161,9 @@ fun StatusPengirimanScreen(
                         if (pengirimanItem.isUploaded) {
                             PengirimanTerkirimCard(pengirimanItem = pengirimanItem)
                         } else {
-                            // Mencari WorkInfo yang sesuai untuk item ini.
-                            // Asumsi pengirimanItem memiliki workerId yang unik.
                             val syncingWorkInfo = workInfos.firstOrNull { it.id.toString() == pengirimanItem.workerId }
                             val progress = syncingWorkInfo?.progress?.getFloat("progress", 0.0f) ?: 0.0f
 
-                            // Menggunakan WorkInfo untuk menentukan apakah proses sedang berjalan
                             val isRunning = syncingWorkInfo?.state == WorkInfo.State.RUNNING
 
                             PengirimanBelumTerkirimCard(
@@ -180,12 +183,13 @@ fun StatusPengirimanScreen(
 fun PengirimanTerkirimCard(pengirimanItem: PengirimanData) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(Grey)
     ) {
         Column(
             modifier = Modifier
-                .padding(16.dp)
                 .fillMaxWidth()
+                .background(OldGrey)
+                .padding(16.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -239,40 +243,40 @@ fun PengirimanBelumTerkirimCard(pengirimanItem: PengirimanData, syncProgress: Fl
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White
                 )
-                // Menampilkan indikator progres hanya jika item sedang disinkronkan.
-                if (isSyncing) {
-                    Box(contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            progress = syncProgress,
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Text(
-                            text = "${(syncProgress * 100).toInt()}%",
-                            fontSize = 8.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    }
-                } else {
+                Box(contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(
+                        progress = { syncProgress },
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth,
+                        trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
+                        strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                    )
                     Text(
-                        text = "Status: Menunggu",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error,
-                        fontWeight = FontWeight.Bold
+                        text = "${(syncProgress * 100).toInt()}%",
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
+                Text(
+                    text = "Status: Menunggu",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold
+                )
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Supir: ${pengirimanItem.namaSupir}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "SPB No: ${pengirimanItem.spbNumber}",
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Supir: ${pengirimanItem.namaSupir}",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "SPB No: ${pengirimanItem.spbNumber}",
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
+

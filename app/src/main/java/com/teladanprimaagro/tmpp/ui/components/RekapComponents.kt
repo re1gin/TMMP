@@ -48,8 +48,6 @@ fun PanenTableRow(
     onDetailClick: (PanenData) -> Unit,
     onEditClick: (PanenData) -> Unit
 ) {
-    val backgroundColor = if (isSelected) Gray.copy(alpha = 0.5f) else Color.Transparent
-
     val displayTime = if (data.tanggalWaktu.length >= 5) {
         data.tanggalWaktu.substring(data.tanggalWaktu.length - 5)
     } else {
@@ -113,8 +111,6 @@ fun PengirimanTableRow(
     onLongPress: (PengirimanData) -> Unit,
     onDetailClick: (PengirimanData) -> Unit,
 ) {
-    val backgroundColor = if (isSelected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f) else Color.Transparent
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -128,8 +124,8 @@ fun PengirimanTableRow(
                 },
                 onLongClick = { onLongPress(data) }
             )
-            .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
+            .background(Grey.copy(0.5f))
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isSelectionMode) {
@@ -145,19 +141,6 @@ fun PengirimanTableRow(
         TableCellText(text = data.waktuPengiriman, weight = 0.20f)
         TableCellText(text = data.spbNumber, weight = 0.35f)
         TableCellText(text = data.totalBuah.toString(), weight = 0.20f)
-
-        if (!isSelectionMode) {
-            Box(modifier = Modifier.weight(0.15f), contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Detail",
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier
-                        .size(20.dp)
-                        .clickable { onDetailClick(data) }
-                )
-            }
-        }
     }
 }
 

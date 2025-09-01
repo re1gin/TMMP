@@ -25,7 +25,6 @@ class SyncPengirimanWorker(
         Log.d("SyncPengirimanWorker", "Starting background data synchronization...")
 
         try {
-            // Dapatkan daftar data yang belum terunggah dari Room
             val unuploadedPengirimanList = pengirimanDao. getUnuploadedPengirimanData()
             val unuploadedFinalizedList = pengirimanDao.getUnuploadedFinalizedUniqueNos()
 
@@ -34,7 +33,6 @@ class SyncPengirimanWorker(
                 return Result.success()
             }
 
-            // Bagian 1: Unggah data PengirimanData menggunakan batch
             if (unuploadedPengirimanList.isNotEmpty()) {
                 val batchUpdates = mutableMapOf<String, Any>()
                 for (data in unuploadedPengirimanList) {

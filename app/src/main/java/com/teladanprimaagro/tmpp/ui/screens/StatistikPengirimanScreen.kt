@@ -18,12 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,17 +41,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.ui.components.SummaryBox
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LaporanScreen(
+fun StatistikPengirimanScreen(
     pengirimanViewModel: PengirimanViewModel = viewModel(),
+    navController: NavController
 ) {
     val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()
     val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
@@ -57,55 +67,77 @@ fun LaporanScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Laporan Pengiriman",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                    Text(
+                        text = "Statistik Pengiriman",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali",
+                            tint = Color.White
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MainBackground)
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item {
                 Text(
-                    text = "Ringkasan Statistik Utama",
+                    text = "Ringkasan Statistik Pengiriman Hari ini",
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White // Menggunakan warna putih
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
-                Spacer(modifier = Modifier.height(10.dp))
-                MainStatsColumn(
-                    totalBuah = totalSemuaBuah,
-                    totalScanned = totalSuccessfulScans,
-                    totalFinalized = totalDataMasuk
-                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SummaryBox(
+                        label = "Total Scan",
+                        value = totalSuccessfulScans.toString(),
+                    )
+                    SummaryBox(
+                        label = "Data Masuk",
+                        value = totalDataMasuk.toString(),
+                    )
+                    SummaryBox(
+                        label = "Total Buah",
+                        value = totalSemuaBuah.toString(),
+                    )
+                }
             }
 
             item {
                 ReportStatistikSection(
                     title = "Total Buah per Blok",
                     data = blokSummary.associate { it.blok to it.totalBuah },
-                    barColor = MaterialTheme.colorScheme.onPrimary,
-                    titleColor = Color.White // Meneruskan warna putih
+                    barColor = MainColor
                 )
             }
 
@@ -113,51 +145,10 @@ fun LaporanScreen(
                 ReportStatistikSection(
                     title = "Total Buah per Supir",
                     data = supirSummary.associate { it.namaSupir to it.totalBuah },
-                    barColor = MaterialTheme.colorScheme.onPrimary,
-                    titleColor = Color.White // Meneruskan warna putih
+                    barColor = MainColor
                 )
             }
         }
-    }
-}
-
-@Composable
-fun MainStatsColumn(totalBuah: Int, totalScanned: Int, totalFinalized: Int) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                MaterialTheme.colorScheme.surface,
-                RoundedCornerShape(12.dp)
-            )
-            .padding(16.dp)
-    ) {
-        StatistikItem("Total Buah", totalBuah.toString(), Color.White) // Menggunakan warna putih
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Scan", totalScanned.toString(), Color.White) // Menggunakan warna putih
-        HorizontalDivider(Modifier.padding(vertical = 8.dp))
-        StatistikItem("Data Masuk", totalFinalized.toString(), Color.White) // Menggunakan warna putih
-    }
-}
-
-@Composable
-fun StatistikItem(label: String, value: String, color: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = color
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
     }
 }
 
@@ -167,21 +158,22 @@ fun ReportStatistikSection(
     title: String,
     data: Map<String, Int>,
     barColor: Color,
-    titleColor: Color
 ) {
     val maxValue = data.values.maxOrNull()?.toFloat() ?: 0f
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp))
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = titleColor // Menggunakan parameter yang baru
+            fontWeight = FontWeight.Medium,
+            fontSize = 14.sp,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
         HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
@@ -189,7 +181,7 @@ fun ReportStatistikSection(
             Text(
                 text = "Belum ada data.",
                 style = MaterialTheme.typography.bodySmall,
-                color = titleColor.copy(alpha = 0.8f), // Menggunakan parameter yang baru
+                color = MainColor.copy(alpha = 0.8f),
                 modifier = Modifier.padding(top = 8.dp)
             )
         } else {
