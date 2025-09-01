@@ -60,19 +60,21 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.androidx.tv.material)
     implementation(libs.androidx.work.runtime.ktx)
+
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
+
     testImplementation(libs.junit)
     implementation (libs.room.runtime)
+    implementation(libs.androidx.room.ktx)
 
     implementation(libs.osmdroid.android)
-    implementation("org.osmdroid:osmdroid-mapsforge:6.1.20")
+    implementation(libs.osmdroid.mapsforge)
 
     implementation(libs.androidx.runtime.livedata)
     kapt(libs.androidx.room.compiler)
 
-    implementation(libs.androidx.room.ktx)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

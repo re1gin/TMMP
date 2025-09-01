@@ -1,10 +1,11 @@
 package com.teladanprimaagro.tmpp.viewmodels
 
+import android.content.Intent
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.teladanprimaagro.tmpp.data.PanenData // Pastikan import PanenData jika digunakan dalam state
+import com.teladanprimaagro.tmpp.data.PanenData
 
 /**
  * Sealed class yang merepresentasikan semua kemungkinan status dan hasil dari operasi NFC.
@@ -85,6 +86,10 @@ class SharedNfcViewModel : ViewModel() {
 
     // StateFlow publik yang dapat diamati oleh Composable
     val nfcState: StateFlow<NfcOperationState> = _nfcState.asStateFlow()
+
+    // Tambahan: Properti untuk menampung NFC Intent dari Activity
+    private val _nfcIntent = MutableStateFlow<Intent?>(null)
+    val nfcIntent: StateFlow<Intent?> = _nfcIntent.asStateFlow()
 
     /**
      * Mengupdate status umum NFC di perangkat (misalnya, NFC diaktifkan/dinonaktifkan).
@@ -169,5 +174,13 @@ class SharedNfcViewModel : ViewModel() {
      */
     fun resetNfcState() {
         _nfcState.value = NfcOperationState.Idle
+    }
+
+    /**
+     * Menerima dan memproses Intent NFC yang datang dari Activity.
+     * @param intent Intent yang berisi data NFC.
+     */
+    fun handleNfcIntent(intent: Intent?) {
+        _nfcIntent.value = intent
     }
 }

@@ -24,6 +24,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +39,7 @@ fun PengaturanScreen(
 ) {
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
-    val adminPassword = "supersawit2025"
+    val adminPassword = "1"
     var showThemeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -48,14 +52,14 @@ fun PengaturanScreen(
                     ) {
                         Text(
                             text = "Pengaturan",
-                            fontSize = 18.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = MainColor
                 )
             )
         },
@@ -64,23 +68,16 @@ fun PengaturanScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MainBackground)
                 .padding(innerPadding)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .background(
-                        color = MaterialTheme.colorScheme.background,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-                    )
                     .padding(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(24.dp))
 
-                SettingMenuItem(text = "Tema") {
-                    showThemeDialog = true // Tampilkan dialog tema saat diklik
-                }
                 HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outline)
 
                 userRole?.let { role ->
