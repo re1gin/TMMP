@@ -6,7 +6,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
+import android.os.Build
+import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,10 +18,13 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.teladanprimaagro.tmpp.data.AppDatabase
-import com.teladanprimaagro.tmpp.data.PanenDao
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.workers.SyncPanenWorker
 import kotlinx.coroutines.Dispatchers
@@ -30,21 +37,79 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@Suppress("DEPRECATION")
 @SuppressLint("StaticFieldLeak")
 class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val panenDao: PanenDao = AppDatabase.getDatabase(application).panenDao()
+    private val panenDao = AppDatabase.getDatabase(application).panenDao()
     private val panenDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("panenEntries")
     private val storage = FirebaseStorage.getInstance()
     private val context = application.applicationContext
+    private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
 
-    // ==================== UI State and Filters ====================
+    // State untuk form input
+    private val _locationPart1 = MutableStateFlow("")
+    val locationPart1: StateFlow<String> = _locationPart1.asStateFlow()
+
+    private val _locationPart2 = MutableStateFlow("")
+    val locationPart2: StateFlow<String> = _locationPart2.asStateFlow()
+
+    private val _isFindingLocation = MutableStateFlow(false)
+    val isFindingLocation: StateFlow<Boolean> = _isFindingLocation.asStateFlow()
+
+    private val _imageUri = MutableStateFlow<Uri?>(null)
+    val imageUri: StateFlow<Uri?> = _imageUri.asStateFlow()
+
+    private val _imageBitmap = MutableStateFlow<Bitmap?>(null)
+    val imageBitmap: StateFlow<Bitmap?> = _imageBitmap.asStateFlow()
+
+    private val _uniqueNo = MutableStateFlow("")
+    val uniqueNo: StateFlow<String> = _uniqueNo.asStateFlow()
+
+    private val _selectedForeman = MutableStateFlow("")
+    val selectedForeman: StateFlow<String> = _selectedForeman.asStateFlow()
+
+    private val _selectedHarvester = MutableStateFlow("")
+    val selectedHarvester: StateFlow<String> = _selectedHarvester.asStateFlow()
+
+    private val _selectedBlock = MutableStateFlow("")
+    val selectedBlock: StateFlow<String> = _selectedBlock.asStateFlow()
+
+    private val _selectedTph = MutableStateFlow("")
+    val selectedTph: StateFlow<String> = _selectedTph.asStateFlow()
+
+    private val _buahN = MutableStateFlow(0)
+    val buahN: StateFlow<Int> = _buahN.asStateFlow()
+
+    private val _buahA = MutableStateFlow(0)
+    val buahA: StateFlow<Int> = _buahA.asStateFlow()
+
+    private val _buahOR = MutableStateFlow(0)
+    val buahOR: StateFlow<Int> = _buahOR.asStateFlow()
+
+    private val _buahE = MutableStateFlow(0)
+    val buahE: StateFlow<Int> = _buahE.asStateFlow()
+
+    private val _buahAB = MutableStateFlow(0)
+    val buahAB: StateFlow<Int> = _buahAB.asStateFlow()
+
+    private val _buahBL = MutableStateFlow(0)
+    val buahBL: StateFlow<Int> = _buahBL.asStateFlow()
+
+    val totalBuah: StateFlow<Int> = combine(_buahN, _buahAB, _buahOR) { n, ab, or ->
+        n + ab + or
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    // State untuk data dan filter
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
     val panenDataToEdit: StateFlow<PanenData?> = _panenDataToEdit.asStateFlow()
 
@@ -60,7 +125,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
-    // ==================== Data Flows ====================
+    // Data flows untuk daftar panen dan statistik
     val panenList: StateFlow<List<PanenData>> =
         panenDao.getAllPanen()
             .combine(_sortBy) { list, sortBy -> sortPanenList(list, sortBy) }
@@ -109,21 +174,240 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    // ==================== WorkManager Trigger ====================
-    private fun startSyncWorker() {
-        Log.d("PanenViewModel", "Enqueuing SyncPanenWorker...")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+    // Setter untuk state form
+    fun setLocationPart1(value: String) { _locationPart1.value = value }
+    fun setLocationPart2(value: String) { _locationPart2.value = value }
+    fun setSelectedForeman(value: String) { _selectedForeman.value = value }
+    fun setSelectedHarvester(value: String) { _selectedHarvester.value = value }
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun setSelectedBlock(value: String) {
+        _selectedBlock.value = value
+        updateUniqueNo()
+    }
+    fun setSelectedTph(value: String) { _selectedTph.value = value }
+    fun setBuahN(value: Int) { _buahN.value = value }
+    fun setBuahA(value: Int) { _buahA.value = value }
+    fun setBuahOR(value: Int) { _buahOR.value = value }
+    fun setBuahE(value: Int) { _buahE.value = value }
+    fun setBuahAB(value: Int) { _buahAB.value = value }
+    fun setBuahBL(value: Int) { _buahBL.value = value }
 
-        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPanenWorker>()
-            .setConstraints(constraints)
-            .build()
-
-        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun updateUniqueNo() {
+        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
     }
 
-    // ==================== CRUD Operations ====================
+    // Membuat objek PanenData dari state saat ini
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createPanenData(id: Int, tanggalWaktu: String, firebaseImageUrl: String? = null): PanenData {
+        return PanenData(
+            id = id,
+            tanggalWaktu = tanggalWaktu,
+            uniqueNo = _uniqueNo.value,
+            locationPart1 = _locationPart1.value,
+            locationPart2 = _locationPart2.value,
+            kemandoran = _selectedForeman.value,
+            namaPemanen = _selectedHarvester.value,
+            blok = _selectedBlock.value,
+            noTph = _selectedTph.value,
+            totalBuah = totalBuah.value,
+            buahN = _buahN.value,
+            buahA = _buahA.value,
+            buahOR = _buahOR.value,
+            buahE = _buahE.value,
+            buahAB = _buahAB.value,
+            buahBL = _buahBL.value,
+            localImageUri = _imageUri.value?.toString(),
+            firebaseImageUrl = firebaseImageUrl,
+            isSynced = false
+        )
+    }
+
+    // Validasi data form
+    fun validatePanenData(nfcAdapter: android.nfc.NfcAdapter?): Pair<Boolean, String?> {
+        if (_selectedForeman.value.isBlank()) {
+            return Pair(false, "Kemandoran tidak boleh kosong.")
+        }
+        if (_selectedHarvester.value.isBlank()) {
+            return Pair(false, "Nama Pemanen tidak boleh kosong.")
+        }
+        if (_selectedBlock.value.isBlank()) {
+            return Pair(false, "Blok tidak boleh kosong.")
+        }
+        if (_selectedTph.value.isBlank()) {
+            return Pair(false, "No. TPH tidak boleh kosong.")
+        }
+        if (_locationPart1.value.isBlank() || _locationPart2.value.isBlank()) {
+            return Pair(false, "Lokasi (Latitude/Longitude) tidak boleh kosong.")
+        }
+        if (totalBuah.value <= 0) {
+            return Pair(false, "Total Buah harus lebih dari 0.")
+        }
+        if (_imageUri.value == null || _imageBitmap.value == null) {
+            return Pair(false, "Harap ambil gambar panen.")
+        }
+        if (nfcAdapter == null || !nfcAdapter.isEnabled) {
+            val message = if (nfcAdapter == null) {
+                "NFC tidak tersedia di perangkat ini."
+            } else {
+                "NFC dinonaktifkan. Harap aktifkan NFC."
+            }
+            return Pair(false, message)
+        }
+        return Pair(true, null)
+    }
+
+    // Mengatur ulang form
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun resetPanenForm() {
+        _locationPart1.value = ""
+        _locationPart2.value = ""
+        _imageUri.value = null
+        _imageBitmap.value?.recycle()
+        _imageBitmap.value = null
+        _selectedForeman.value = ""
+        _selectedHarvester.value = ""
+        _selectedBlock.value = ""
+        _selectedTph.value = ""
+        _buahN.value = 0
+        _buahA.value = 0
+        _buahOR.value = 0
+        _buahE.value = 0
+        _buahAB.value = 0
+        _buahBL.value = 0
+        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), "", 0)
+    }
+
+    // Memuat data untuk edit
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun loadEditData(panenData: PanenData) {
+        _locationPart1.value = panenData.locationPart1
+        _locationPart2.value = panenData.locationPart2
+        _imageUri.value = panenData.localImageUri?.toUri()
+        _uniqueNo.value = panenData.uniqueNo
+        _selectedForeman.value = panenData.kemandoran
+        _selectedHarvester.value = panenData.namaPemanen
+        _selectedBlock.value = panenData.blok
+        _selectedTph.value = panenData.noTph
+        _buahN.value = panenData.buahN
+        _buahA.value = panenData.buahA
+        _buahOR.value = panenData.buahOR
+        _buahE.value = panenData.buahE
+        _buahAB.value = panenData.buahAB
+        _buahBL.value = panenData.buahBL
+        loadImageBitmap(
+            uri = panenData.localImageUri?.toUri(),
+            onSuccess = { /* Bitmap sudah diatur */ },
+            onError = { /* Kesalahan ditangani di UI */ }
+        )
+    }
+
+    // Mendapatkan lokasi
+    @SuppressLint("MissingPermission")
+    fun startLocationUpdates(onLocationResult: (String, String) -> Unit, onError: (String) -> Unit) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 1000L
+            numUpdates = 1
+        }
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                locationResult.lastLocation?.let { location ->
+                    _locationPart1.value = location.latitude.toString()
+                    _locationPart2.value = location.longitude.toString()
+                    onLocationResult(location.latitude.toString(), location.longitude.toString())
+                    fusedLocationClient.removeLocationUpdates(this)
+                    _isFindingLocation.value = false
+                } ?: run {
+                    onError("Gagal mendapatkan lokasi.")
+                    _isFindingLocation.value = false
+                }
+            }
+        }
+        _isFindingLocation.value = true
+        viewModelScope.launch {
+            try {
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+                // Timeout setelah 10 detik
+                delay(10_000)
+                if (_isFindingLocation.value) {
+                    fusedLocationClient.removeLocationUpdates(locationCallback)
+                    _isFindingLocation.value = false
+                    onError("Timeout: Gagal mendapatkan lokasi dalam 10 detik.")
+                }
+            } catch (e: Exception) {
+                onError("Error memulai pembaruan lokasi: ${e.message}")
+                _isFindingLocation.value = false
+            }
+        }
+    }
+
+    // Membuat URI untuk gambar
+    fun createImageUri(): Uri {
+        val photosDir = File(context.cacheDir, "panen_photos")
+        photosDir.mkdirs()
+        val newFile = File(photosDir, "IMG_${System.currentTimeMillis()}.jpg")
+        val uri = FileProvider.getUriForFile(
+            context,
+            context.packageName + ".fileprovider",
+            newFile
+        )
+        context.grantUriPermission(
+            context.packageName,
+            uri,
+            android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+        )
+        _imageUri.value = uri
+        return uri
+    }
+
+    // Memuat bitmap gambar
+    fun loadImageBitmap(uri: Uri?, onSuccess: (Bitmap?) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _imageBitmap.value?.recycle()
+            _imageBitmap.value = null
+            if (uri == null) {
+                onSuccess(null)
+                return@launch
+            }
+            var attempts = 0
+            val maxAttempts = 5
+            val retryDelayMs = 750L
+            var lastException: Exception? = null
+            while (attempts < maxAttempts) {
+                try {
+                    if (attempts > 0) {
+                        delay(retryDelayMs)
+                    }
+                    context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        val bitmap = BitmapFactory.decodeStream(inputStream)
+                        _imageBitmap.value = bitmap
+                        onSuccess(bitmap)
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    lastException = e
+                }
+                attempts++
+            }
+            _imageBitmap.value = null
+            onError("Gagal memuat gambar: ${lastException?.message ?: "Gambar tidak valid"}")
+        }
+    }
+
+    // Membersihkan gambar
+    fun clearImage() {
+        _imageUri.value = null
+        _imageBitmap.value?.recycle()
+        _imageBitmap.value = null
+    }
+
+    // Menyimpan data panen dengan gambar terkompresi
     fun compressImageAndSavePanen(panenData: PanenData, imageUri: Uri?) {
         viewModelScope.launch {
             if (imageUri == null) {
@@ -148,7 +432,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 panenDao.insertPanen(panenData)
-                startSyncWorker() // Memanggil WorkManager setelah data disimpan
+                startSyncWorker()
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error saving panen data to local DB", e)
             }
@@ -156,7 +440,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private suspend fun compressImage(uri: Uri): Uri = suspendCoroutine { continuation ->
-        viewModelScope.launch(Dispatchers.IO) { // Gunakan Dispatchers.IO untuk operasi file
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val originalBitmap = BitmapFactory.decodeStream(context.contentResolver.openInputStream(uri))
                 if (originalBitmap == null) {
@@ -164,12 +448,9 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Resizing gambar
                 val resizedBitmap = resizeBitmap(originalBitmap, 1200, 860)
-
                 val compressedImageFile = File(context.cacheDir, "compressed_image_${UUID.randomUUID()}.jpg")
 
-                // Logika kompresi adaptif
                 var quality = 90
                 var finalUri: Uri? = null
 
@@ -182,17 +463,16 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     val fileSizeInKb = compressedImageFile.length() / 1024
                     Log.d("CompressImage", "Quality: $quality, Size: ${fileSizeInKb}KB")
 
-                    if (fileSizeInKb <= 100) { // Target ukuran file 200KB
+                    if (fileSizeInKb <= 100) {
                         finalUri = compressedImageFile.toUri()
                         break
                     }
-                    quality -= 5 // Turunkan kualitas 5%
+                    quality -= 5
                 }
 
                 if (finalUri != null) {
                     continuation.resume(finalUri)
                 } else {
-                    // Jika tidak tercapai, gunakan kualitas terendah yang dicoba
                     val outputStream = FileOutputStream(compressedImageFile)
                     resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
                     outputStream.flush()
@@ -210,7 +490,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Pisahkan fungsi resizing agar kode lebih bersih
     private fun resizeBitmap(originalBitmap: Bitmap, targetWidth: Int, targetHeight: Int): Bitmap {
         val originalWidth = originalBitmap.width
         val originalHeight = originalBitmap.height
@@ -226,6 +505,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Memperbarui data panen
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
             panenDao.updatePanen(panen)
@@ -233,16 +513,19 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Memuat data panen berdasarkan ID
     fun loadPanenDataById(id: Int) {
         viewModelScope.launch {
             _panenDataToEdit.value = panenDao.getPanenById(id)
         }
     }
 
+    // Mengosongkan data edit
     fun clearPanenDataToEdit() {
         _panenDataToEdit.value = null
     }
 
+    // Menghapus gambar dari Firebase Storage
     private suspend fun deleteImageFromFirebaseStorage(imageUrl: String?) {
         if (imageUrl.isNullOrEmpty()) {
             return
@@ -255,6 +538,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    // Menghapus data panen terpilih
     fun deleteSelectedPanenData(ids: List<Int>) {
         viewModelScope.launch {
             val dataToDelete = panenDao.getPanenByIds(ids)
@@ -270,7 +554,34 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // --- Filter & Sort Functions ---
+    // Memicu WorkManager untuk sinkronisasi
+    private fun startSyncWorker() {
+        Log.d("PanenViewModel", "Enqueuing SyncPanenWorker...")
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPanenWorker>()
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
+    }
+
+    // Membuat kode unik
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun generateUniqueCode(dateTime: LocalDateTime, block: String, totalBuah: Int): String {
+        val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
+        val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
+        val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
+        val formattedDate = dateTime.format(dateFormatter)
+        val formattedTime = dateTime.format(timeFormatter)
+        val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
+        val formattedBuah = totalBuah.toString().padStart(3, '0')
+        return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
+    }
+
+    // Fungsi untuk filter dan sort
     fun setSortBy(criteria: String) {
         _sortBy.value = criteria
     }
@@ -296,7 +607,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return when (sortBy) {
             "Nama" -> list.sortedBy { it.namaPemanen }
             "Blok" -> list.sortedBy { it.blok }
-            "Waktu" -> list.sortedBy { it.tanggalWaktu } // Add this line
+            "Waktu" -> list.sortedBy { it.tanggalWaktu }
             else -> list
         }
     }
@@ -306,14 +617,14 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             when (_sortBy.value) {
                 "Nama" -> list.sortedBy { it.namaPemanen }
                 "Blok" -> list.sortedBy { it.blok }
-                "Waktu" -> list.sortedBy { it.tanggalWaktu } // Add this line
+                "Waktu" -> list.sortedBy { it.tanggalWaktu }
                 else -> list
             }
         } else {
             when (_sortBy.value) {
                 "Nama" -> list.sortedByDescending { it.namaPemanen }
                 "Blok" -> list.sortedByDescending { it.blok }
-                "Waktu" -> list.sortedByDescending { it.tanggalWaktu } // Add this line
+                "Waktu" -> list.sortedByDescending { it.tanggalWaktu }
                 else -> list
             }
         }

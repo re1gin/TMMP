@@ -1,6 +1,7 @@
 package com.teladanprimaagro.tmpp.workers
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
@@ -9,6 +10,7 @@ import androidx.work.Data
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.teladanprimaagro.tmpp.data.AppDatabase
+import com.teladanprimaagro.tmpp.data.PanenData
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.util.UUID
@@ -48,9 +50,10 @@ class SyncPanenWorker(
             for ((index, panenData) in unsyncedDataList.withIndex()) {
                 try {
                     var firebaseImageUrl: String? = panenData.firebaseImageUrl
+                    var localFile: File?
 
                     if (panenData.localImageUri != null && panenData.firebaseImageUrl.isNullOrEmpty()) {
-                        val localFile = File(panenData.localImageUri.toUri().path ?: continue)
+                        localFile = File(panenData.localImageUri.toUri().path ?: continue)
 
                         if (localFile.exists()) {
                             val imageName = UUID.randomUUID().toString()
@@ -95,14 +98,19 @@ class SyncPanenWorker(
                 panenDbRef.updateChildren(firebaseUpdates).await()
                 Log.d("SyncPanenWorker", "Batch upload successful.")
 
-                // Step 3: Setelah berhasil, perbarui status di Room
+                // Step 3: Setelah berhasil, perbarui status di Room dan hapus file lokal
                 for (panenData in unsyncedDataList) {
                     val updatedLocalData = panenData.copy(
                         isSynced = true,
-                        firebaseImageUrl = firebaseUpdates[panenData.uniqueNo]?.let { (it as com.teladanprimaagro.tmpp.data.PanenData).firebaseImageUrl }
+                        firebaseImageUrl = firebaseUpdates[panenData.uniqueNo]?.let { (it as PanenData).firebaseImageUrl }
                     )
                     panenDao.updatePanen(updatedLocalData)
                     Log.d("SyncPanenWorker", "Panen data updated in local DB: ${updatedLocalData.uniqueNo}")
+
+                    // Hapus file lokal setelah berhasil disinkronkan
+                    if (panenData.localImageUri != null) {
+                        deleteLocalImageFile(panenData.localImageUri.toUri())
+                    }
                 }
             }
 
@@ -111,6 +119,22 @@ class SyncPanenWorker(
         } catch (e: Exception) {
             Log.e("SyncPanenWorker", "Major error during sync process. Retrying...", e)
             return Result.retry()
+        }
+    }
+
+    private fun deleteLocalImageFile(uri: Uri) {
+        try {
+            val file = uri.path?.let { File(it) }
+            if (file != null && file.exists()) {
+                val isDeleted = file.delete()
+                if (isDeleted) {
+                    Log.d("SyncPanenWorker", "Local image file deleted successfully: ${file.path}")
+                } else {
+                    Log.w("SyncPanenWorker", "Failed to delete local image file: ${file.path}")
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("SyncPanenWorker", "Error deleting local image file: ${uri.path}", e)
         }
     }
 }

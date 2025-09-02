@@ -45,7 +45,11 @@ fun DropdownInputField(
             value = selectedOption,
             onValueChange = {},
             readOnly = true,
-            label = { Text(label) },
+            label = { Text(
+                text = label,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            ) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             shape = RoundedCornerShape(8.dp),
             textStyle = MaterialTheme.typography.bodyMedium.copy(
@@ -76,6 +80,7 @@ fun DropdownInputField(
                 focusedLabelColor = Black,
                 unfocusedLabelColor = MainColor,
                 errorLabelColor = MaterialTheme.colorScheme.error,
+                disabledLabelColor = MainColor,
 
                 // Warna cursor
                 cursorColor = MaterialTheme.colorScheme.onPrimary,

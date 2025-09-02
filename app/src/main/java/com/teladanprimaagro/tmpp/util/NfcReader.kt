@@ -152,7 +152,6 @@ fun NfcReadDialog(
                         val nfcMessage = rawMessages[0]
                         val ndefRecord = nfcMessage.records[0]
 
-                        // ... sisa logika pembacaan NDEF yang sudah ada ...
                         if (ndefRecord.tnf == NdefRecord.TNF_WELL_KNOWN &&
                             ndefRecord.type.contentEquals(NdefRecord.RTD_TEXT)
                         ) {
@@ -201,7 +200,6 @@ fun NfcReadDialog(
             } else {
                 sharedNfcViewModel.setReadError("Stiker NFC tidak terdeteksi dengan benar.")
             }
-
             if (context is MainActivity) {
                 context._nfcIntent.value = null
             } else {

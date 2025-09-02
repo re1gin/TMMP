@@ -15,6 +15,53 @@ import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 
+//@Composable
+//fun NfcReadDialog(
+//    showDialog: Boolean,
+//    onDismissRequest: () -> Unit,
+//    sharedNfcViewModel: SharedNfcViewModel
+//) {
+//    val nfcState by sharedNfcViewModel.nfcState.collectAsState()
+//
+//    AnimatedVisibility(
+//        visible = showDialog && nfcState !is NfcOperationState.Idle,
+//        enter = fadeIn(),
+//        exit = fadeOut()
+//    ) {
+//        AlertDialog(
+//            onDismissRequest = onDismissRequest,
+//            title = { Text(stringResource(R.string.nfc_read_title)) },
+//            text = {
+//                when (val state = nfcState) {
+//                    is NfcOperationState.WaitingForRead -> Text("Dekatkan tag NFC untuk membaca data.")
+//                    is NfcOperationState.Reading -> Column(
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                        Text("Sedang membaca tag NFC...")
+//                    }
+//                    is NfcOperationState.ReadSuccess -> Text("Data berhasil dibaca: ${state.data.uniqueNo}")
+//                    is NfcOperationState.ReadError -> Text(state.message)
+//                    else -> Text(stringResource(R.string.unknown_nfc_state))
+//                }
+//            },
+//            confirmButton = {
+//                if (nfcState is NfcOperationState.ReadError) {
+//                    Button(onClick = { sharedNfcViewModel.setWaitingForRead() }) {
+//                        Text(stringResource(R.string.retry_button))
+//                    }
+//                }
+//            },
+//            dismissButton = {
+//                Button(onClick = onDismissRequest) {
+//                    Text(stringResource(R.string.cancel_button))
+//                }
+//            }
+//        )
+//    }
+//}
+
 @Composable
 fun SuccessDialog(onDismiss: () -> Unit) {
     AlertDialog(

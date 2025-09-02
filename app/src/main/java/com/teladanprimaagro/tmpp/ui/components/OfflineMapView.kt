@@ -18,6 +18,7 @@ import org.osmdroid.views.overlay.compass.CompassOverlay
 import java.io.File
 import androidx.core.graphics.drawable.DrawableCompat
 
+@Suppress("DEPRECATION")
 @SuppressLint("RememberReturnType")
 @Composable
 fun OfflineMapView(

@@ -1,30 +1,30 @@
 @file:Suppress("DEPRECATION")
-
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.Manifest
-import android.annotation.SuppressLint
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
-import android.net.Uri
-import android.nfc.NfcAdapter
 import android.os.Build
-import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,8 +32,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,16 +61,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import androidx.core.content.FileProvider
-import androidx.core.net.toUri
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.google.android.gms.location.*
 import com.teladanprimaagro.tmpp.data.PanenData
-import com.teladanprimaagro.tmpp.ui.components.*
+import com.teladanprimaagro.tmpp.ui.components.BuahCounter
+import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
+import com.teladanprimaagro.tmpp.ui.components.FailureDialog
+import com.teladanprimaagro.tmpp.ui.components.SuccessDialog
+import com.teladanprimaagro.tmpp.ui.components.TextInputField
+import com.teladanprimaagro.tmpp.ui.components.TotalBuahDisplay
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
-import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
@@ -64,15 +78,8 @@ import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.Exception
-import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +87,7 @@ import java.time.format.DateTimeFormatter
 fun PanenInputScreen(
     navController: NavController,
     panenViewModel: PanenViewModel,
-    settingsViewModel: SettingsViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel,
     nfcIntentFromActivity: State<Intent?>,
     panenDataToEdit: PanenData? = null
 ) {
@@ -93,207 +100,108 @@ fun PanenInputScreen(
     val formatter = remember { DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") }
     val dateTimeDisplay = remember { panenDataToEdit?.tanggalWaktu ?: currentDateTime.format(formatter) }
 
-    var locationPart1 by remember(panenDataToEdit) { mutableStateOf(panenDataToEdit?.locationPart1 ?: "") }
-    var locationPart2 by remember(panenDataToEdit) { mutableStateOf(panenDataToEdit?.locationPart2 ?: "") }
+    // Menggunakan state dari PanenViewModel
+    val locationPart1 by panenViewModel.locationPart1.collectAsState()
+    val locationPart2 by panenViewModel.locationPart2.collectAsState()
+    val isFindingLocation by panenViewModel.isFindingLocation.collectAsState()
+    val imageUri by panenViewModel.imageUri.collectAsState()
+    val imageBitmap by panenViewModel.imageBitmap.collectAsState()
+    val uniqueNo by panenViewModel.uniqueNo.collectAsState()
+    val selectedForeman by panenViewModel.selectedForeman.collectAsState()
+    val selectedHarvester by panenViewModel.selectedHarvester.collectAsState()
+    val selectedBlock by panenViewModel.selectedBlock.collectAsState()
+    val selectedTph by panenViewModel.selectedTph.collectAsState()
+    val buahN by panenViewModel.buahN.collectAsState()
+    val buahA by panenViewModel.buahA.collectAsState()
+    val buahOR by panenViewModel.buahOR.collectAsState()
+    val buahE by panenViewModel.buahE.collectAsState()
+    val buahAB by panenViewModel.buahAB.collectAsState()
+    val buahBL by panenViewModel.buahBL.collectAsState()
+    val totalBuah by panenViewModel.totalBuah.collectAsState()
 
+    // Dropdown options dari SettingsViewModel
     val foremanOptions = settingsViewModel.mandorList.toList()
-    var selectedForeman by remember(panenDataToEdit, foremanOptions) {
-        mutableStateOf(panenDataToEdit?.kemandoran ?: foremanOptions.firstOrNull() ?: "")
-    }
     var foremanExpanded by remember { mutableStateOf(false) }
 
     val harvesterOptions = settingsViewModel.pemanenList.toList()
-    var selectedHarvester by remember(panenDataToEdit, harvesterOptions) {
-        mutableStateOf(panenDataToEdit?.namaPemanen ?: harvesterOptions.firstOrNull() ?: "")
-    }
     var harvesterExpanded by remember { mutableStateOf(false) }
 
     val blockOptions = settingsViewModel.blokList.toList()
-    var selectedBlock by remember(panenDataToEdit, blockOptions) {
-        mutableStateOf(panenDataToEdit?.blok ?: blockOptions.firstOrNull() ?: "")
-    }
     var blockExpanded by remember { mutableStateOf(false) }
 
     val tphOptions = settingsViewModel.tphList.toList()
-    var selectedTph by remember(panenDataToEdit, tphOptions) {
-        mutableStateOf(panenDataToEdit?.noTph ?: tphOptions.firstOrNull() ?: "")
-    }
     var tphExpanded by remember { mutableStateOf(false) }
 
-    var buahN by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahN ?: 0) }
-    var buahA by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahA ?: 0) }
-    var buahOR by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahOR ?: 0) }
-    var buahE by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahE ?: 0) }
-    var buahAB by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahAB ?: 0) }
-    var buahBL by remember(panenDataToEdit) { mutableIntStateOf(panenDataToEdit?.buahBL ?: 0) }
+    // State untuk indikator loading gambar
+    var isImageLoading by remember { mutableStateOf(false) }
 
-    val totalBuah = remember(buahN, buahAB, buahOR) { buahN + buahAB + buahOR }
-
-    var imageUri by remember(panenDataToEdit) {
-        mutableStateOf(panenDataToEdit?.localImageUri?.toUri())
+    // Memuat data edit jika ada
+    LaunchedEffect(panenDataToEdit) {
+        if (panenDataToEdit != null) {
+            panenViewModel.loadEditData(panenDataToEdit)
+        } else {
+            panenViewModel.resetPanenForm()
+        }
     }
-    var imageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
 
+    // Memuat bitmap saat imageUri berubah
     LaunchedEffect(imageUri) {
-        imageBitmap = null
-        if (imageUri != null) {
-            var attempts = 0
-            val maxAttempts = 5
-            val retryDelayMs = 750L
-            var lastException: Exception? = null
-            while (attempts < maxAttempts) {
-                try {
-                    if (attempts > 0) {
-                        delay(retryDelayMs)
-                    }
-                    context.contentResolver.openInputStream(imageUri!!)?.use { inputStream ->
-                        val bitmap = BitmapFactory.decodeStream(inputStream)
-                        if (bitmap != null) {
-                            imageBitmap = bitmap
-                            return@LaunchedEffect
-                        }
-                    }
-                } catch (e: Exception) {
-                    lastException = e
-                }
-                attempts++
-            }
-            imageBitmap = null
-            if (lastException != null) {
-                Log.e("PanenInputScreen", "Final Error loading image from URI: ${lastException.message}", lastException)
+        isImageLoading = true
+        panenViewModel.loadImageBitmap(
+            uri = imageUri,
+            onSuccess = { isImageLoading = false },
+            onError = { error ->
+                isImageLoading = false
                 if (isEditing) {
-                    Toast.makeText(context, "Gagal memuat gambar lama: ${lastException.message}", Toast.LENGTH_LONG).show()
-                }
-            } else {
-                if (isEditing) {
-                    Toast.makeText(context, "Gambar lama rusak atau tidak valid.", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                 }
             }
-        }
-    }
-
-    var showNfcWriteDialog by remember { mutableStateOf(false) }
-    var nfcDataToPass by remember { mutableStateOf<PanenData?>(null) }
-    val nfcAdapter: NfcAdapter? = remember { NfcAdapter.getDefaultAdapter(context) }
-    val fusedLocationClient: FusedLocationProviderClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-
-    // --- KODE LOKASI BARU ---
-    var isFindingLocation by remember { mutableStateOf(false) }
-
-    val locationCallback = remember {
-        object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                locationResult.lastLocation?.let { location ->
-                    locationPart1 = location.latitude.toString()
-                    locationPart2 = location.longitude.toString()
-                    Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
-
-                    // Setelah mendapatkan lokasi, hentikan pembaruan
-                    fusedLocationClient.removeLocationUpdates(this)
-                    isFindingLocation = false
-                }
-            }
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    val startLocationUpdates = {
-        isFindingLocation = true
-        val locationRequest = LocationRequest.create().apply {
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 1000L
-            numUpdates = 1
-        }
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
         )
     }
+
+    // State untuk NFC dan dialog
+    var showNfcWriteDialog by remember { mutableStateOf(false) }
+    var nfcDataToPass by remember { mutableStateOf<PanenData?>(null) }
+    val nfcAdapter = remember { android.nfc.NfcAdapter.getDefaultAdapter(context) }
 
     var showSuccessDialog by remember { mutableStateOf(false) }
     var showFailureDialog by remember { mutableStateOf(false) }
     var failureMessage by remember { mutableStateOf("") }
 
+    // Launcher untuk izin lokasi
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                startLocationUpdates()
+                panenViewModel.startLocationUpdates(
+                    onLocationResult = { lat, lon ->
+                        Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
+                    },
+                    onError = { error ->
+                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                    }
+                )
             } else {
                 Toast.makeText(context, "Izin lokasi ditolak.", Toast.LENGTH_SHORT).show()
             }
         }
     )
 
-    fun generateUniqueCode(
-        dateTime: LocalDateTime,
-        block: String,
-        totalBuah: Int
-    ): String {
-        val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
-        val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
-        val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
-        val formattedDate = dateTime.format(dateFormatter)
-        val formattedTime = dateTime.format(timeFormatter)
-        val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
-        val formattedBuah = totalBuah.toString().padStart(3, '0')
-        return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
-    }
-
-    val initialUniqueNo = remember {
-        panenDataToEdit?.uniqueNo ?: generateUniqueCode(currentDateTime, "", 0)
-    }
-    var uniqueNo by remember(panenDataToEdit) { mutableStateOf(initialUniqueNo) }
-
-    LaunchedEffect(selectedBlock, totalBuah) {
-        if (!isEditing) {
-            uniqueNo = generateUniqueCode(currentDateTime, selectedBlock, totalBuah)
-        }
-    }
-
-    fun createImageUri(context: Context): Uri {
-        val photosDir = File(context.cacheDir, "panen_photos")
-        photosDir.mkdirs()
-        val newFile = File(photosDir, "IMG_${System.currentTimeMillis()}.jpg")
-        val uri = FileProvider.getUriForFile(
-            context,
-            context.packageName + ".fileprovider",
-            newFile
-        )
-        context.grantUriPermission(
-            context.packageName,
-            uri,
-            Intent.FLAG_GRANT_READ_URI_PERMISSION
-        )
-        imageUri = uri
-        return uri
-    }
-
+    // Launcher untuk izin kamera dan pengambilan gambar
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
+            isImageLoading = false
             if (success) {
-                val capturedUri = imageUri
-                if (capturedUri != null) {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        delay(100)
-                        try {
-                            context.contentResolver.openInputStream(capturedUri)?.use { inputStream ->
-                                val bitmap = BitmapFactory.decodeStream(inputStream)
-                                if (bitmap != null) {
-                                    imageBitmap = bitmap
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Toast.makeText(context, "Gagal memuat gambar: ${e.message}", Toast.LENGTH_LONG).show()
-                        }
-                        imageUri = capturedUri
+                panenViewModel.loadImageBitmap(
+                    uri = imageUri,
+                    onSuccess = { /* Bitmap sudah diatur */ },
+                    onError = { error ->
+                        Toast.makeText(context, error, Toast.LENGTH_LONG).show()
                     }
-                }
+                )
             } else {
-                imageUri = null
-                imageBitmap = null
+                panenViewModel.clearImage()
             }
         }
     )
@@ -302,29 +210,13 @@ fun PanenInputScreen(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { isGranted ->
             if (isGranted) {
-                cameraLauncher.launch(createImageUri(context))
+                isImageLoading = true
+                cameraLauncher.launch(panenViewModel.createImageUri())
             } else {
                 Toast.makeText(context, "Izin kamera ditolak.", Toast.LENGTH_SHORT).show()
             }
         }
     )
-
-    fun resetForm() {
-        locationPart1 = ""
-        locationPart2 = ""
-        selectedForeman = foremanOptions.firstOrNull() ?: ""
-        selectedHarvester = harvesterOptions.firstOrNull() ?: ""
-        selectedBlock = blockOptions.firstOrNull() ?: ""
-        selectedTph = tphOptions.firstOrNull() ?: ""
-        buahN = 0
-        buahA = 0
-        buahOR = 0
-        buahE = 0
-        buahAB = 0
-        buahBL = 0
-        imageUri = null
-        imageBitmap = null
-    }
 
     Column(
         modifier = Modifier
@@ -384,7 +276,7 @@ fun PanenInputScreen(
                 TextInputField(
                     label = "Latitude",
                     value = locationPart1,
-                    onValueChange = { if (!isEditing) locationPart1 = it },
+                    onValueChange = { if (!isEditing) panenViewModel.setLocationPart1(it) },
                     modifier = Modifier
                         .weight(0.5f)
                         .padding(end = 8.dp),
@@ -394,7 +286,7 @@ fun PanenInputScreen(
                 TextInputField(
                     label = "Longitude",
                     value = locationPart2,
-                    onValueChange = { if (!isEditing) locationPart2 = it },
+                    onValueChange = { if (!isEditing) panenViewModel.setLocationPart2(it) },
                     modifier = Modifier
                         .weight(0.5f)
                         .padding(start = 8.dp),
@@ -405,7 +297,14 @@ fun PanenInputScreen(
                     onClick = {
                         if (!isEditing) {
                             if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                startLocationUpdates()
+                                panenViewModel.startLocationUpdates(
+                                    onLocationResult = { lat, lon ->
+                                        Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
+                                    },
+                                    onError = { error ->
+                                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                    }
+                                )
                             } else {
                                 locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                             }
@@ -420,12 +319,20 @@ fun PanenInputScreen(
                             shape = RoundedCornerShape(10.dp)
                         )
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = "Dapatkan Lokasi",
-                        tint = Color.Black,
-                        modifier = Modifier.size(30.dp)
-                    )
+                    if (isFindingLocation) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(30.dp),
+                            color = Black,
+                            strokeWidth = 3.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.LocationOn,
+                            contentDescription = "Dapatkan Lokasi",
+                            tint = Color.Black,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -433,7 +340,7 @@ fun PanenInputScreen(
                 label = "Kemandoran",
                 options = foremanOptions,
                 selectedOption = selectedForeman,
-                onOptionSelected = { selectedForeman = it },
+                onOptionSelected = { panenViewModel.setSelectedForeman(it) },
                 expanded = foremanExpanded,
                 onExpandedChange = { foremanExpanded = it },
             )
@@ -442,7 +349,7 @@ fun PanenInputScreen(
                 label = "Nama Pemanen",
                 options = harvesterOptions,
                 selectedOption = selectedHarvester,
-                onOptionSelected = { selectedHarvester = it },
+                onOptionSelected = { panenViewModel.setSelectedHarvester(it) },
                 expanded = harvesterExpanded,
                 onExpandedChange = { harvesterExpanded = it },
             )
@@ -456,7 +363,7 @@ fun PanenInputScreen(
                     label = "Blok",
                     options = blockOptions,
                     selectedOption = selectedBlock,
-                    onOptionSelected = { selectedBlock = it },
+                    onOptionSelected = { panenViewModel.setSelectedBlock(it) },
                     expanded = blockExpanded,
                     onExpandedChange = { blockExpanded = it },
                     modifier = Modifier
@@ -467,7 +374,7 @@ fun PanenInputScreen(
                     label = "No. TPH",
                     options = tphOptions,
                     selectedOption = selectedTph,
-                    onOptionSelected = { selectedTph = it },
+                    onOptionSelected = { panenViewModel.setSelectedTph(it) },
                     expanded = tphExpanded,
                     onExpandedChange = { tphExpanded = it },
                     modifier = Modifier
@@ -485,17 +392,17 @@ fun PanenInputScreen(
                 color = White)
             Spacer(modifier = Modifier.height(20.dp))
 
-            BuahCounter(label = "Buah N", count = buahN, onCountChange = { buahN = it })
+            BuahCounter(label = "Buah N", count = buahN, onCountChange = { panenViewModel.setBuahN(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah A", count = buahA, onCountChange = { buahA = it })
+            BuahCounter(label = "Buah A", count = buahA, onCountChange = { panenViewModel.setBuahA(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah OR", count = buahOR, onCountChange = { buahOR = it })
+            BuahCounter(label = "Buah OR", count = buahOR, onCountChange = { panenViewModel.setBuahOR(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah E", count = buahE, onCountChange = { buahE = it })
+            BuahCounter(label = "Buah E", count = buahE, onCountChange = { panenViewModel.setBuahE(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah AB", count = buahAB, onCountChange = { buahAB = it })
+            BuahCounter(label = "Buah AB", count = buahAB, onCountChange = { panenViewModel.setBuahAB(it) })
             Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Berondolan Lepas", count = buahBL, onCountChange = { buahBL = it })
+            BuahCounter(label = "Berondolan Lepas", count = buahBL, onCountChange = { panenViewModel.setBuahBL(it) })
             Spacer(modifier = Modifier.height(20.dp))
             TotalBuahDisplay(value = totalBuah)
 
@@ -514,20 +421,27 @@ fun PanenInputScreen(
                     .height(180.dp)
                     .background(Grey, RoundedCornerShape(10.dp))
                     .clip(RoundedCornerShape(10.dp))
-                    .clickable {
+                    .clickable(enabled = !isImageLoading) {
                         if (ContextCompat.checkSelfPermission(
                                 context,
                                 Manifest.permission.CAMERA
                             ) == PackageManager.PERMISSION_GRANTED
                         ) {
-                            cameraLauncher.launch(createImageUri(context))
+                            isImageLoading = true
+                            cameraLauncher.launch(panenViewModel.createImageUri())
                         } else {
                             cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
-                if (imageBitmap != null) {
+                if (isImageLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp),
+                        color = Black,
+                        strokeWidth = 4.dp
+                    )
+                } else if (imageBitmap != null) {
                     Image(
                         bitmap = imageBitmap!!.asImageBitmap(),
                         contentDescription = "Captured Image (Manual)",
@@ -566,64 +480,15 @@ fun PanenInputScreen(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    if (locationPart1.isBlank() || locationPart2.isBlank()) {
-                        Toast.makeText(
-                            context,
-                            "Lokasi (Latitude/Longitude) tidak boleh kosong. Gunakan tombol lokasi atau isi manual.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                    val (isValid, errorMessage) = panenViewModel.validatePanenData(nfcAdapter)
+                    if (!isValid) {
+                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                         return@Button
                     }
-                    if (totalBuah <= 0) {
-                        Toast.makeText(
-                            context,
-                            "Total Buah harus lebih dari 0. Pastikan setidaknya Buah N, Buah AB, atau Buah OR memiliki nilai.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@Button
-                    }
-                    if (buahN == 0 && buahA == 0 && buahOR == 0 && buahE == 0 && buahAB == 0 && buahBL == 0) {
-                        Toast.makeText(
-                            context,
-                            "Minimal satu jenis buah harus memiliki nilai lebih dari 0.",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        return@Button
-                    }
-                    if (imageUri == null || imageBitmap == null) {
-                        Toast.makeText(context, "Harap ambil gambar panen.", Toast.LENGTH_SHORT)
-                            .show()
-                        return@Button
-                    }
-                    if (nfcAdapter == null || !nfcAdapter.isEnabled) {
-                        val message = if (nfcAdapter == null) {
-                            "NFC tidak tersedia di perangkat ini. Data tidak dapat disimpan."
-                        } else {
-                            "NFC dinonaktifkan. Harap aktifkan NFC untuk menyimpan data."
-                        }
-                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                        return@Button
-                    }
-                    val panenDataFinal = PanenData(
+                    val panenDataFinal = panenViewModel.createPanenData(
                         id = panenDataToEdit?.id ?: 0,
                         tanggalWaktu = dateTimeDisplay,
-                        uniqueNo = uniqueNo,
-                        locationPart1 = locationPart1,
-                        locationPart2 = locationPart2,
-                        kemandoran = selectedForeman,
-                        namaPemanen = selectedHarvester,
-                        blok = selectedBlock,
-                        noTph = selectedTph,
-                        totalBuah = totalBuah,
-                        buahN = buahN,
-                        buahA = buahA,
-                        buahOR = buahOR,
-                        buahE = buahE,
-                        buahAB = buahAB,
-                        buahBL = buahBL,
-                        localImageUri = imageUri?.toString(),
-                        firebaseImageUrl = null,
-                        isSynced = false
+                        firebaseImageUrl = null
                     )
                     nfcDataToPass = panenDataFinal.copy(id = 0)
                     showNfcWriteDialog = true
@@ -639,24 +504,9 @@ fun PanenInputScreen(
             ) {
                 Text(if (isEditing) "Simpan Perubahan" else "Kirim", fontWeight = FontWeight.Bold)
             }
+
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                repeat(3) {
-                    Box(
-                        modifier = Modifier
-                            .size(8.dp)
-                            .background(MaterialTheme.colorScheme.primary, shape = RoundedCornerShape(50))
-                            .padding(horizontal = 4.dp)
-                    )
-                    if (it < 2) Spacer(modifier = Modifier.width(8.dp))
-                }
-            }
+
             NfcWriteDialog(
                 showDialog = showNfcWriteDialog,
                 onDismissRequest = {
@@ -669,27 +519,10 @@ fun PanenInputScreen(
                     nfcDataToPass = null
                     if (success) {
                         showSuccessDialog = true
-                        vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-                        val panenData = PanenData(
+                        val panenData = panenViewModel.createPanenData(
                             id = panenDataToEdit?.id ?: 0,
                             tanggalWaktu = dateTimeDisplay,
-                            uniqueNo = uniqueNo,
-                            locationPart1 = locationPart1,
-                            locationPart2 = locationPart2,
-                            kemandoran = selectedForeman,
-                            namaPemanen = selectedHarvester,
-                            blok = selectedBlock,
-                            noTph = selectedTph,
-                            totalBuah = totalBuah,
-                            buahN = buahN,
-                            buahA = buahA,
-                            buahOR = buahOR,
-                            buahE = buahE,
-                            buahAB = buahAB,
-                            buahBL = buahBL,
-                            localImageUri = imageUri?.toString(),
-                            firebaseImageUrl = panenDataToEdit?.firebaseImageUrl,
-                            isSynced = false
+                            firebaseImageUrl = panenDataToEdit?.firebaseImageUrl
                         )
                         if (isEditing) {
                             panenViewModel.updatePanenData(panenData)
@@ -710,7 +543,7 @@ fun PanenInputScreen(
                         showSuccessDialog = false
                         navController.popBackStack()
                         if (!isEditing) {
-                            resetForm()
+                            panenViewModel.resetPanenForm()
                         }
                     }
                 )

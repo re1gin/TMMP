@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.White
 
 
@@ -47,7 +48,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
     ) {
         Text(
             text = label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = White,
             fontSize = 15.sp,
             fontWeight = FontWeight.Medium,
             modifier = Modifier.weight(1f)
@@ -63,12 +64,13 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     // Menggunakan onPrimary sebagai warna background lingkaran
-                    .background(MaterialTheme.colorScheme.onPrimary.copy(0.9f), CircleShape)
+                    .background(MainColor, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
                     contentDescription = "Kurang",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Black,
+                    modifier = Modifier.size(30.dp)
                 )
             }
 
@@ -110,12 +112,13 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     // Menggunakan onPrimary sebagai warna background lingkaran
-                    .background(MaterialTheme.colorScheme.onPrimary.copy(0.9f), CircleShape)
+                    .background(MainColor, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Tambah",
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = Black,
+                    modifier = Modifier.size(30.dp)
                 )
             }
         }

@@ -24,7 +24,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -45,12 +44,11 @@ import com.teladanprimaagro.tmpp.MainActivity
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.InfoBlue
-import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import java.nio.charset.Charset
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.util.Locale // Import Locale untuk bahasa
+import java.util.Locale
 
 
 fun writeNdefMessageToTag(
@@ -99,7 +97,7 @@ fun NfcWriteDialog(
 
     val context = LocalContext.current
     val view = LocalView.current
-    val lifecycleOwner = remember(view) { view.findViewTreeLifecycleOwner() }
+    remember(view) { view.findViewTreeLifecycleOwner() }
 
     var nfcWriteStatusMessage by remember { mutableStateOf("Tempelkan stiker NFC ke perangkat Anda untuk menulis data.") }
 

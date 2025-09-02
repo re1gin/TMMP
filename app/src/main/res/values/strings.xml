@@ -1,3 +1,56 @@
 <resources>
     <string name="app_name">TMPP</string>
+
+    <!-- Strings for NfcWriteDialog -->
+    <string name="nfc_write_title">Tulis Tag NFC</string>
+    <string name="nfc_waiting_for_write">Dekatkan tag NFC untuk menulis data.</string>
+    <string name="nfc_writing">Sedang menulis ke tag NFC…</string>
+    <string name="nfc_write_success">Data berhasil ditulis ke tag NFC!</string>
+    <string name="nfc_write_error_too_large">Ukuran data terlalu besar untuk tag.</string>
+    <string name="nfc_write_error_read_only">Tag NFC hanya-baca.</string>
+    <string name="nfc_write_error_no_ndef">Tag tidak mendukung format NDEF.</string>
+    <string name="nfc_write_error">Gagal menulis ke tag: %1$s</string>
+
+    <!-- Strings for ScanInputScreen -->
+    <string name="nfc_status_description">Status NFC</string>
+    <string name="nfc_not_available">NFC tidak tersedia di perangkat ini.</string>
+    <string name="nfc_disabled">NFC dinonaktifkan. Harap aktifkan di pengaturan.</string>
+
+    <!-- Existing strings for other dialogs (SuccessDialog, FailureDialog, etc.) -->
+    <string name="success_dialog_title">Data Berhasil ✓</string>
+    <string name="success_dialog_message">Berhasil menambahkan data ke-NFC</string>
+    <string name="failure_dialog_title">Gagal ❌</string>
+    <string name="duplicate_scan_title">Peringatan ⚠️</string>
+    <string name="success_scan_title">Scan Berhasil ✓</string>
+    <string name="success_scan_message">Tag NFC telah berhasil di-scan.</string>
+
+    <!-- Existing strings from PanenInputScreen (for completeness) -->
+    <string name="panen_title">Input Panen</string>
+    <string name="edit_panen_title">Edit Panen</string>
+    <string name="back_button_description">Kembali</string>
+    <string name="unique_no_label">Nomor Unik</string>
+    <string name="date_time_label">Tanggal dan Waktu</string>
+    <string name="latitude_label">Latitude</string>
+    <string name="longitude_label">Longitude</string>
+    <string name="get_location_description">Ambil Lokasi</string>
+    <string name="foreman_label">Mandor</string>
+    <string name="harvester_label">Pemanen</string>
+    <string name="block_label">Blok</string>
+    <string name="tph_label">TPH</string>
+    <string name="buah_n_label">Buah N</string>
+    <string name="buah_a_label">Buah A</string>
+    <string name="buah_or_label">Buah OR</string>
+    <string name="buah_e_label">Buah E</string>
+    <string name="buah_ab_label">Buah AB</string>
+    <string name="buah_bl_label">Buah BL</string>
+    <string name="take_photo_description">Ambil Foto</string>
+    <string name="captured_image_description">Foto yang Diambil</string>
+    <string name="retake_photo_hint">Ketuk untuk mengambil ulang</string>
+    <string name="take_photo_label">Ambil Foto</string>
+    <string name="submit_button">Kirim</string>
+    <string name="save_changes_button">Simpan Perubahan</string>
+    <string name="validation_failed">Validasi data gagal</string>
+    <string name="location_detected">Lokasi berhasil dideteksi</string>
+    <string name="location_permission_denied">Izin lokasi ditolak</string>
+    <string name="camera_permission_denied">Izin kamera ditolak</string>
 </resources>
