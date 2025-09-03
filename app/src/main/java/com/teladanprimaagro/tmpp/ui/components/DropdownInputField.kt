@@ -23,6 +23,7 @@ import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
 import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,7 +81,6 @@ fun DropdownInputField(
                 focusedLabelColor = Black,
                 unfocusedLabelColor = MainColor,
                 errorLabelColor = MaterialTheme.colorScheme.error,
-                disabledLabelColor = MainColor,
 
                 // Warna cursor
                 cursorColor = MaterialTheme.colorScheme.onPrimary,
@@ -92,7 +92,7 @@ fun DropdownInputField(
             expanded = expanded,
             onDismissRequest = { onExpandedChange(false) },
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.secondary) // Warna background menu
+                .background(OldGrey)
         ) {
             options.forEach { item ->
                 DropdownMenuItem(
@@ -102,7 +102,7 @@ fun DropdownInputField(
                         onExpandedChange(false)
                     },
                     colors = MenuDefaults.itemColors(
-                        textColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        textColor = White
                     )
                 )
             }

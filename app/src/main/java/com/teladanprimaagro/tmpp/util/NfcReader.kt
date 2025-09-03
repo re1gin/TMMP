@@ -14,13 +14,20 @@ import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -37,6 +44,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.MainActivity
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
@@ -152,6 +160,7 @@ fun NfcReadDialog(
                         val nfcMessage = rawMessages[0]
                         val ndefRecord = nfcMessage.records[0]
 
+                        // ... sisa logika pembacaan NDEF yang sudah ada ...
                         if (ndefRecord.tnf == NdefRecord.TNF_WELL_KNOWN &&
                             ndefRecord.type.contentEquals(NdefRecord.RTD_TEXT)
                         ) {

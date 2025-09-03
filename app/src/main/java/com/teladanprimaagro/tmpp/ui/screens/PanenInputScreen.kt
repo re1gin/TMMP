@@ -31,15 +31,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -57,7 +61,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -218,343 +221,424 @@ fun PanenInputScreen(
         }
     )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MainBackground)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .height(60.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            IconButton(onClick = { navController.popBackStack() }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = White
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = if (isEditing) "Edit Panen" else "Panen",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        if (isEditing) {
+                            navController.popBackStack()
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isEditing) Icons.Default.Clear else Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = if (isEditing) "Batal" else "Kembali",
+                            tint = White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.Transparent
                 )
-            }
-
-            Text(
-                text = if (isEditing) "Edit Panen" else "Panen",
-                color = White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
             )
         }
+    ) { paddingValues ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp)
-                .verticalScroll(scrollState)
+                .fillMaxSize()
+                .background(MainBackground)
+                .padding(paddingValues)
         ) {
-            TextInputField(
-                label = "No. Unik",
-                value = uniqueNo,
-                onValueChange = {},
-                readOnly = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            TextInputField(
-                label = "Tanggal/Jam",
-                value = dateTimeDisplay,
-                onValueChange = {},
-                readOnly = true
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                    .verticalScroll(scrollState)
             ) {
                 TextInputField(
-                    label = "Latitude",
-                    value = locationPart1,
-                    onValueChange = { if (!isEditing) panenViewModel.setLocationPart1(it) },
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .padding(end = 8.dp),
-                    keyboardType = KeyboardType.Decimal,
-                    readOnly = true
+                    label = "No. Unik",
+                    value = uniqueNo,
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
+                Spacer(modifier = Modifier.height(12.dp))
                 TextInputField(
-                    label = "Longitude",
-                    value = locationPart2,
-                    onValueChange = { if (!isEditing) panenViewModel.setLocationPart2(it) },
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .padding(start = 8.dp),
-                    keyboardType = KeyboardType.Decimal,
+                    label = "Tanggal/Jam",
+                    value = dateTimeDisplay,
+                    onValueChange = {},
                     readOnly = true
                 )
-                IconButton(
-                    onClick = {
-                        if (!isEditing) {
-                            if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                panenViewModel.startLocationUpdates(
-                                    onLocationResult = { lat, lon ->
-                                        Toast.makeText(context, "Lokasi terdeteksi.", Toast.LENGTH_SHORT).show()
-                                    },
-                                    onError = { error ->
-                                        Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                                    }
-                                )
-                            } else {
-                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                            }
-                        }
-                    },
-                    enabled = !isEditing && !isFindingLocation,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .fillMaxHeight()
-                        .background(
-                            color = if (isEditing || isFindingLocation) OldGrey.copy(alpha = 0.5f) else MainColor,
-                            shape = RoundedCornerShape(10.dp)
-                        )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (isFindingLocation) {
+                    TextInputField(
+                        label = "Latitude",
+                        value = locationPart1,
+                        onValueChange = { if (!isEditing) panenViewModel.setLocationPart1(it) },
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(end = 8.dp),
+                        keyboardType = KeyboardType.Decimal,
+                        readOnly = true
+                    )
+                    TextInputField(
+                        label = "Longitude",
+                        value = locationPart2,
+                        onValueChange = { if (!isEditing) panenViewModel.setLocationPart2(it) },
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(start = 8.dp),
+                        keyboardType = KeyboardType.Decimal,
+                        readOnly = true
+                    )
+                    IconButton(
+                        onClick = {
+                            if (!isEditing) {
+                                if (ContextCompat.checkSelfPermission(
+                                        context,
+                                        Manifest.permission.ACCESS_FINE_LOCATION
+                                    ) == PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    panenViewModel.startLocationUpdates(
+                                        onLocationResult = { lat, lon ->
+                                            Toast.makeText(
+                                                context,
+                                                "Lokasi terdeteksi.",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        },
+                                        onError = { error ->
+                                            Toast.makeText(context, error, Toast.LENGTH_SHORT)
+                                                .show()
+                                        }
+                                    )
+                                } else {
+                                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                                }
+                            }
+                        },
+                        enabled = !isEditing && !isFindingLocation,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .fillMaxHeight()
+                            .background(
+                                color = if (isEditing || isFindingLocation) OldGrey.copy(alpha = 0.5f) else MainColor,
+                                shape = RoundedCornerShape(10.dp)
+                            )
+                    ) {
+                        if (isFindingLocation) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(30.dp),
+                                color = MainColor,
+                                strokeWidth = 3.dp
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = "Dapatkan Lokasi",
+                                tint = Black,
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(12.dp))
+                DropdownInputField(
+                    label = "Kemandoran",
+                    options = foremanOptions,
+                    selectedOption = selectedForeman,
+                    onOptionSelected = { panenViewModel.setSelectedForeman(it) },
+                    expanded = foremanExpanded,
+                    onExpandedChange = { foremanExpanded = it },
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                DropdownInputField(
+                    label = "Nama Pemanen",
+                    options = harvesterOptions,
+                    selectedOption = selectedHarvester,
+                    onOptionSelected = { panenViewModel.setSelectedHarvester(it) },
+                    expanded = harvesterExpanded,
+                    onExpandedChange = { harvesterExpanded = it },
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    DropdownInputField(
+                        label = "Blok",
+                        options = blockOptions,
+                        selectedOption = selectedBlock,
+                        onOptionSelected = { panenViewModel.setSelectedBlock(it) },
+                        expanded = blockExpanded,
+                        onExpandedChange = { blockExpanded = it },
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(end = 8.dp),
+                    )
+                    DropdownInputField(
+                        label = "No. TPH",
+                        options = tphOptions,
+                        selectedOption = selectedTph,
+                        onOptionSelected = { panenViewModel.setSelectedTph(it) },
+                        expanded = tphExpanded,
+                        onExpandedChange = { tphExpanded = it },
+                        modifier = Modifier
+                            .weight(0.5f)
+                            .padding(start = 8.dp),
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    thickness = 1.dp,
+                    color = White
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                BuahCounter(
+                    label = "Buah N",
+                    count = buahN,
+                    onCountChange = { panenViewModel.setBuahN(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                BuahCounter(
+                    label = "Buah A",
+                    count = buahA,
+                    onCountChange = { panenViewModel.setBuahA(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                BuahCounter(
+                    label = "Buah OR",
+                    count = buahOR,
+                    onCountChange = { panenViewModel.setBuahOR(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                BuahCounter(
+                    label = "Buah E",
+                    count = buahE,
+                    onCountChange = { panenViewModel.setBuahE(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                BuahCounter(
+                    label = "Buah AB",
+                    count = buahAB,
+                    onCountChange = { panenViewModel.setBuahAB(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                BuahCounter(
+                    label = "Berondolan Lepas",
+                    count = buahBL,
+                    onCountChange = { panenViewModel.setBuahBL(it) })
+                Spacer(modifier = Modifier.height(10.dp))
+                TotalBuahDisplay(value = totalBuah)
+
+                Spacer(modifier = Modifier.height(20.dp))
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    thickness = 1.dp,
+                    color = White
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .background(Grey, RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable(enabled = !isImageLoading) {
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                isImageLoading = true
+                                cameraLauncher.launch(panenViewModel.createImageUri())
+                            } else {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isImageLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(30.dp),
+                            modifier = Modifier.size(64.dp),
                             color = Black,
-                            strokeWidth = 3.dp
+                            strokeWidth = 4.dp
+                        )
+                    } else if (imageBitmap != null) {
+                        Image(
+                            bitmap = imageBitmap!!.asImageBitmap(),
+                            contentDescription = "Captured Image (Manual)",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                        Text(
+                            text = "*Tekan untuk ambil gambar baru",
+                            color = White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .padding(4.dp)
                         )
                     } else {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = "Dapatkan Lokasi",
-                            tint = Color.Black,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            DropdownInputField(
-                label = "Kemandoran",
-                options = foremanOptions,
-                selectedOption = selectedForeman,
-                onOptionSelected = { panenViewModel.setSelectedForeman(it) },
-                expanded = foremanExpanded,
-                onExpandedChange = { foremanExpanded = it },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            DropdownInputField(
-                label = "Nama Pemanen",
-                options = harvesterOptions,
-                selectedOption = selectedHarvester,
-                onOptionSelected = { panenViewModel.setSelectedHarvester(it) },
-                expanded = harvesterExpanded,
-                onExpandedChange = { harvesterExpanded = it },
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DropdownInputField(
-                    label = "Blok",
-                    options = blockOptions,
-                    selectedOption = selectedBlock,
-                    onOptionSelected = { panenViewModel.setSelectedBlock(it) },
-                    expanded = blockExpanded,
-                    onExpandedChange = { blockExpanded = it },
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .padding(end = 8.dp),
-                )
-                DropdownInputField(
-                    label = "No. TPH",
-                    options = tphOptions,
-                    selectedOption = selectedTph,
-                    onOptionSelected = { panenViewModel.setSelectedTph(it) },
-                    expanded = tphExpanded,
-                    onExpandedChange = { tphExpanded = it },
-                    modifier = Modifier
-                        .weight(0.5f)
-                        .padding(start = 8.dp),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = White)
-            Spacer(modifier = Modifier.height(20.dp))
-
-            BuahCounter(label = "Buah N", count = buahN, onCountChange = { panenViewModel.setBuahN(it) })
-            Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah A", count = buahA, onCountChange = { panenViewModel.setBuahA(it) })
-            Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah OR", count = buahOR, onCountChange = { panenViewModel.setBuahOR(it) })
-            Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah E", count = buahE, onCountChange = { panenViewModel.setBuahE(it) })
-            Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Buah AB", count = buahAB, onCountChange = { panenViewModel.setBuahAB(it) })
-            Spacer(modifier = Modifier.height(10.dp))
-            BuahCounter(label = "Berondolan Lepas", count = buahBL, onCountChange = { panenViewModel.setBuahBL(it) })
-            Spacer(modifier = Modifier.height(20.dp))
-            TotalBuahDisplay(value = totalBuah)
-
-            Spacer(modifier = Modifier.height(20.dp))
-            HorizontalDivider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                thickness = 1.dp,
-                color = White)
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .background(Grey, RoundedCornerShape(10.dp))
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable(enabled = !isImageLoading) {
-                        if (ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            ) == PackageManager.PERMISSION_GRANTED
-                        ) {
-                            isImageLoading = true
-                            cameraLauncher.launch(panenViewModel.createImageUri())
-                        } else {
-                            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = "Ambil Gambar",
+                                tint = Black,
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "Ambil Gambar",
+                                color = Black,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                if (isImageLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp),
-                        color = Black,
-                        strokeWidth = 4.dp
-                    )
-                } else if (imageBitmap != null) {
-                    Image(
-                        bitmap = imageBitmap!!.asImageBitmap(),
-                        contentDescription = "Captured Image (Manual)",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                    Text(
-                        text = "*Tekan untuk ambil gambar baru",
-                        color = White,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(4.dp)
-                    )
-                } else {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = "Ambil Gambar",
-                            tint = Black,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Text(
-                            text = "Ambil Gambar",
-                            color = Black,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
-                        )
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            Button(
-                onClick = {
-                    val (isValid, errorMessage) = panenViewModel.validatePanenData(nfcAdapter)
-                    if (!isValid) {
-                        Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                        return@Button
-                    }
-                    val panenDataFinal = panenViewModel.createPanenData(
-                        id = panenDataToEdit?.id ?: 0,
-                        tanggalWaktu = dateTimeDisplay,
-                        firebaseImageUrl = null
-                    )
-                    nfcDataToPass = panenDataFinal.copy(id = 0)
-                    showNfcWriteDialog = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .padding(horizontal = 16.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFADFF2F),
-                    contentColor = Color.Black),
-            ) {
-                Text(if (isEditing) "Simpan Perubahan" else "Kirim", fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            NfcWriteDialog(
-                showDialog = showNfcWriteDialog,
-                onDismissRequest = {
-                    showNfcWriteDialog = false
-                    nfcDataToPass = null
-                },
-                dataToWrite = nfcDataToPass,
-                onWriteComplete = { success, message ->
-                    showNfcWriteDialog = false
-                    nfcDataToPass = null
-                    if (success) {
-                        showSuccessDialog = true
-                        val panenData = panenViewModel.createPanenData(
+                Spacer(modifier = Modifier.height(24.dp))
+                Button(
+                    onClick = {
+                        val (isValid, errorMessage) = panenViewModel.validatePanenData(nfcAdapter)
+                        if (!isValid) {
+                            Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
+                        val panenDataFinal = panenViewModel.createPanenData(
                             id = panenDataToEdit?.id ?: 0,
                             tanggalWaktu = dateTimeDisplay,
-                            firebaseImageUrl = panenDataToEdit?.firebaseImageUrl
+                            firebaseImageUrl = null
                         )
-                        if (isEditing) {
-                            panenViewModel.updatePanenData(panenData)
-                        } else {
-                            panenViewModel.compressImageAndSavePanen(panenData, imageUri)
-                        }
+                        nfcDataToPass = panenDataFinal.copy(id = 0)
+                        showNfcWriteDialog = true
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFADFF2F),
+                        disabledContainerColor = Color(0xFFADFF2F).copy(alpha = 0.4f),
+                        contentColor = Color.Black,
+                        disabledContentColor = Color.White // Warna teks saat nonaktif
+                    ),
+                    enabled = selectedForeman != "Pilih Mandor" &&
+                            selectedHarvester != "Pilih Pemanen" &&
+                            selectedBlock != "Pilih Blok" &&
+                            selectedTph != "Pilih TPH" &&
+                            locationPart1.isNotBlank() &&
+                            locationPart2.isNotBlank() &&
+                            imageUri != null &&
+                            imageBitmap != null &&
+                            totalBuah > 0 &&
+                            (nfcAdapter?.isEnabled ?: false)
+                ) {
+                    val textColor = if (selectedForeman != "Pilih Mandor" &&
+                        selectedHarvester != "Pilih Pemanen" &&
+                        selectedBlock != "Pilih Blok" &&
+                        selectedTph != "Pilih TPH" &&
+                        locationPart1.isNotBlank() &&
+                        locationPart2.isNotBlank() &&
+                        imageUri != null &&
+                        imageBitmap != null &&
+                        totalBuah > 0 &&
+                        (nfcAdapter?.isEnabled ?: false)
+                    ) {
+                        Color.Black
                     } else {
-                        failureMessage = message
-                        showFailureDialog = true
-                        vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
+                        Color.White
                     }
-                },
-                nfcIntentFromActivity = nfcIntentFromActivity
-            )
-            if (showSuccessDialog) {
-                SuccessDialog(
-                    onDismiss = {
-                        showSuccessDialog = false
-                        navController.popBackStack()
-                        if (!isEditing) {
-                            panenViewModel.resetPanenForm()
+                    Text(
+                        text = if (isEditing) "Simpan Perubahan" else "Kirim",
+                        color = textColor,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                NfcWriteDialog(
+                    showDialog = showNfcWriteDialog,
+                    onDismissRequest = {
+                        showNfcWriteDialog = false
+                        nfcDataToPass = null
+                    },
+                    dataToWrite = nfcDataToPass,
+                    onWriteComplete = { success, message ->
+                        showNfcWriteDialog = false
+                        nfcDataToPass = null
+                        if (success) {
+                            showSuccessDialog = true
+                            val panenData = panenViewModel.createPanenData(
+                                id = panenDataToEdit?.id ?: 0,
+                                tanggalWaktu = dateTimeDisplay,
+                                firebaseImageUrl = panenDataToEdit?.firebaseImageUrl
+                            )
+                            if (isEditing) {
+                                panenViewModel.updatePanenData(panenData)
+                            } else {
+                                panenViewModel.compressImageAndSavePanen(panenData, imageUri)
+                            }
+                        } else {
+                            failureMessage = message
+                            showFailureDialog = true
+                            vibrator?.vibrate(
+                                VibrationEffect.createWaveform(
+                                    longArrayOf(
+                                        0,
+                                        200,
+                                        100,
+                                        200
+                                    ), -1
+                                )
+                            )
                         }
-                    }
+                    },
+                    nfcIntentFromActivity = nfcIntentFromActivity
                 )
-            }
-            if (showFailureDialog) {
-                FailureDialog(
-                    message = failureMessage,
-                    onDismiss = {
-                        showFailureDialog = false
-                    }
-                )
+                if (showSuccessDialog) {
+                    SuccessDialog(
+                        onDismiss = {
+                            showSuccessDialog = false
+                            navController.popBackStack()
+                            if (!isEditing) {
+                                panenViewModel.resetPanenForm()
+                            }
+                        }
+                    )
+                }
+                if (showFailureDialog) {
+                    FailureDialog(
+                        message = failureMessage,
+                        onDismiss = {
+                            showFailureDialog = false
+                        }
+                    )
+                }
             }
         }
     }

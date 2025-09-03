@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -228,7 +229,7 @@ fun ReportBarChartItem(
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = Color.White // Menggunakan warna putih
+            color = White // Menggunakan warna putih
         )
         Spacer(modifier = Modifier.width(8.dp))
         Box(

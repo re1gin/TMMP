@@ -6,15 +6,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,17 +20,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     navController: NavController,
     userRole: UserRole,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    sharedNfcViewModel: SharedNfcViewModel
 ) {
     var contentVisible by remember { mutableStateOf(false) }
 
@@ -58,7 +56,7 @@ fun HomeScreen(
                 .weight(1f)
         ) {
             when (userRole) {
-                UserRole.HARVESTER -> HarvesterContent(navController = navController)
+                UserRole.HARVESTER -> HarvesterContent(navController = navController, sharedNfcViewModel = sharedNfcViewModel)
                 UserRole.DRIVER -> DriverContent(navController = navController)
             }
         }

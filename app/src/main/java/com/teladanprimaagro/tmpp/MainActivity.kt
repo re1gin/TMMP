@@ -11,7 +11,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -21,7 +20,8 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.navigation.AppNavigation
-import com.teladanprimaagro.tmpp.navigation.AppWrapper
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainTheme
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.workers.PanenCleanupWorker
@@ -43,10 +43,10 @@ class MainActivity : ComponentActivity() {
         scheduleDailyCleanupWorkers(application)
 
         setContent {
-            AppWrapper {
+            MainTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MainBackground
                 ) {
                     // The main navigation component of the app.
                     AppNavigation(
@@ -102,22 +102,21 @@ class MainActivity : ComponentActivity() {
     private fun scheduleDailyCleanupWorkers(application: Application) {
         val workManager = WorkManager.getInstance(application)
 
-        // Calculate the initial delay to run the task at midnight (00:00).
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-        calendar.set(Calendar.HOUR_OF_DAY, 0)
-        calendar.set(Calendar.MINUTE, 0)
-        calendar.set(Calendar.SECOND, 0)
-        calendar.set(Calendar.MILLISECOND, 0)
+        val currentTime = Calendar.getInstance()
+        val dueTime = Calendar.getInstance()
+        dueTime.set(Calendar.HOUR_OF_DAY, 5)
+        dueTime.set(Calendar.MINUTE, 0)
+        dueTime.set(Calendar.SECOND, 0)
+        dueTime.set(Calendar.MILLISECOND, 0)
 
-        // If the current time is past midnight, schedule it for the next day.
-        if (calendar.timeInMillis <= System.currentTimeMillis()) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        if (dueTime.timeInMillis <= currentTime.timeInMillis) {
+            dueTime.add(Calendar.DAY_OF_MONTH, 1)
         }
 
-        val initialDelay = calendar.timeInMillis - System.currentTimeMillis()
+        val initialDelay = dueTime.timeInMillis - currentTime.timeInMillis
 
-        // Create and enqueue the periodic work request for Panen cleanup.
+        Log.d("Scheduler", "Initial delay for next 5 AM is: $initialDelay ms")
+
         val panenCleanupRequest = PeriodicWorkRequestBuilder<PanenCleanupWorker>(
             1, TimeUnit.DAYS
         )
@@ -127,7 +126,7 @@ class MainActivity : ComponentActivity() {
 
         workManager.enqueueUniquePeriodicWork(
             "PanenCleanupWork",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             panenCleanupRequest
         )
 
@@ -140,7 +139,7 @@ class MainActivity : ComponentActivity() {
 
         workManager.enqueueUniquePeriodicWork(
             "PengirimanCleanupWork",
-            ExistingPeriodicWorkPolicy.UPDATE,
+            ExistingPeriodicWorkPolicy.KEEP,
             pengirimanCleanupRequest
         )
     }

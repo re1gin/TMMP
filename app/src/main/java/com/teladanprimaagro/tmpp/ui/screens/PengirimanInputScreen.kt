@@ -96,8 +96,10 @@ fun PengirimanInputScreen(
     val selectedMandorLoading by settingsViewModel.selectedMandorLoading.collectAsState()
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(selectedMandorLoading) {
-        pengirimanViewModel.generateSpbNumber(selectedMandorLoading)
+    LaunchedEffect(Unit) {
+        if (!pengirimanViewModel.isSessionActive.value) {
+            pengirimanViewModel.generateSpbNumber(selectedMandorLoading)
+        }
     }
 
     Scaffold(
@@ -124,7 +126,7 @@ fun PengirimanInputScreen(
                     containerColor = Color.Transparent
                 )
             )
-        },
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -164,9 +166,7 @@ fun PengirimanInputScreen(
                     label = "Nama Supir",
                     options = supirOptions.toList(),
                     selectedOption = selectedSupir,
-                    onOptionSelected = {
-                        selectedSupir = it
-                    },
+                    onOptionSelected = { selectedSupir = it },
                     expanded = supirExpanded,
                     onExpandedChange = { supirExpanded = it }
                 )
@@ -196,9 +196,7 @@ fun PengirimanInputScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            color = MainColor
-                        )
+                        .background(color = MainColor)
                         .padding(vertical = 10.dp),
                     horizontalArrangement = Arrangement.SpaceAround,
                     verticalAlignment = Alignment.CenterVertically
@@ -267,7 +265,8 @@ fun PengirimanInputScreen(
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MainColor,
-                    disabledContainerColor = MainColor.copy(0.4f)),
+                    disabledContainerColor = MainColor.copy(0.4f)
+                ),
                 enabled = scannedItems.isNotEmpty() &&
                         selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
                         selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi"
@@ -275,9 +274,9 @@ fun PengirimanInputScreen(
                 val textColor = if (scannedItems.isNotEmpty() &&
                     selectedSupir.isNotBlank() && selectedSupir != "Pilih Supir" &&
                     selectedVehicle.isNotBlank() && selectedVehicle != "Pilih No Polisi") {
-                    Color.Black // Teks hitam saat aktif
+                    Color.Black
                 } else {
-                    Color.White // Teks putih saat tidak aktif
+                    Color.White
                 }
                 Text("Finalisasi Pengiriman", color = textColor, fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }

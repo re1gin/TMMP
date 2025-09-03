@@ -75,7 +75,8 @@ fun AppNavigation(
             MainScreen(
                 mainNavController = navController,
                 userRole = userRole,
-                settingsViewModel = settingsViewModel
+                settingsViewModel = settingsViewModel,
+                sharedNfcViewModel = sharedNfcViewModel
             )
         }
 

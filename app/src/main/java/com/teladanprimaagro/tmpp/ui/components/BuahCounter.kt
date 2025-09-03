@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
 
 
@@ -63,14 +64,12 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 onClick = { if (count > 0) onCountChange(count - 1) },
                 modifier = Modifier
                     .size(40.dp)
-                    // Menggunakan onPrimary sebagai warna background lingkaran
                     .background(MainColor, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
                     contentDescription = "Kurang",
-                    tint = Black,
-                    modifier = Modifier.size(30.dp)
+                    tint = Black
                 )
             }
 
@@ -96,7 +95,7 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                     unfocusedContainerColor = Grey.copy(0.7f),
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.onPrimary,
+                    cursorColor = White,
                 ),
                 modifier = Modifier.width(100.dp),
                 textStyle = LocalTextStyle.current.copy(
@@ -112,13 +111,12 @@ fun BuahCounter(label: String, count: Int, onCountChange: (Int) -> Unit) {
                 modifier = Modifier
                     .size(40.dp)
                     // Menggunakan onPrimary sebagai warna background lingkaran
-                    .background(MainColor, CircleShape)
+                    .background(MainColor.copy(0.9f), CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Tambah",
-                    tint = Black,
-                    modifier = Modifier.size(30.dp)
+                    tint = Black
                 )
             }
         }

@@ -11,13 +11,15 @@ import androidx.navigation.compose.rememberNavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.components.AppBottomBar
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainScreen(
     mainNavController: NavHostController,
     userRole: UserRole,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    sharedNfcViewModel: SharedNfcViewModel
 ) {
     val bottomNavController = rememberNavController()
 
@@ -38,6 +40,7 @@ fun MainScreen(
                     navController = mainNavController,
                     userRole = userRole,
                     paddingValues = paddingValues,
+                    sharedNfcViewModel = sharedNfcViewModel
                 )
             }
             // Hapus composable "peta_screen" dan "laporan_screen"

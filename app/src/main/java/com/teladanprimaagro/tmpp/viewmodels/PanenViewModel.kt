@@ -15,26 +15,19 @@ import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.teladanprimaagro.tmpp.data.AppDatabase
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.workers.SyncPanenWorker
+import com.teladanprimaagro.tmpp.util.ConnectivityObserver
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.delay
@@ -47,6 +40,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("DEPRECATION")
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StaticFieldLeak")
 class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -55,6 +49,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val storage = FirebaseStorage.getInstance()
     private val context = application.applicationContext
     private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
+    private val connectivityObserver = ConnectivityObserver(context)
 
     // State untuk form input
     private val _locationPart1 = MutableStateFlow("")
@@ -72,19 +67,16 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _imageBitmap = MutableStateFlow<Bitmap?>(null)
     val imageBitmap: StateFlow<Bitmap?> = _imageBitmap.asStateFlow()
 
-    private val _uniqueNo = MutableStateFlow("")
-    val uniqueNo: StateFlow<String> = _uniqueNo.asStateFlow()
-
-    private val _selectedForeman = MutableStateFlow("")
+    private val _selectedForeman = MutableStateFlow("Pilih Mandormu!")
     val selectedForeman: StateFlow<String> = _selectedForeman.asStateFlow()
 
-    private val _selectedHarvester = MutableStateFlow("")
+    private val _selectedHarvester = MutableStateFlow("Pilih Pemanenmu?")
     val selectedHarvester: StateFlow<String> = _selectedHarvester.asStateFlow()
 
-    private val _selectedBlock = MutableStateFlow("")
+    private val _selectedBlock = MutableStateFlow("Pilih Blok")
     val selectedBlock: StateFlow<String> = _selectedBlock.asStateFlow()
 
-    private val _selectedTph = MutableStateFlow("")
+    private val _selectedTph = MutableStateFlow("Pilih TPH")
     val selectedTph: StateFlow<String> = _selectedTph.asStateFlow()
 
     private val _buahN = MutableStateFlow(0)
@@ -109,6 +101,14 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         n + ab + or
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    private val _uniqueNo = MutableStateFlow("")
+    val uniqueNo: StateFlow<String> = combine(
+        _selectedBlock,
+        totalBuah
+    ) { block, total ->
+        generateUniqueCode(LocalDateTime.now(), block, total)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
     // State untuk data dan filter
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
     val panenDataToEdit: StateFlow<PanenData?> = _panenDataToEdit.asStateFlow()
@@ -125,7 +125,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
-    // Data flows untuk daftar panen dan statistik
     val panenList: StateFlow<List<PanenData>> =
         panenDao.getAllPanen()
             .combine(_sortBy) { list, sortBy -> sortPanenList(list, sortBy) }
@@ -162,6 +161,21 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
+    val statistikJenisBuahPerBlok: StateFlow<Map<String, Map<String, Int>>> = panenDao.getAllPanen()
+        .map { panenList ->
+            panenList.groupBy { it.blok }.mapValues { (_, dataList) ->
+                mapOf(
+                    "Buah N" to dataList.sumOf { it.buahN },
+                    "Buah A" to dataList.sumOf { it.buahA },
+                    "Buah OR" to dataList.sumOf { it.buahOR },
+                    "Buah E" to dataList.sumOf { it.buahE },
+                    "Buah AB" to dataList.sumOf { it.buahAB },
+                    "Buah BL" to dataList.sumOf { it.buahBL }
+                )
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
     val totalJenisBuah: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
         .map { panenList ->
             mapOf(
@@ -174,16 +188,25 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    // Setter untuk state form
+    init {
+        viewModelScope.launch {
+            panenDao.getUnsyncedPanenDataFlow()
+                .combine(connectivityObserver.isConnected) { unuploadedData, connected ->
+                    unuploadedData.isNotEmpty() && connected
+                }.collect { shouldSync ->
+                    if (shouldSync) {
+                        Log.d("PanenViewModel", "Triggering automatic sync via WorkManager.")
+                        startSyncWorker()
+                    }
+                }
+        }
+    }
+
     fun setLocationPart1(value: String) { _locationPart1.value = value }
     fun setLocationPart2(value: String) { _locationPart2.value = value }
     fun setSelectedForeman(value: String) { _selectedForeman.value = value }
     fun setSelectedHarvester(value: String) { _selectedHarvester.value = value }
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun setSelectedBlock(value: String) {
-        _selectedBlock.value = value
-        updateUniqueNo()
-    }
+    fun setSelectedBlock(value: String) { _selectedBlock.value = value }
     fun setSelectedTph(value: String) { _selectedTph.value = value }
     fun setBuahN(value: Int) { _buahN.value = value }
     fun setBuahA(value: Int) { _buahA.value = value }
@@ -191,11 +214,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun setBuahE(value: Int) { _buahE.value = value }
     fun setBuahAB(value: Int) { _buahAB.value = value }
     fun setBuahBL(value: Int) { _buahBL.value = value }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun updateUniqueNo() {
-        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
-    }
 
     // Membuat objek PanenData dari state saat ini
     @RequiresApi(Build.VERSION_CODES.O)
@@ -225,17 +243,17 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     // Validasi data form
     fun validatePanenData(nfcAdapter: android.nfc.NfcAdapter?): Pair<Boolean, String?> {
-        if (_selectedForeman.value.isBlank()) {
-            return Pair(false, "Kemandoran tidak boleh kosong.")
+        if (_selectedForeman.value == "Pilih Mandor") {
+            return Pair(false, "Harap pilih nama mandor.")
         }
-        if (_selectedHarvester.value.isBlank()) {
-            return Pair(false, "Nama Pemanen tidak boleh kosong.")
+        if (_selectedHarvester.value == "Pilih Pemanen") {
+            return Pair(false, "Harap pilih nama pemanen.")
         }
-        if (_selectedBlock.value.isBlank()) {
-            return Pair(false, "Blok tidak boleh kosong.")
+        if (_selectedBlock.value == "Pilih Blok") {
+            return Pair(false, "Harap pilih blok.")
         }
-        if (_selectedTph.value.isBlank()) {
-            return Pair(false, "No. TPH tidak boleh kosong.")
+        if (_selectedTph.value == "Pilih TPH") {
+            return Pair(false, "Harap pilih TPH.")
         }
         if (_locationPart1.value.isBlank() || _locationPart2.value.isBlank()) {
             return Pair(false, "Lokasi (Latitude/Longitude) tidak boleh kosong.")
@@ -265,17 +283,16 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _imageUri.value = null
         _imageBitmap.value?.recycle()
         _imageBitmap.value = null
-        _selectedForeman.value = ""
-        _selectedHarvester.value = ""
-        _selectedBlock.value = ""
-        _selectedTph.value = ""
+        _selectedForeman.value = "Pilih Mandor"
+        _selectedHarvester.value = "Pilih Pemanen"
+        _selectedBlock.value = "Pilih Blok"
+        _selectedTph.value = "Pilih TPH"
         _buahN.value = 0
         _buahA.value = 0
         _buahOR.value = 0
         _buahE.value = 0
         _buahAB.value = 0
         _buahBL.value = 0
-        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), "", 0)
     }
 
     // Memuat data untuk edit
@@ -284,7 +301,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _locationPart1.value = panenData.locationPart1
         _locationPart2.value = panenData.locationPart2
         _imageUri.value = panenData.localImageUri?.toUri()
-        _uniqueNo.value = panenData.uniqueNo
         _selectedForeman.value = panenData.kemandoran
         _selectedHarvester.value = panenData.namaPemanen
         _selectedBlock.value = panenData.blok
@@ -302,7 +318,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    // Mendapatkan lokasi
     @SuppressLint("MissingPermission")
     fun startLocationUpdates(onLocationResult: (String, String) -> Unit, onError: (String) -> Unit) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -333,7 +348,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     locationCallback,
                     Looper.getMainLooper()
                 )
-                // Timeout setelah 10 detik
                 delay(10_000)
                 if (_isFindingLocation.value) {
                     fusedLocationClient.removeLocationUpdates(locationCallback)
@@ -347,7 +361,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Membuat URI untuk gambar
     fun createImageUri(): Uri {
         val photosDir = File(context.cacheDir, "panen_photos")
         photosDir.mkdirs()
@@ -366,7 +379,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return uri
     }
 
-    // Memuat bitmap gambar
     fun loadImageBitmap(uri: Uri?, onSuccess: (Bitmap?) -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             _imageBitmap.value?.recycle()
@@ -432,7 +444,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 panenDao.insertPanen(panenData)
-                startSyncWorker()
+                // Tidak perlu memanggil startSyncWorker() di sini karena init block akan menangani sinkronisasi otomatis
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error saving panen data to local DB", e)
             }
@@ -508,8 +520,12 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     // Memperbarui data panen
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
-            panenDao.updatePanen(panen)
-            startSyncWorker()
+            try {
+                panenDao.updatePanen(panen)
+                // Tidak perlu memanggil startSyncWorker() di sini karena init block akan menangani sinkronisasi otomatis
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Error updating panen data", e)
+            }
         }
     }
 
@@ -556,16 +572,32 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     // Memicu WorkManager untuk sinkronisasi
     private fun startSyncWorker() {
-        Log.d("PanenViewModel", "Enqueuing SyncPanenWorker...")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        Log.d("PanenViewModel", "Checking network status before enqueuing...")
 
-        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPanenWorker>()
-            .setConstraints(constraints)
-            .build()
+        viewModelScope.launch {
+            try {
+                if (connectivityObserver.isConnected.value) {
+                    Log.d("PanenViewModel", "Network is available, enqueuing SyncPanenWorker...")
+                    val constraints = Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
 
-        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
+                    val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPanenWorker>()
+                        .setConstraints(constraints)
+                        .build()
+
+                    WorkManager.getInstance(getApplication()).enqueueUniqueWork(
+                        "SyncPanenWork",
+                        ExistingWorkPolicy.KEEP,
+                        syncWorkRequest
+                    )
+                } else {
+                    Log.d("PanenViewModel", "Network not available, skipping enqueue.")
+                }
+            } catch (e: Exception) {
+                Log.e("PanenViewModel", "Failed to start sync worker: ${e.message}")
+            }
+        }
     }
 
     // Membuat kode unik
@@ -576,8 +608,9 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
         val formattedDate = dateTime.format(dateFormatter)
         val formattedTime = dateTime.format(timeFormatter)
-        val cleanBlock = block.replace("[^a-zA-Z0-9]".toRegex(), "")
+        val cleanBlock = if (block == "Pilih Blok") "" else block.replace("[^a-zA-Z0-9]".toRegex(), "")
         val formattedBuah = totalBuah.toString().padStart(3, '0')
+        Log.d("PanenViewModel", "Generating unique code: totalBuah=$totalBuah, formattedBuah=$formattedBuah, block=$block, cleanBlock=$cleanBlock, uniqueNo=$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah")
         return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
     }
 

@@ -302,7 +302,7 @@ fun RekapPanenScreen(
                         ExposedDropdownMenu(
                             expanded = pemanenDropdownExpanded,
                             onDismissRequest = { pemanenDropdownExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.secondary)
+                            modifier = Modifier.background(OldGrey)
                         ) {
                             pemanenFilterOptions.value.forEach { pemanen ->
                                 DropdownMenuItem(

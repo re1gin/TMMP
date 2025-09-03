@@ -34,4 +34,7 @@ interface PanenDao {
 
     @Query("SELECT * FROM panen_entries WHERE isSynced = 0")
     suspend fun getUnsyncedPanenData(): List<PanenData>
+
+    @Query("SELECT * FROM panen_entries WHERE isSynced = 0")
+    fun getUnsyncedPanenDataFlow(): Flow<List<PanenData>>
 }

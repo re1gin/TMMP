@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -57,11 +58,12 @@ fun LoginScreen(
                 contentDescription = "App Logo",
                 modifier = Modifier.size(90.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
                 text = "Teladan Prima Agro",
                 color = White,
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.SemiBold)
+                fontSize = 24.sp,
+                fontWeight = FontWeight.SemiBold
             )
         }
 
@@ -94,7 +96,8 @@ fun LoginScreen(
                 focusedLabelColor = White,
                 unfocusedLabelColor = White.copy(alpha = 0.6f),
                 focusedTextColor = White,
-                unfocusedTextColor = White
+                unfocusedTextColor = White,
+                cursorColor = MainColor
             )
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -132,7 +135,8 @@ fun LoginScreen(
                 focusedLabelColor = White,
                 unfocusedLabelColor = White.copy(alpha = 0.6f),
                 focusedTextColor = White,
-                unfocusedTextColor = White
+                unfocusedTextColor = White,
+                cursorColor = MainColor
             )
         )
 

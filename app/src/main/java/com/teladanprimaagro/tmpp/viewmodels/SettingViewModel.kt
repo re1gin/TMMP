@@ -32,7 +32,6 @@ private const val KEY_AFD_CODE = "afd_code"
 private const val DEFAULT_AFD_CODE = "AFD1"
 
 private const val KEY_SELECTED_MANDOR_LOADING = "selected_mandor_loading"
-private const val DEFAULT_MANDOR_LOADING = "Pilih Mandor Loading"
 
 // --- Konstanta Tema Baru ---
 private const val KEY_IS_YELLOW_NEON_THEME = "is_yellow_neon_theme"

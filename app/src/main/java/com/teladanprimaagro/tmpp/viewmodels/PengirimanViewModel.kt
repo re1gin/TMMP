@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Constraints
+import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -21,7 +22,7 @@ import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.ScannedItemDao
 import com.teladanprimaagro.tmpp.data.ScannedItemEntity
 import com.teladanprimaagro.tmpp.util.ConnectivityObserver
-import com.teladanprimaagro.tmpp.workers.SyncPengirimanWorker // Impor Worker baru
+import com.teladanprimaagro.tmpp.workers.SyncPengirimanWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -88,9 +89,14 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     val uniqueNoDisplay = mutableStateOf("Scan NFC")
     val dateTimeDisplay = mutableStateOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss")))
     val totalBuahCalculated = mutableIntStateOf(0)
+
     val spbNumber = mutableStateOf("")
 
     // --- Observers & Data Flow ---
+
+    private val _isSessionActive = MutableStateFlow(false)
+    val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
+
     val scannedItems: StateFlow<List<ScannedItem>> = scannedItemDao.getAllScannedItems()
         .map { list -> list.map { ScannedItem(it.uniqueNo, it.tanggal, it.blok, it.totalBuah) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -135,22 +141,8 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope, SharingStarted.WhileSubscribed(5000), false
     )
 
-    private val _syncProgress = MutableStateFlow(0f)
-    val syncProgress: StateFlow<Float> = _syncProgress.asStateFlow()
-
-    private val _totalItemsToSync = MutableStateFlow(0)
-    val totalItemsToSync: StateFlow<Int> = _totalItemsToSync.asStateFlow()
-
-    private val _isSyncing = MutableStateFlow(false)
-    val isSyncing: StateFlow<Boolean> = _isSyncing.asStateFlow()
-
     init {
         Log.d("PengirimanViewModel", "INIT: PengirimanViewModel created.")
-        viewModelScope.launch {
-            val mandor = settingsViewModel.selectedMandorLoading.first()
-            generateSpbNumber(mandor)
-        }
-
         viewModelScope.launch {
             scannedItems.collect { items ->
                 Log.d("PengirimanViewModel", "Scanned items loaded: ${items.size} items")
@@ -166,7 +158,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
 
-        // --- Perubahan Utama: Pemicu WorkManager ---
         viewModelScope.launch {
             combine(unuploadedPengirimanList, unuploadedFinalizedUniqueNos, isConnected) { pengirimanData, finalizedData, connected ->
                 (pengirimanData.isNotEmpty() || finalizedData.isNotEmpty()) && connected
@@ -197,23 +188,25 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     suspend fun getPengirimanById(id: Int): PengirimanData? = pengirimanDao.getPengirimanById(id)
 
     fun generateSpbNumber(selectedMandorLoading: String) {
+        if (_isSessionActive.value) {
+            Log.d("PengirimanViewModel", "Sesi aktif, lewati pembuatan SPB.")
+            return
+        }
+
         val currentDateTime = LocalDateTime.now()
         val currentMonth = currentDateTime.monthValue
         val currentYear = currentDateTime.year
 
-        var counter = settingsViewModel.getSpbCounterForMandor(selectedMandorLoading)
         val lastMonth = settingsViewModel.getSpbLastMonth()
         val lastYear = settingsViewModel.getSpbLastYear()
-
         if (currentMonth != lastMonth || currentYear != lastYear) {
             settingsViewModel.resetAllSpbCounters()
-            counter = 0
             settingsViewModel.setSpbLastMonth(currentMonth)
             settingsViewModel.setSpbLastYear(currentYear)
-            Log.d("PengirimanViewModel", "SPB Counters reset. New month/year detected.")
+            Log.d("PengirimanViewModel", "Counter SPB direset. Bulan/tahun baru terdeteksi.")
         }
 
-        counter++
+        val counter = settingsViewModel.getSpbCounterForMandor(selectedMandorLoading) + 1
         settingsViewModel.setSpbCounterForMandor(selectedMandorLoading, counter)
 
         val spbFormat = settingsViewModel.getSpbFormat()
@@ -222,7 +215,8 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         val romanMonth = getRomanMonth(currentDateTime.month)
 
         spbNumber.value = "$spbFormat/$afdCode/$romanMonth/$currentYear/${selectedMandorLoading}$sequenceNumber"
-        Log.d("PengirimanViewModel", "Generated SPB: ${spbNumber.value}")
+        Log.d("PengirimanViewModel", "SPB dihasilkan: ${spbNumber.value}")
+        _isSessionActive.value = true // Tandai sesi sebagai aktif
     }
 
     fun addScannedItem(item: ScannedItem) {
@@ -288,9 +282,10 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             }
             scannedItemDao.deleteAllScannedItems()
 
-            Log.d("PengirimanViewModel", "FINALIZE: Finalization complete. Temporary items deleted.")
+            Log.d("PengirimanViewModel", "FINALISASI: Finalisasi selesai. Item sementara dihapus.")
             _scanStatus.value = ScanStatus.Finalized
-            startSyncWorker() // Panggil worker setelah data baru disimpan
+            _isSessionActive.value = false // Reset sesi
+            startSyncWorker()
         }
     }
 
@@ -325,17 +320,32 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         _scanStatus.value = ScanStatus.Idle
     }
 
-    // --- Fungsi WorkManager yang Baru ---
     private fun startSyncWorker() {
-        Log.d("PengirimanViewModel", "Enqueuing SyncPengirimanWorker...")
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
+        Log.d("PengirimanViewModel", "Checking network status before enqueuing...")
 
-        val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPengirimanWorker>()
-            .setConstraints(constraints)
-            .build()
+        viewModelScope.launch {
+            try {
+                if (connectivityObserver.isConnected.value) {
+                    Log.d("PengirimanViewModel", "Network is available, enqueuing SyncPengirimanWorker...")
+                    val constraints = Constraints.Builder()
+                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                        .build()
 
-        WorkManager.getInstance(getApplication()).enqueue(syncWorkRequest)
+                    val syncWorkRequest = OneTimeWorkRequestBuilder<SyncPengirimanWorker>()
+                        .setConstraints(constraints)
+                        .build()
+
+                    WorkManager.getInstance(getApplication()).enqueueUniqueWork(
+                        "SyncPengirimanWork",
+                        ExistingWorkPolicy.KEEP,
+                        syncWorkRequest
+                    )
+                } else {
+                    Log.d("PengirimanViewModel", "Network not available, skipping enqueue.")
+                }
+            } catch (e: Exception) {
+                Log.e("PengirimanViewModel", "Failed to start sync worker: ${e.message}")
+            }
+        }
     }
 }

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.os.Build
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,13 +26,14 @@ import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -37,7 +41,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,6 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
@@ -54,7 +62,9 @@ import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
+import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -65,8 +75,11 @@ import java.util.Locale
 fun HarvesterContent(
     navController: NavController,
     modifier: Modifier = Modifier,
-    panenViewModel: PanenViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    sharedNfcViewModel: SharedNfcViewModel,
+    panenViewModel: PanenViewModel = viewModel()
 ) {
+    var showNfcDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier
             .fillMaxSize()
@@ -135,19 +148,25 @@ fun HarvesterContent(
                     )
                 }
 
-                // Kanan
                 Box(
-                    modifier = Modifier
-                        .background(MainColor, CircleShape)
-                        .padding(horizontal = 10.dp, vertical = 3.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Krani Panen",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Light,
-                        color = Black
-                    )
+                    Button(
+                        onClick = { showNfcDialog = true },
+                        colors = ButtonDefaults.buttonColors(containerColor = OldGrey),
+                        shape = RoundedCornerShape(15.dp),
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(60.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Nfc,
+                            contentDescription = "Baca NFC",
+                            tint = White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
                 }
             }
 
@@ -196,7 +215,7 @@ fun HarvesterContent(
                 text = "Menu lain",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color.White,
+                color = White,
                 modifier = Modifier.align(Alignment.Start)
             )
 
@@ -230,10 +249,178 @@ fun HarvesterContent(
                     backgroundColor = LightGrey
                 )
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Tambah baris tombol baru untuk fitur baca NFC
+            Text(
+                text = "Fitur Tambahan",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                modifier = Modifier.align(Alignment.Start)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Baris tombol Fitur Tambahan
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CustomMenuButton(
+                    text = "Baca NFC",
+                    icon = Icons.Default.Nfc,
+                    onClick = { showNfcDialog = true },
+                    modifier = Modifier.weight(1f),
+                    backgroundColor = LightGrey
+                )
+            }
+        }
+    }
+
+    ReadNfc(
+        showDialog = showNfcDialog,
+        onDismissRequest = { showNfcDialog = false },
+        sharedNfcViewModel = sharedNfcViewModel
+    )
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Composable
+fun ReadNfc(
+    showDialog: Boolean,
+    onDismissRequest: () -> Unit,
+    sharedNfcViewModel: SharedNfcViewModel
+) {
+    if (!showDialog) return
+
+    val nfcState by sharedNfcViewModel.nfcState.collectAsState()
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = White)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Nfc,
+                    contentDescription = "NFC Scanner",
+                    tint = Black,
+                    modifier = Modifier.size(80.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                when (val state = nfcState) {
+                    is NfcOperationState.WaitingForRead -> {
+                        Text(
+                            text = "Dekatkan tag NFC ke perangkat Anda untuk memindai.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    is NfcOperationState.Reading -> {
+                        Text(
+                            text = "Sedang membaca tag...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    is NfcOperationState.ReadSuccess -> {
+                        val scannedItem = state.scannedItem
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = "Tag berhasil dibaca!",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Unique No: ${scannedItem.uniqueNo}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Tanggal: ${scannedItem.tanggal}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Blok: ${scannedItem.blok}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "Total Buah: ${scannedItem.totalBuah}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    is NfcOperationState.ReadError -> {
+                        Text(
+                            text = "Tag NFC bukan milik aplikasi ini.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Red
+                        )
+                        Text(
+                            text = state.message,
+                            style = MaterialTheme.typography.bodySmall,
+                            textAlign = TextAlign.Center,
+                            color = Black
+                        )
+                    }
+                    else -> {
+                        Text(
+                            text = "Dekatkan tag NFC ke perangkat Anda untuk memindai.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    onClick = onDismissRequest,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(8.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = OldGrey)
+                ) {
+                    Text(
+                        text = "Tutup",
+                        color = White,
+                        fontSize = 14.sp
+                    )
+                }
+            }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) {
     val totalDataMasuk by panenViewModel.totalDataMasuk.collectAsState()
@@ -344,7 +531,7 @@ fun MenuButton(
         modifier = modifier.height(120.dp),
         shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        contentPadding = PaddingValues(12.dp) // kasih ruang dalam tombol
+        contentPadding = PaddingValues(12.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -353,7 +540,7 @@ fun MenuButton(
         ) {
             Box(
                 modifier = Modifier
-                    .size(56.dp) // ukuran lingkaran
+                    .size(56.dp)
                     .background(White.copy(0.7f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
@@ -378,7 +565,6 @@ fun MenuButton(
     }
 }
 
-
 @Composable
 fun CustomMenuButton(
     text: String,
@@ -389,17 +575,16 @@ fun CustomMenuButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(100.dp), // tinggi 100 dp
+        modifier = modifier.height(100.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
-        contentPadding = PaddingValues(12.dp) // ruang dalam tombol
+        contentPadding = PaddingValues(12.dp)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Lingkaran dengan ikon di tengah
             Box(
                 contentAlignment = Alignment.Center
             ) {
@@ -407,7 +592,7 @@ fun CustomMenuButton(
                     imageVector = icon,
                     contentDescription = text,
                     tint = OldGrey,
-                    modifier = Modifier.size(48.dp) // ukuran ikon
+                    modifier = Modifier.size(48.dp)
                 )
             }
 

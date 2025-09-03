@@ -1,5 +1,7 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -57,9 +59,7 @@ import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
-// Added colors for each fruit type
-
-
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatistikPanenScreen(
@@ -71,6 +71,7 @@ fun StatistikPanenScreen(
     val statistikPerPemanen by panenViewModel.statistikPerPemanen.collectAsState()
     val statistikPerBlok by panenViewModel.statistikPerBlok.collectAsState()
     val statistikJenisBuahPerPemanen by panenViewModel.statistikJenisBuahPerPemanen.collectAsState()
+    val statistikJenisBuahPerBlok by panenViewModel.statistikJenisBuahPerBlok.collectAsState()
     val totalJenisBuah by panenViewModel.totalJenisBuah.collectAsState()
 
     var selectedTabIndex by remember { mutableIntStateOf(0) }
@@ -190,7 +191,7 @@ fun StatistikPanenScreen(
                     }
                     item {
                         FruitTableSection(
-                            data = statistikJenisBuahPerPemanen,
+                            data = statistikJenisBuahPerBlok,
                             totalJenisBuah = totalJenisBuah,
                             title = "Detail Buah per Blok" // Assuming this section would be added
                         )
@@ -270,7 +271,7 @@ fun BarChartItem(
             maxLines = 1,
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Medium,
-            color = Color.White
+            color = White
         )
         Spacer(modifier = Modifier.width(8.dp))
         Box(
@@ -293,7 +294,7 @@ fun BarChartItem(
             text = "$value",
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
-            color = Color.White,
+            color = White,
             modifier = Modifier.width(40.dp),
             textAlign = TextAlign.End
         )
@@ -307,7 +308,7 @@ fun FruitTableSection(
     totalJenisBuah: Map<String, Int>,
     title: String = "Detail Buah per Pemanen"
 ) {
-    val sortedFruitKeys = listOf("N", "A", "OR", "E", "B")
+    val sortedFruitKeys = listOf("N", "A", "OR", "E", "B", "BL")
 
     Column(
         modifier = Modifier
@@ -362,14 +363,14 @@ fun FruitTableSection(
                     )
                 }
             }
-            // Baris data per pemanen
+
             data.forEach { (pemanen, jenisBuahMap) ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 10.dp)
                         .background(Grey.copy(0.5f))
-                        .padding(7.dp),
+                        .padding(horizontal = 0.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -378,7 +379,9 @@ fun FruitTableSection(
                         style = MaterialTheme.typography.bodySmall,
                         color = Color.White,
                         fontSize = 14.sp,
-                        modifier = Modifier.weight(1.2f),
+                        modifier = Modifier
+                            .weight(1.2f)
+                            .padding(horizontal = 8.dp),
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1
                     )
