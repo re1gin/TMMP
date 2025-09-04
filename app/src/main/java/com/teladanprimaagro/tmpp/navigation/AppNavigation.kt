@@ -16,7 +16,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
-import com.teladanprimaagro.tmpp.ui.screens.DataTerkirimScreen
+import com.teladanprimaagro.tmpp.ui.screens.DataPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
@@ -35,7 +35,7 @@ import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
 import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
 import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.StatusPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.DataPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
@@ -75,8 +75,7 @@ fun AppNavigation(
             MainScreen(
                 mainNavController = navController,
                 userRole = userRole,
-                settingsViewModel = settingsViewModel,
-                sharedNfcViewModel = sharedNfcViewModel
+                settingsViewModel = settingsViewModel
             )
         }
 
@@ -133,7 +132,7 @@ fun AppNavigation(
         }
 
         composable("data_terkirim_screen") {
-            DataTerkirimScreen(
+            DataPanenScreen(
                 navController = navController,
             )
         }
@@ -187,7 +186,7 @@ fun AppNavigation(
         }
 
         composable("data_pengiriman_screen") {
-            StatusPengirimanScreen(
+            DataPengirimanScreen(
                 navController = navController,
             )
         }

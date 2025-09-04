@@ -74,7 +74,7 @@ fun StatistikPengirimanScreen(
                         text = "Statistik Pengiriman",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -82,7 +82,7 @@ fun StatistikPengirimanScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = Color.White
+                            tint = White
                         )
                     }
                 },

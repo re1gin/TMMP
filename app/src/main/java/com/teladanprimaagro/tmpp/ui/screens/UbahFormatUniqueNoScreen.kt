@@ -15,7 +15,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,8 +36,8 @@ fun UbahFormatUniqueNoScreen(
                 title = {
                     Text(
                         text = "Ubah Format Nomor Unik",
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 18.sp,
+                        color = White,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold
                     )
                 },
@@ -44,12 +46,12 @@ fun UbahFormatUniqueNoScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -58,10 +60,8 @@ fun UbahFormatUniqueNoScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(color = MainBackground,)
                 .padding(paddingValues)
-                .background(
-                    color = BackgroundDarkGrey,
-                )
         ) {
             Column(
                 modifier = Modifier

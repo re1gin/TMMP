@@ -102,9 +102,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _uniqueNo = MutableStateFlow("")
-    val uniqueNo: StateFlow<String> = combine(
-        _selectedBlock,
-        totalBuah
+    val uniqueNo: StateFlow<String> = combine(_selectedBlock, totalBuah
     ) { block, total ->
         generateUniqueCode(LocalDateTime.now(), block, total)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
@@ -221,21 +219,21 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return PanenData(
             id = id,
             tanggalWaktu = tanggalWaktu,
-            uniqueNo = _uniqueNo.value,
-            locationPart1 = _locationPart1.value,
-            locationPart2 = _locationPart2.value,
-            kemandoran = _selectedForeman.value,
-            namaPemanen = _selectedHarvester.value,
-            blok = _selectedBlock.value,
-            noTph = _selectedTph.value,
+            uniqueNo = uniqueNo.value,
+            locationPart1 = locationPart1.value,
+            locationPart2 = locationPart2.value,
+            kemandoran = selectedForeman.value,
+            namaPemanen = selectedHarvester.value,
+            blok = selectedBlock.value,
+            noTph = selectedTph.value,
             totalBuah = totalBuah.value,
-            buahN = _buahN.value,
-            buahA = _buahA.value,
-            buahOR = _buahOR.value,
-            buahE = _buahE.value,
-            buahAB = _buahAB.value,
-            buahBL = _buahBL.value,
-            localImageUri = _imageUri.value?.toString(),
+            buahN = buahN.value,
+            buahA = buahA.value,
+            buahOR = buahOR.value,
+            buahE = buahE.value,
+            buahAB = buahAB.value,
+            buahBL = buahBL.value,
+            localImageUri = imageUri.value?.toString(),
             firebaseImageUrl = firebaseImageUrl,
             isSynced = false
         )
@@ -301,6 +299,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _locationPart1.value = panenData.locationPart1
         _locationPart2.value = panenData.locationPart2
         _imageUri.value = panenData.localImageUri?.toUri()
+        _uniqueNo.value = panenData.uniqueNo
         _selectedForeman.value = panenData.kemandoran
         _selectedHarvester.value = panenData.namaPemanen
         _selectedBlock.value = panenData.blok
@@ -608,10 +607,9 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
         val formattedDate = dateTime.format(dateFormatter)
         val formattedTime = dateTime.format(timeFormatter)
-        val cleanBlock = if (block == "Pilih Blok") "" else block.replace("[^a-zA-Z0-9]".toRegex(), "")
+        val formattedBlock = if (block == "Pilih Blok") "ABC" else block.replace("[^a-zA-Z0-9]".toRegex(), "")
         val formattedBuah = totalBuah.toString().padStart(3, '0')
-        Log.d("PanenViewModel", "Generating unique code: totalBuah=$totalBuah, formattedBuah=$formattedBuah, block=$block, cleanBlock=$cleanBlock, uniqueNo=$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah")
-        return "$uniqueNoFormat$formattedDate$formattedTime$cleanBlock$formattedBuah"
+        return "$uniqueNoFormat$formattedDate$formattedTime$formattedBlock$formattedBuah"
     }
 
     // Fungsi untuk filter dan sort

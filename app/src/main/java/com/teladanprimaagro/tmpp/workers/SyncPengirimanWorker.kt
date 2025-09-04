@@ -18,8 +18,12 @@ class SyncPengirimanWorker(
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val pengirimanDao = AppDatabase.getDatabase(appContext).pengirimanDao()
-    private val pengirimanDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("pengirimanEntries")
-    private val finalizedUniqueNoDbRef = FirebaseDatabase.getInstance("https://ineka-database.firebaseio.com/").getReference("finalizedUniqueNos")
+    private val pengirimanDbRef = FirebaseDatabase
+        .getInstance("https://ineka-database.firebaseio.com/")
+        .getReference("pengirimanEntries")
+    private val finalizedUniqueNoDbRef = FirebaseDatabase
+        .getInstance("https://ineka-database.firebaseio.com/")
+        .getReference("finalizedUniqueNos")
     private val gson = Gson()
 
     override suspend fun doWork(): Result {
@@ -42,62 +46,78 @@ class SyncPengirimanWorker(
                     .build()
             )
 
-            var processedItems = 0
+            val firebasePengirimanUpdates = mutableMapOf<String, Any>()
+            val firebaseFinalizedUpdates = mutableMapOf<String, Any>()
 
-            // Bagian 1: Unggah data PengirimanData
-            if (unuploadedPengirimanList.isNotEmpty()) {
-                val batchUpdates = mutableMapOf<String, Any>()
-                for (data in unuploadedPengirimanList) {
-                    try {
-                        val simplePengirimanData = mapToSimplePengirimanData(data)
-                        val firebaseKey = data.spbNumber.replace('/', '-')
-                        batchUpdates[firebaseKey] = simplePengirimanData
-                    } catch (e: Exception) {
-                        Log.e("SyncPengirimanWorker", "Error processing pengiriman data for SPB: ${data.spbNumber}. Skipping...", e)
-                        continue
-                    }
+            // Proses PengirimanData
+            for ((index, data) in unuploadedPengirimanList.withIndex()) {
+                try {
+                    val simplePengirimanData = mapToSimplePengirimanData(data)
+                    val firebaseKey = data.spbNumber.replace('/', '-')
+                    firebasePengirimanUpdates[firebaseKey] = simplePengirimanData
+
+                    // Update progress untuk item ini
+                    val progress = ((index + 1).toFloat() / totalItems.toFloat())
+                    val progressData = Data.Builder()
+                        .putString("currentWorkerId", data.spbNumber)  // Sesuaikan dengan workerId di DataPengirimanScreen
+                        .putFloat("progress", progress)
+                        .build()
+                    setProgress(progressData)
+
+                    Log.d("SyncPengirimanWorker", "Progress for ${data.spbNumber}: ${progress * 100}%")
+
+                } catch (e: Exception) {
+                    Log.e("SyncPengirimanWorker", "Error processing pengiriman data for SPB: ${data.spbNumber}. Skipping...", e)
+                    continue
                 }
-
-                if (batchUpdates.isNotEmpty()) {
-                    Log.d("SyncPengirimanWorker", "Uploading ${batchUpdates.size} pengiriman data in a single batch.")
-                    pengirimanDbRef.updateChildren(batchUpdates).await()
-
-                    // Perbarui status di database Room setelah unggahan batch berhasil
-                    for (data in unuploadedPengirimanList) {
-                        pengirimanDao.updatePengiriman(data.copy(isUploaded = true))
-                    }
-                    Log.d("SyncPengirimanWorker", "Batch upload of pengiriman data successful and local status updated.")
-                }
-
-                processedItems += unuploadedPengirimanList.size
-                updateProgress(processedItems, totalItems)
             }
 
-            // Bagian 2: Unggah data FinalizedUniqueNos
-            if (unuploadedFinalizedList.isNotEmpty()) {
-                val batchUpdates = mutableMapOf<String, Any>()
+            // Proses FinalizedUniqueNos
+            for ((index, item) in unuploadedFinalizedList.withIndex()) {
+                try {
+                    firebaseFinalizedUpdates[item.uniqueNo] = item
+
+                    // Update progress untuk item ini (offset dengan jumlah pengiriman sebelumnya)
+                    val offsetIndex = unuploadedPengirimanList.size + index
+                    val progress = ((offsetIndex + 1).toFloat() / totalItems.toFloat())
+                    val progressData = Data.Builder()
+                        .putString("currentWorkerId", item.uniqueNo)  // Gunakan uniqueNo sebagai identifier
+                        .putFloat("progress", progress)
+                        .build()
+                    setProgress(progressData)
+
+                    Log.d("SyncPengirimanWorker", "Progress for ${item.uniqueNo}: ${progress * 100}%")
+
+                } catch (e: Exception) {
+                    Log.e("SyncPengirimanWorker", "Error processing finalized uniqueNo: ${item.uniqueNo}. Skipping...", e)
+                    continue
+                }
+            }
+
+            // Batch upload PengirimanData
+            if (firebasePengirimanUpdates.isNotEmpty()) {
+                Log.d("SyncPengirimanWorker", "Uploading ${firebasePengirimanUpdates.size} pengiriman data in a single batch.")
+                pengirimanDbRef.updateChildren(firebasePengirimanUpdates).await()
+                Log.d("SyncPengirimanWorker", "Batch upload of pengiriman data successful.")
+
+                // Perbarui status di database Room setelah unggahan batch berhasil
+                for (data in unuploadedPengirimanList) {
+                    pengirimanDao.updatePengiriman(data.copy(isUploaded = true))
+                }
+                Log.d("SyncPengirimanWorker", "Local status updated for pengiriman data.")
+            }
+
+            // Batch upload FinalizedUniqueNos
+            if (firebaseFinalizedUpdates.isNotEmpty()) {
+                Log.d("SyncPengirimanWorker", "Uploading ${firebaseFinalizedUpdates.size} finalized unique numbers in a single batch.")
+                finalizedUniqueNoDbRef.updateChildren(firebaseFinalizedUpdates).await()
+                Log.d("SyncPengirimanWorker", "Batch upload of finalized unique numbers successful.")
+
+                // Perbarui status di database Room
                 for (item in unuploadedFinalizedList) {
-                    try {
-                        batchUpdates[item.uniqueNo] = item
-                    } catch (e: Exception) {
-                        Log.e("SyncPengirimanWorker", "Error processing finalized uniqueNo: ${item.uniqueNo}. Skipping...", e)
-                        continue
-                    }
+                    pengirimanDao.updateFinalizedUniqueNo(item.copy(isUploaded = true))
                 }
-
-                if (batchUpdates.isNotEmpty()) {
-                    Log.d("SyncPengirimanWorker", "Uploading ${batchUpdates.size} finalized unique numbers in a single batch.")
-                    finalizedUniqueNoDbRef.updateChildren(batchUpdates).await()
-
-                    // Perbarui status di database Room
-                    for (item in unuploadedFinalizedList) {
-                        pengirimanDao.updateFinalizedUniqueNo(item.copy(isUploaded = true))
-                    }
-                    Log.d("SyncPengirimanWorker", "Batch upload of finalized unique numbers successful.")
-                }
-
-                processedItems += unuploadedFinalizedList.size
-                updateProgress(processedItems, totalItems)
+                Log.d("SyncPengirimanWorker", "Local status updated for finalized unique numbers.")
             }
 
             Log.d("SyncPengirimanWorker", "Data synchronization finished successfully.")
@@ -107,16 +127,6 @@ class SyncPengirimanWorker(
             Log.e("SyncPengirimanWorker", "Major error during sync process. Retrying...", e)
             return Result.retry()
         }
-    }
-
-    private suspend fun updateProgress(processed: Int, total: Int) {
-        val progress = (processed.toFloat() / total.toFloat())
-        setProgress(
-            Data.Builder()
-                .putFloat("progress", progress)
-                .putInt("total", total)
-                .build()
-        )
     }
 
     private fun mapToSimplePengirimanData(pengirimanData: PengirimanData): SimplePengirimanData {

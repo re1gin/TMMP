@@ -88,21 +88,11 @@ fun ScanInputScreen(
         when(scanStatus) {
             is ScanStatus.Success -> {
                 showSuccessScanDialog = true
-                if (vibrator != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else if (vibrator != null) {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(100)
-                }
+                vibrator?.vibrate(VibrationEffect.createOneShot(100, VibrationEffect.DEFAULT_AMPLITUDE))
             }
             is ScanStatus.Duplicate -> {
                 showDuplicateDialog = true
-                if (vibrator != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
-                } else if (vibrator != null) {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(longArrayOf(0, 200, 100, 200), -1)
-                }
+                vibrator?.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 200, 100, 200), -1))
             }
             is ScanStatus.Idle -> {
                 showSuccessScanDialog = false

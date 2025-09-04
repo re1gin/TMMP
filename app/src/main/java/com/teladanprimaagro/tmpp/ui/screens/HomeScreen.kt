@@ -23,15 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
-import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HomeScreen(
     navController: NavController,
     userRole: UserRole,
-    paddingValues: PaddingValues,
-    sharedNfcViewModel: SharedNfcViewModel
+    paddingValues: PaddingValues
 ) {
     var contentVisible by remember { mutableStateOf(false) }
 
@@ -56,7 +54,7 @@ fun HomeScreen(
                 .weight(1f)
         ) {
             when (userRole) {
-                UserRole.HARVESTER -> HarvesterContent(navController = navController, sharedNfcViewModel = sharedNfcViewModel)
+                UserRole.HARVESTER -> HarvesterContent(navController = navController)
                 UserRole.DRIVER -> DriverContent(navController = navController)
             }
         }

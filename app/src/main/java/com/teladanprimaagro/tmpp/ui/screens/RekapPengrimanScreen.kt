@@ -62,6 +62,7 @@ import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
@@ -126,8 +127,8 @@ fun RekapPengirimanScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MainBackground)
                 .padding(paddingValues)
-                .background(MaterialTheme.colorScheme.background)
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(modifier = Modifier.height(24.dp))

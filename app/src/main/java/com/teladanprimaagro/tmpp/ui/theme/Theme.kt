@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 
 private val MainColorPalette = lightColorScheme(
-    primary = Black,
+    primary = MainBackground,
     onPrimary = Orange,
 
     secondary = DarkBrown1,

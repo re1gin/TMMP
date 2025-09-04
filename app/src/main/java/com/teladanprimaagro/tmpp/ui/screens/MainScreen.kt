@@ -18,8 +18,7 @@ import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 fun MainScreen(
     mainNavController: NavHostController,
     userRole: UserRole,
-    settingsViewModel: SettingsViewModel,
-    sharedNfcViewModel: SharedNfcViewModel
+    settingsViewModel: SettingsViewModel
 ) {
     val bottomNavController = rememberNavController()
 
@@ -39,8 +38,7 @@ fun MainScreen(
                 HomeScreen(
                     navController = mainNavController,
                     userRole = userRole,
-                    paddingValues = paddingValues,
-                    sharedNfcViewModel = sharedNfcViewModel
+                    paddingValues = paddingValues
                 )
             }
             // Hapus composable "peta_screen" dan "laporan_screen"

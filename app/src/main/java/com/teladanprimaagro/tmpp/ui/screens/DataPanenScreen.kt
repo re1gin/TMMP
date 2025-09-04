@@ -61,7 +61,7 @@ import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DataTerkirimScreen(
+fun DataPanenScreen(
     navController: NavController,
     panenViewModel: PanenViewModel = viewModel()
 ) {

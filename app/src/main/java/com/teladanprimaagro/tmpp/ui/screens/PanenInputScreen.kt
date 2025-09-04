@@ -14,17 +14,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -33,17 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -526,11 +506,13 @@ fun PanenInputScreen(
                             Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
                             return@Button
                         }
+
                         val panenDataFinal = panenViewModel.createPanenData(
                             id = panenDataToEdit?.id ?: 0,
                             tanggalWaktu = dateTimeDisplay,
                             firebaseImageUrl = null
                         )
+
                         nfcDataToPass = panenDataFinal.copy(id = 0)
                         showNfcWriteDialog = true
                     },
@@ -541,39 +523,12 @@ fun PanenInputScreen(
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFFADFF2F),
-                        disabledContainerColor = Color(0xFFADFF2F).copy(alpha = 0.4f),
                         contentColor = Color.Black,
-                        disabledContentColor = Color.White // Warna teks saat nonaktif
-                    ),
-                    enabled = selectedForeman != "Pilih Mandor" &&
-                            selectedHarvester != "Pilih Pemanen" &&
-                            selectedBlock != "Pilih Blok" &&
-                            selectedTph != "Pilih TPH" &&
-                            locationPart1.isNotBlank() &&
-                            locationPart2.isNotBlank() &&
-                            imageUri != null &&
-                            imageBitmap != null &&
-                            totalBuah > 0 &&
-                            (nfcAdapter?.isEnabled ?: false)
+                        disabledContentColor = Color.White)
                 ) {
-                    val textColor = if (selectedForeman != "Pilih Mandor" &&
-                        selectedHarvester != "Pilih Pemanen" &&
-                        selectedBlock != "Pilih Blok" &&
-                        selectedTph != "Pilih TPH" &&
-                        locationPart1.isNotBlank() &&
-                        locationPart2.isNotBlank() &&
-                        imageUri != null &&
-                        imageBitmap != null &&
-                        totalBuah > 0 &&
-                        (nfcAdapter?.isEnabled ?: false)
-                    ) {
-                        Color.Black
-                    } else {
-                        Color.White
-                    }
                     Text(
                         text = if (isEditing) "Simpan Perubahan" else "Kirim",
-                        color = textColor,
+                        color = Black,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )

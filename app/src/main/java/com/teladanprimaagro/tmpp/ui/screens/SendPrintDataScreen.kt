@@ -12,6 +12,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,6 +21,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.getDetailScannedItems
+import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +87,7 @@ fun SendPrintDataScreen(
                         text = "Kirim & Cetak Data",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = White
                     )
                 },
                 navigationIcon = {
@@ -90,12 +95,12 @@ fun SendPrintDataScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Kembali",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = White
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -104,6 +109,7 @@ fun SendPrintDataScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(MainBackground)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -112,14 +118,14 @@ fun SendPrintDataScreen(
                 Text(
                     text = if (pengirimanId == -1) "ID data tidak valid." else "Memuat data pengiriman...",
                     fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = White
                 )
             } else {
                 Text(
                     text = "Data Pengiriman SPB: ${pengirimanData!!.spbNumber}",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
+                    color = MainColor,
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
