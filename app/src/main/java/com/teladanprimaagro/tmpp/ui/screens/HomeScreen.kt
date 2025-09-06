@@ -24,12 +24,12 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 @Composable
 fun HomeScreen(
     navController: NavController,
     userRole: UserRole,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
 ) {
     var contentVisible by remember { mutableStateOf(false) }
 

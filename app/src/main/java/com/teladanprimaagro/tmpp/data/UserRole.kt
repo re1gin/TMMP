@@ -4,3 +4,4 @@ enum class UserRole {
     HARVESTER,
     DRIVER,
 }
+

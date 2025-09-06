@@ -72,8 +72,6 @@ sealed class ScanStatus {
     data class Duplicate(val uniqueNo: String) : ScanStatus()
     object Finalized : ScanStatus()
 }
-
-@RequiresApi(Build.VERSION_CODES.O)
 class PengirimanViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- Repositories & Utilities ---
@@ -348,14 +346,4 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
-    //Fungsi Untuk Ekspor
-
-    val allPengirimanData: StateFlow<List<PengirimanData>> =
-        pengirimanDao.getAllPengiriman()
-            .map { it }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
 }

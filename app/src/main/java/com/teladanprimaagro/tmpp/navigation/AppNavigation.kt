@@ -1,7 +1,5 @@
 package com.teladanprimaagro.tmpp.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,6 +21,7 @@ import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.MainScreen
+import com.teladanprimaagro.tmpp.ui.screens.NfcScannerScreen
 import com.teladanprimaagro.tmpp.ui.screens.PanenExportScreen
 import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
@@ -41,16 +40,15 @@ import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
-    pengirimanViewModel: PengirimanViewModel,
+
     sharedNfcViewModel: SharedNfcViewModel
 ) {
     val navController = rememberNavController()
-
+    val pengirimanViewModel: PengirimanViewModel =viewModel()
     val panenViewModel: PanenViewModel = viewModel()
-    val settingsViewModel: SettingsViewModel = viewModel() // This is the instance you need to pass
+    val settingsViewModel: SettingsViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "splash_screen") {
         composable("splash_screen") {
@@ -229,6 +227,11 @@ fun AppNavigation(
             StatistikPengirimanScreen(
                 navController = navController,
             )
+        }
+
+
+        composable("nfc_scanner_screen") {
+            NfcScannerScreen(navController = navController, sharedNfcViewModel = sharedNfcViewModel)
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,21 +33,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.work.WorkInfo
-import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
@@ -57,24 +51,20 @@ import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SyncStatusViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataPanenScreen(
     navController: NavController,
-    panenViewModel: PanenViewModel = viewModel()
+    panenViewModel: PanenViewModel = viewModel(),
+    syncStatusViewModel: SyncStatusViewModel = viewModel()
 ) {
-    val context = LocalContext.current
+    // Ambil state dari ViewModel baru
+    val syncMessage by syncStatusViewModel.syncMessage.collectAsState()
+    val isSyncing by syncStatusViewModel.isSyncing.collectAsState()
 
     val allPanenData by panenViewModel.panenList.collectAsState()
-
-    val workInfos = WorkManager.getInstance(context)
-        .getWorkInfosForUniqueWorkLiveData("sync_panen_work")
-        .observeAsState()
-
-    val syncingWorkInfo = workInfos.value?.firstOrNull { it.state == WorkInfo.State.RUNNING }
-
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
 
     Scaffold(
@@ -109,7 +99,22 @@ fun DataPanenScreen(
                 .background(MainBackground)
                 .padding(paddingValues)
         ) {
-            @OptIn(ExperimentalMaterial3Api::class)
+            if (isSyncing || syncMessage.isNotEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = if (isSyncing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = syncMessage,
+                        color = White,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+
             if (allPanenData.isNotEmpty()) {
                 val syncedCount = allPanenData.count { it.isSynced }
                 val unsyncedCount = allPanenData.count { !it.isSynced }
@@ -169,7 +174,7 @@ fun DataPanenScreen(
                     } else {
                         "Belum ada data panen yang menunggu."
                     }
-                    Text(message, style = MaterialTheme.typography.bodyLarge)
+                    Text(message, style = MaterialTheme.typography.bodyLarge, color = White)
                 }
             } else {
                 LazyColumn(
@@ -181,17 +186,12 @@ fun DataPanenScreen(
                         if (panenItem.isSynced) {
                             DataTerkirimCard(panenItem = panenItem)
                         } else {
-                            val currentProgressData = syncingWorkInfo?.progress
-                            val currentUniqueNo = currentProgressData?.getString("currentUniqueNo")
-                            val progress = if (currentUniqueNo == panenItem.uniqueNo) {
-                                currentProgressData.getFloat("progress", 0f)
-                            } else {
-                                0f // Tunjukkan 0 atau status "Menunggu"
-                            }
-
-                            val isSyncing = currentUniqueNo == panenItem.uniqueNo
-
-                            DataBelumTerkirimCard(panenItem = panenItem, syncProgress = progress, isSyncing = isSyncing)
+                            val syncProgress by syncStatusViewModel.syncProgress.collectAsState()
+                            DataBelumTerkirimCard(
+                                panenItem = panenItem,
+                                syncProgress = syncProgress,
+                                isSyncing = isSyncing
+                            )
                         }
                     }
                 }
@@ -280,7 +280,6 @@ fun DataBelumTerkirimCard(panenItem: PanenData, syncProgress: Float, isSyncing: 
                         )
                     }
                 } else {
-                    // Tampilkan status "Menunggu" jika tidak sedang disinkronkan
                     Text(
                         text = "Status: Menunggu",
                         style = MaterialTheme.typography.labelSmall,

@@ -1,5 +1,3 @@
-@file:Suppress("DEPRECATION")
-
 package com.teladanprimaagro.tmpp
 
 import android.content.Context
@@ -18,7 +16,6 @@ import androidx.work.WorkManager
 import com.teladanprimaagro.tmpp.navigation.AppNavigation
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainTheme
-import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import com.teladanprimaagro.tmpp.workers.PanenCleanupWorker
 import com.teladanprimaagro.tmpp.workers.PengirimanCleanupWorker
@@ -29,7 +26,6 @@ import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
 
-    private val pengirimanViewModel: PengirimanViewModel by viewModels()
     private val sharedNfcViewModel: SharedNfcViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,7 +42,6 @@ class MainActivity : ComponentActivity() {
                     color = MainBackground
                 ) {
                     AppNavigation(
-                        pengirimanViewModel = pengirimanViewModel,
                         sharedNfcViewModel = sharedNfcViewModel
                     )
                 }

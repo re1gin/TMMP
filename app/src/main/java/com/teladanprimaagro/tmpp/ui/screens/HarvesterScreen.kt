@@ -1,11 +1,22 @@
 @file:Suppress("DEPRECATION")
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,11 +28,22 @@ import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Nfc
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,7 +61,9 @@ import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
+import com.teladanprimaagro.tmpp.util.DirectNfcReadDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -49,7 +73,7 @@ import java.util.Locale
 fun HarvesterContent(
     navController: NavController,
     modifier: Modifier = Modifier,
-    panenViewModel: PanenViewModel = viewModel()
+    panenViewModel: PanenViewModel = viewModel(),
 ) {
 
     Scaffold(
@@ -124,7 +148,7 @@ fun HarvesterContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Button(
-                        onClick = { /*TODO: Masih Pengembangan */ },
+                        onClick = { navController.navigate("nfc_scanner_screen") },
                         colors = ButtonDefaults.buttonColors(containerColor = OldGrey),
                         shape = RoundedCornerShape(15.dp),
                         modifier = Modifier
@@ -232,8 +256,6 @@ fun HarvesterContent(
                     backgroundColor = LightGrey
                 )
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

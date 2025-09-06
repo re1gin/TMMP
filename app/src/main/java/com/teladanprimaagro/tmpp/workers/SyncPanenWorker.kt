@@ -9,7 +9,6 @@ import androidx.work.Data
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.teladanprimaagro.tmpp.data.AppDatabase
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.util.UUID
@@ -50,7 +49,7 @@ class SyncPanenWorker(
                 try {
                     var firebaseImageUrl: String? = panenData.firebaseImageUrl
 
-                    // Upload gambar jika belum pernah diunggah
+                    // Unggah gambar jika belum pernah diunggah
                     if (panenData.localImageUri != null && panenData.firebaseImageUrl.isNullOrEmpty()) {
                         val localFile = File(panenData.localImageUri.toUri().path ?: continue)
 
@@ -58,10 +57,10 @@ class SyncPanenWorker(
                             val imageName = UUID.randomUUID().toString()
                             val imageRef = storageRef.child("$imageName.jpg")
 
-                            // Retry upload maksimal 3x
+                            // Retry upload maksimal 3x, tanpa delay
                             var attempts = 0
                             var uploaded = false
-                            while (attempts < 100 && !uploaded) {
+                            while (attempts < 3 && !uploaded) {
                                 try {
                                     Log.d("SyncPanenWorker", "Uploading image (try ${attempts + 1}) for uniqueNo: ${panenData.uniqueNo}")
                                     imageRef.putFile(panenData.localImageUri.toUri()).await()
@@ -69,14 +68,12 @@ class SyncPanenWorker(
                                     uploaded = true
                                 } catch (e: Exception) {
                                     attempts++
-                                    if (attempts < 3) {
-                                        Log.w("SyncPanenWorker", "Upload failed, retrying...", e)
-                                        delay(2000L * attempts) // exponential kecil
-                                    } else {
-                                        Log.e("SyncPanenWorker", "Image upload failed after 3 attempts: ${panenData.localImageUri}", e)
-                                        firebaseImageUrl = null
-                                    }
+                                    Log.w("SyncPanenWorker", "Upload failed, retrying...", e)
                                 }
+                            }
+                            if (!uploaded) {
+                                Log.e("SyncPanenWorker", "Image upload failed after 3 attempts: ${panenData.localImageUri}")
+                                firebaseImageUrl = null
                             }
                         } else {
                             Log.e("SyncPanenWorker", "Local image file not found: ${panenData.localImageUri}")
