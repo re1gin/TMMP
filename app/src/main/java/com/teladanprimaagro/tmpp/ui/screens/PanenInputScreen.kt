@@ -2,7 +2,6 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.VibrationEffect
@@ -14,7 +13,17 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -23,10 +32,19 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +79,7 @@ import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.util.NfcWriteDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -71,7 +90,7 @@ fun PanenInputScreen(
     navController: NavController,
     panenViewModel: PanenViewModel,
     settingsViewModel: SettingsViewModel,
-    nfcIntentFromActivity: State<Intent?>,
+    sharedNfcViewModel: SharedNfcViewModel,
     panenDataToEdit: PanenData? = null
 ) {
     val scrollState = rememberScrollState()
@@ -573,7 +592,7 @@ fun PanenInputScreen(
                             )
                         }
                     },
-                    nfcIntentFromActivity = nfcIntentFromActivity
+                    sharedNfcViewModel = sharedNfcViewModel
                 )
                 if (showSuccessDialog) {
                     SuccessDialog(

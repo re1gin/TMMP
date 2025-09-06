@@ -11,9 +11,3 @@ data class ScannedItemEntity(
     val blok: String,
     val totalBuah: Int,
 )
-
-@Entity(tableName = "finalized_unique_nos")
-data class FinalizedUniqueNoEntity(
-    @PrimaryKey val uniqueNo: String,
-    val isUploaded: Boolean = false
-)

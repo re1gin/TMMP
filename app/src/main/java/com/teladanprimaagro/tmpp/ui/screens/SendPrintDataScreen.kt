@@ -11,7 +11,6 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -28,8 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.PengirimanData
-import com.teladanprimaagro.tmpp.data.getDetailScannedItems
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.White
@@ -44,7 +44,6 @@ import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SendPrintDataScreen(
@@ -213,7 +212,6 @@ fun SendPrintDataScreen(
 
 private val SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
 
-@RequiresApi(Build.VERSION_CODES.O)
 private suspend fun printData(context: Context, device: BluetoothDevice, data: PengirimanData) {
     withContext(Dispatchers.IO) {
         if (context.checkSelfPermission(Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -244,7 +242,12 @@ private suspend fun printData(context: Context, device: BluetoothDevice, data: P
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
+private val gson = Gson()
+private fun PengirimanData.getDetailScannedItems(): List<ScannedItem> {
+    val type = object : TypeToken<List<ScannedItem>>() {}.type
+    return gson.fromJson(this.detailScannedItemsJson, type) ?: emptyList()
+}
+
 private fun ThermalPrinter(data: PengirimanData): String {
     val ESC = 0x1B.toChar()
     val GS = 0x1D.toChar()

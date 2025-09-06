@@ -1,11 +1,9 @@
 package com.teladanprimaagro.tmpp.navigation
 
-import android.content.Intent
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -15,17 +13,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.DataPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.DataPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
 import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
-import com.teladanprimaagro.tmpp.ui.screens.StatistikPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
 import com.teladanprimaagro.tmpp.ui.screens.MainScreen
+import com.teladanprimaagro.tmpp.ui.screens.PanenExportScreen
+import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PetaScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
@@ -35,7 +34,7 @@ import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
 import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
 import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
 import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.DataPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.StatistikPengirimanScreen
 import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
@@ -45,7 +44,6 @@ import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(
-    nfcIntent: State<Intent?>,
     pengirimanViewModel: PengirimanViewModel,
     sharedNfcViewModel: SharedNfcViewModel
 ) {
@@ -87,6 +85,8 @@ fun AppNavigation(
             SendPrintDataScreen(navController, pengirimanId)
         }
 
+        //Screen Harvester
+
         composable(
             route = "panenInputScreen/{panenId}",
             arguments = listOf(
@@ -112,7 +112,7 @@ fun AppNavigation(
                 navController = navController,
                 panenViewModel = panenViewModel,
                 settingsViewModel = settingsViewModel,
-                nfcIntentFromActivity = nfcIntent,
+                sharedNfcViewModel = sharedNfcViewModel,
                 panenDataToEdit = if (panenId != -1) panenDataToEdit else null
             )
         }
@@ -134,6 +134,12 @@ fun AppNavigation(
         composable("data_terkirim_screen") {
             DataPanenScreen(
                 navController = navController,
+            )
+        }
+
+        composable("peta_screen") {
+            PetaScreen(
+                navController,
             )
         }
 
@@ -164,58 +170,61 @@ fun AppNavigation(
             )
         }
 
+        composable("panen_export_screen") {
+            PanenExportScreen(navController, panenViewModel)
+
+        }
+
+
+        //Screen Driver
+
         composable("scan_input_screen") {
             ScanInputScreen(
                 navController = navController,
                 pengirimanViewModel = pengirimanViewModel,
                 sharedNfcViewModel = sharedNfcViewModel,
-                nfcIntentFromActivity = nfcIntent
             )
         }
         composable("pengiriman_input_screen") {
             PengirimanInputScreen(
-                navController = navController,
-                pengirimanViewModel = pengirimanViewModel
+                navController,
+                pengirimanViewModel
             )
         }
         composable("rekap_pengiriman_screen") {
             RekapPengirimanScreen(
-                navController = navController,
-                pengirimanViewModel = pengirimanViewModel
+                navController,
+                pengirimanViewModel
             )
         }
 
         composable("data_pengiriman_screen") {
             DataPengirimanScreen(
-                navController = navController,
+                navController,
             )
         }
 
         composable("spb_settings_screen") {
             SpbSettingsScreen(
-                navController = navController,
-                settingsViewModel = settingsViewModel
+                navController,
+                settingsViewModel
             )
         }
-
 
         composable("kelola_supir_screen") {
             KelolaSupirScreen(
-                navController = navController,
-                settingsViewModel = settingsViewModel
+                navController,
+                settingsViewModel
             )
         }
+
         composable("kelola_kendaraan_screen") {
             KelolaKendaraanScreen(
-                navController = navController,
-                settingsViewModel = settingsViewModel
+                navController,
+                settingsViewModel
             )
         }
-        composable("peta_screen") {
-            PetaScreen(
-                navController = navController,
-            )
-        }
+
         composable("statistik_pengiriman_screen") {
             StatistikPengirimanScreen(
                 navController = navController,

@@ -6,10 +6,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.net.Uri
-import android.os.Build
 import android.os.Looper
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
@@ -40,7 +38,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 @Suppress("DEPRECATION")
-@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StaticFieldLeak")
 class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -214,7 +211,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun setBuahBL(value: Int) { _buahBL.value = value }
 
     // Membuat objek PanenData dari state saat ini
-    @RequiresApi(Build.VERSION_CODES.O)
     fun createPanenData(id: Int, tanggalWaktu: String, firebaseImageUrl: String? = null): PanenData {
         return PanenData(
             id = id,
@@ -274,7 +270,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Mengatur ulang form
-    @RequiresApi(Build.VERSION_CODES.O)
     fun resetPanenForm() {
         _locationPart1.value = ""
         _locationPart2.value = ""
@@ -294,7 +289,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Memuat data untuk edit
-    @RequiresApi(Build.VERSION_CODES.O)
     fun loadEditData(panenData: PanenData) {
         _locationPart1.value = panenData.locationPart1
         _locationPart2.value = panenData.locationPart2
@@ -600,7 +594,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Membuat kode unik
-    @RequiresApi(Build.VERSION_CODES.O)
     fun generateUniqueCode(dateTime: LocalDateTime, block: String, totalBuah: Int): String {
         val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
@@ -668,4 +661,14 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private fun filterByBlok(list: List<PanenData>, blokFilter: String): List<PanenData> {
         return if (blokFilter == "Semua") list else list.filter { it.blok == blokFilter }
     }
+
+    //Fungsi Untuk Ekspor Data
+    val allPanenData: StateFlow<List<PanenData>> =
+        panenDao.getAllPanen()
+            .map { it }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 }

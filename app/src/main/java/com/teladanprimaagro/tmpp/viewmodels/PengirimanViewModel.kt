@@ -348,4 +348,14 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             }
         }
     }
+    //Fungsi Untuk Ekspor
+
+    val allPengirimanData: StateFlow<List<PengirimanData>> =
+        pengirimanDao.getAllPengiriman()
+            .map { it }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
 }

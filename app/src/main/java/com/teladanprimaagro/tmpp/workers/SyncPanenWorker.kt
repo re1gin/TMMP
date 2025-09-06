@@ -61,7 +61,7 @@ class SyncPanenWorker(
                             // Retry upload maksimal 3x
                             var attempts = 0
                             var uploaded = false
-                            while (attempts < 3 && !uploaded) {
+                            while (attempts < 100 && !uploaded) {
                                 try {
                                     Log.d("SyncPanenWorker", "Uploading image (try ${attempts + 1}) for uniqueNo: ${panenData.uniqueNo}")
                                     imageRef.putFile(panenData.localImageUri.toUri()).await()

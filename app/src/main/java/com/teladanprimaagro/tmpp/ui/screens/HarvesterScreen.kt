@@ -4,19 +4,9 @@ package com.teladanprimaagro.tmpp.ui.screens
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,18 +14,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Nfc
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,7 +45,6 @@ import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun HarvesterContent(
     navController: NavController,
@@ -214,51 +195,49 @@ fun HarvesterContent(
 
             // Baris tombol Menu lain
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
+
                 CustomMenuButton(
                     text = "Statistik",
                     icon = Icons.Default.Equalizer,
                     onClick = { navController.navigate("statistik_panen_screen") },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     backgroundColor = LightGrey
                 )
                 CustomMenuButton(
                     text = "Upload",
                     icon = Icons.Default.CloudDone,
                     onClick = { navController.navigate("data_terkirim_screen") },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     backgroundColor = LightGrey
                 )
                 CustomMenuButton(
                     text = "Peta",
                     icon = Icons.Default.Map,
                     onClick = { navController.navigate("peta_screen") },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    backgroundColor = LightGrey
+                )
+
+                CustomMenuButton(
+                    text = "Ekspor",
+                    icon = Icons.Default.FileUpload,
+                    onClick = { navController.navigate("panen_export_screen") },
+                    modifier = Modifier.padding(horizontal = 8.dp),
                     backgroundColor = LightGrey
                 )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
-            // Tambah baris tombol baru untuk fitur baca NFC
-            Text(
-                text = "Fitur Tambahan",
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                modifier = Modifier.align(Alignment.Start)
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
         }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) {
     val totalDataMasuk by panenViewModel.totalDataMasuk.collectAsState()
@@ -413,8 +392,10 @@ fun CustomMenuButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(100.dp),
-        shape = RoundedCornerShape(16.dp),
+        modifier = modifier
+            .height(100.dp)
+            .width(105.dp),
+        shape = RoundedCornerShape(10.dp),
         colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
         contentPadding = PaddingValues(12.dp)
     ) {
