@@ -1,7 +1,6 @@
 @file:Suppress("DEPRECATION")
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -41,9 +40,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -61,9 +58,7 @@ import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
-import com.teladanprimaagro.tmpp.util.DirectNfcReadDialog
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
-import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

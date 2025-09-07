@@ -515,7 +515,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 panenDao.updatePanen(panen)
-                // Tidak perlu memanggil startSyncWorker() di sini karena init block akan menangani sinkronisasi otomatis
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error updating panen data", e)
             }

@@ -1,9 +1,7 @@
 package com.teladanprimaagro.tmpp.viewmodels
 
 import android.app.Application
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
@@ -135,9 +133,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     private val allFinalizedUniqueNos = pengirimanDao.getAllFinalizedUniqueNos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val isConnected: StateFlow<Boolean> = connectivityObserver.isConnected.stateIn(
-        viewModelScope, SharingStarted.WhileSubscribed(5000), false
-    )
+
 
     init {
         Log.d("PengirimanViewModel", "INIT: PengirimanViewModel created.")
@@ -157,7 +153,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         }
 
         viewModelScope.launch {
-            combine(unuploadedPengirimanList, unuploadedFinalizedUniqueNos, isConnected) { pengirimanData, finalizedData, connected ->
+            combine(unuploadedPengirimanList, unuploadedFinalizedUniqueNos, connectivityObserver.isConnected) { pengirimanData, finalizedData, connected ->
                 (pengirimanData.isNotEmpty() || finalizedData.isNotEmpty()) && connected
             }.collect { shouldSync ->
                 if (shouldSync) {

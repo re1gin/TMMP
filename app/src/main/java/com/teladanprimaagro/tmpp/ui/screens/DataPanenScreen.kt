@@ -16,14 +16,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CloudSync
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -38,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,8 +50,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
+import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.White
@@ -60,11 +69,14 @@ fun DataPanenScreen(
     panenViewModel: PanenViewModel = viewModel(),
     syncStatusViewModel: SyncStatusViewModel = viewModel()
 ) {
-    // Ambil state dari ViewModel baru
-    val syncMessage by syncStatusViewModel.syncMessage.collectAsState()
-    val isSyncing by syncStatusViewModel.isSyncing.collectAsState()
 
     val allPanenData by panenViewModel.panenList.collectAsState()
+
+    val syncMessage by syncStatusViewModel.syncMessage.collectAsState()
+    val isSyncing by syncStatusViewModel.isSyncing.collectAsState()
+    val syncProgress by syncStatusViewModel.syncProgress.collectAsState()
+    val currentSyncId by syncStatusViewModel.currentSyncId.collectAsState()
+
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
 
     Scaffold(
@@ -91,6 +103,24 @@ fun DataPanenScreen(
                     containerColor = Color.Transparent
                 )
             )
+        },
+        floatingActionButton = {
+            val fabAlpha = if (isSyncing) 0.5f else 1f
+            FloatingActionButton(
+                onClick = {
+                    if (!isSyncing) {
+                        syncStatusViewModel.triggerManualSync()
+                    }
+                },
+                modifier = Modifier.alpha(fabAlpha),
+                containerColor = MainColor,
+                contentColor = Black
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.CloudSync,
+                    contentDescription = "Sinkronisasi Sekarang"
+                )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -99,21 +129,18 @@ fun DataPanenScreen(
                 .background(MainBackground)
                 .padding(paddingValues)
         ) {
-            if (isSyncing || syncMessage.isNotEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(color = if (isSyncing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary)
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = syncMessage,
-                        color = White,
-                        fontWeight = FontWeight.Bold
-                    )
+            Text(
+                text = syncMessage,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                color = when {
+                    syncMessage.contains("berhasil", ignoreCase = true) -> SuccessGreen
+                    syncMessage.contains("gagal", ignoreCase = true) -> DangerRed
+                    else -> Color.White
                 }
-            }
+            )
 
             if (allPanenData.isNotEmpty()) {
                 val syncedCount = allPanenData.count { it.isSynced }
@@ -139,16 +166,15 @@ fun DataPanenScreen(
                     ) {
                         Text("Sudah Terkirim ($syncedCount)")
                     }
-
                     SegmentedButton(
                         selected = selectedFilter == "Belum Terkirim",
                         onClick = { selectedFilter = "Belum Terkirim" },
                         shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
                         colors = SegmentedButtonDefaults.colors(
                             activeContainerColor = DangerRed,
-                            activeContentColor = Color.White,
+                            activeContentColor = White,
                             activeBorderColor = Color.Transparent,
-                            inactiveContainerColor = Color.White,
+                            inactiveContainerColor = White,
                             inactiveContentColor = MaterialTheme.colorScheme.onSurface,
                             inactiveBorderColor = Color.Transparent
                         )
@@ -174,7 +200,7 @@ fun DataPanenScreen(
                     } else {
                         "Belum ada data panen yang menunggu."
                     }
-                    Text(message, style = MaterialTheme.typography.bodyLarge, color = White)
+                    Text(message, style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 LazyColumn(
@@ -186,11 +212,13 @@ fun DataPanenScreen(
                         if (panenItem.isSynced) {
                             DataTerkirimCard(panenItem = panenItem)
                         } else {
-                            val syncProgress by syncStatusViewModel.syncProgress.collectAsState()
+                            val isItemSyncing = isSyncing && (currentSyncId == panenItem.uniqueNo || syncMessage.contains(panenItem.uniqueNo))
+                            val progress = if (isItemSyncing) syncProgress else 0f
+
                             DataBelumTerkirimCard(
                                 panenItem = panenItem,
-                                syncProgress = syncProgress,
-                                isSyncing = isSyncing
+                                syncProgress = progress,
+                                isSyncing = isItemSyncing
                             )
                         }
                     }
@@ -260,43 +288,57 @@ fun DataBelumTerkirimCard(panenItem: PanenData, syncProgress: Float, isSyncing: 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Ditambahkan: ${panenItem.tanggalWaktu}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White
-                )
-                if (isSyncing) {
-                    Box(contentAlignment = Alignment.Center) {
+                // Bagian Kiri: Informasi utama
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "Ditambahkan: ${panenItem.tanggalWaktu}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Pemanen: ${panenItem.namaPemanen}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "No. Unik: ${panenItem.uniqueNo}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+
+                // Bagian Kanan: Status sinkronisasi
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.size(60.dp)
+                ) {
+                    if (isSyncing) {
                         CircularProgressIndicator(
                             progress = { syncProgress },
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp),
+                            color = MainColor,
+                            strokeWidth = ProgressIndicatorDefaults.CircularStrokeWidth,
+                            trackColor = ProgressIndicatorDefaults.circularIndeterminateTrackColor,
+                            strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap
                         )
                         Text(
                             text = "${(syncProgress * 100).toInt()}%",
-                            fontSize = 8.sp,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = LightGrey
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.CloudOff,
+                            contentDescription = "Menunggu Sinkronisasi",
+                            modifier = Modifier.size(24.dp),
+                            tint = Grey
                         )
                     }
-                } else {
-                    Text(
-                        text = "Status: Menunggu",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
                 }
             }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Pemanen: ${panenItem.namaPemanen}",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "No. Unik: ${panenItem.uniqueNo}",
-                style = MaterialTheme.typography.bodyMedium
-            )
         }
     }
 }

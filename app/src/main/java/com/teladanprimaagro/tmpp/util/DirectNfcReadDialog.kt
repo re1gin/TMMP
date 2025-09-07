@@ -41,7 +41,6 @@ fun DirectNfcReadDialog(
     val view = LocalView.current
     remember(view) { view.findViewTreeLifecycleOwner() }
 
-    // Ambil state NFC dari ViewModel
     val nfcState by sharedNfcViewModel.nfcState.collectAsState()
 
     // State internal untuk UI

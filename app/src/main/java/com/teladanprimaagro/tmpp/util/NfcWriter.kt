@@ -126,18 +126,29 @@ fun NfcWriteDialog(
 
     LaunchedEffect(sharedNfcViewModel.nfcIntent.collectAsState().value) {
         val currentIntent = sharedNfcViewModel.nfcIntent.value
+        // Tambahkan pengecekan ini
         if (currentIntent != null && showDialog && dataToWrite != null) {
-            Log.d("NFCWriter", "Processing NFC Intent from SharedNfcViewModel: ${currentIntent.action}")
+            // Hanya proses intent jika aksinya adalah NFC yang valid
+            if (currentIntent.action in setOf(
+                    NfcAdapter.ACTION_NDEF_DISCOVERED,
+                    NfcAdapter.ACTION_TAG_DISCOVERED,
+                    NfcAdapter.ACTION_TECH_DISCOVERED
+                )) {
+                Log.d("NFCWriter", "Processing NFC Intent from SharedNfcViewModel: ${currentIntent.action}")
 
-            val tag: Tag? = currentIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
-            if (tag != null) {
-                sharedNfcViewModel.writeNfcData(tag, dataToWrite) { success, message ->
-                    onWriteComplete(success, message)
+                val tag: Tag? = currentIntent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+                if (tag != null) {
+                    sharedNfcViewModel.writeNfcData(tag, dataToWrite) { success, message ->
+                        onWriteComplete(success, message)
+                        sharedNfcViewModel.resetNfcIntent()
+                    }
+                } else {
+                    sharedNfcViewModel.setWriteError("Stiker NFC tidak terdeteksi dengan benar.")
+                    onWriteComplete(false, "Stiker NFC tidak terdeteksi dengan benar.")
                     sharedNfcViewModel.resetNfcIntent()
                 }
             } else {
-                sharedNfcViewModel.setWriteError("Stiker NFC tidak terdeteksi dengan benar.")
-                onWriteComplete(false, "Stiker NFC tidak terdeteksi dengan benar.")
+                Log.d("NFCWriter", "Ignoring non-NFC intent: ${currentIntent.action}")
                 sharedNfcViewModel.resetNfcIntent()
             }
         }

@@ -9,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.teladanprimaagro.tmpp.data.AppDatabase
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import com.teladanprimaagro.tmpp.viewmodels.SimplePengirimanData
 import kotlinx.coroutines.tasks.await
 
@@ -59,7 +60,7 @@ class SyncPengirimanWorker(
                     // Update progress untuk item ini
                     val progress = ((index + 1).toFloat() / totalItems.toFloat())
                     val progressData = Data.Builder()
-                        .putString("currentWorkerId", data.spbNumber)  // Sesuaikan dengan workerId di DataPengirimanScreen
+                        .putString("currentWorkerId", data.spbNumber)
                         .putFloat("progress", progress)
                         .build()
                     setProgress(progressData)
@@ -130,8 +131,8 @@ class SyncPengirimanWorker(
     }
 
     private fun mapToSimplePengirimanData(pengirimanData: PengirimanData): SimplePengirimanData {
-        val scannedItemsType = object : com.google.gson.reflect.TypeToken<List<com.teladanprimaagro.tmpp.viewmodels.ScannedItem>>() {}.type
-        val rawDetailScannedItems: List<com.teladanprimaagro.tmpp.viewmodels.ScannedItem> = gson.fromJson(pengirimanData.detailScannedItemsJson, scannedItemsType) ?: emptyList()
+        val scannedItemsType = object : com.google.gson.reflect.TypeToken<List<ScannedItem>>() {}.type
+        val rawDetailScannedItems: List<ScannedItem> = gson.fromJson(pengirimanData.detailScannedItemsJson, scannedItemsType) ?: emptyList()
 
         val ringkasanPerBlok = rawDetailScannedItems
             .groupBy { it.blok }
