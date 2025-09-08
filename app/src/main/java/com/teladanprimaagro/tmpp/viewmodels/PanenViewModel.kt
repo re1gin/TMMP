@@ -161,7 +161,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     "Buah OR" to dataList.sumOf { it.buahOR },
                     "Buah E" to dataList.sumOf { it.buahE },
                     "Buah AB" to dataList.sumOf { it.buahAB },
-                    "Buah BL" to dataList.sumOf { it.buahBL }
+                    "Buah BL" to dataList.sumOf { it.buahBL },
+                    "Buah TL" to dataList.sumOf { it.totalBuah }
                 )
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
@@ -175,7 +176,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                     "Buah OR" to dataList.sumOf { it.buahOR },
                     "Buah E" to dataList.sumOf { it.buahE },
                     "Buah AB" to dataList.sumOf { it.buahAB },
-                    "Buah BL" to dataList.sumOf { it.buahBL }
+                    "Buah BL" to dataList.sumOf { it.buahBL },
+                    "Buah TL" to dataList.sumOf { it.totalBuah }
                 )
             }
         }
@@ -189,7 +191,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                 "Buah OR" to panenList.sumOf { it.buahOR },
                 "Buah E" to panenList.sumOf { it.buahE },
                 "Buah AB" to panenList.sumOf { it.buahAB },
-                "Buah BL" to panenList.sumOf { it.buahBL }
+                "Buah BL" to panenList.sumOf { it.buahBL },
+                "Buah TL" to panenList.sumOf { it.totalBuah }
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
