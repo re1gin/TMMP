@@ -308,7 +308,7 @@ fun FruitTableSection(
     totalJenisBuah: Map<String, Int>,
     title: String = "Detail Buah per Pemanen"
 ) {
-    val sortedFruitKeys = listOf("N", "A", "OR", "E", "B", "BL")
+    val sortedFruitKeys = listOf("N", "A", "OR", "E", "AB", "BL")
 
     Column(
         modifier = Modifier
