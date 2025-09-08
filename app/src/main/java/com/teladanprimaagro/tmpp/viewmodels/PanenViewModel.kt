@@ -31,6 +31,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.delay
 import java.io.File
 import java.io.FileOutputStream
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
@@ -47,6 +48,10 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val context = application.applicationContext
     private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
     private val connectivityObserver = ConnectivityObserver(context)
+
+    // Menghitung tanggal hari ini dalam format "dd-MM-yyyy"
+    private val todayDate: String
+        get() = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
 
     // State untuk form input
     private val _locationPart1 = MutableStateFlow("")
@@ -104,6 +109,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         generateUniqueCode(LocalDateTime.now(), block, total)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
+    private var isEditing = false // Menandai apakah dalam mode edit
+
     // State untuk data dan filter
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
     val panenDataToEdit: StateFlow<PanenData?> = _panenDataToEdit.asStateFlow()
@@ -120,8 +127,11 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
+    val ListPanen: StateFlow<List<PanenData>> =
+        panenDao.getAllPanen().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val panenList: StateFlow<List<PanenData>> =
-        panenDao.getAllPanen()
+        panenDao.getPanenByDate(todayDate)
             .combine(_sortBy) { list, sortBy -> sortPanenList(list, sortBy) }
             .combine(_sortOrderAscending) { list, isAscending -> sortPanenListByOrder(list, isAscending) }
             .combine(_selectedPemanenFilter) { list, pemanenFilter -> filterByPemanen(list, pemanenFilter) }
@@ -134,15 +144,15 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     val totalSemuaBuah: StateFlow<Int> = panenList.map { list -> list.sumOf { it.totalBuah } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val statistikPerPemanen: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+    val statistikPerPemanen: StateFlow<Map<String, Int>> = panenList
         .map { list -> list.groupBy { it.namaPemanen }.mapValues { (_, panenList) -> panenList.sumOf { it.totalBuah } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val statistikPerBlok: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+    val statistikPerBlok: StateFlow<Map<String, Int>> = panenList
         .map { list -> list.groupBy { it.blok }.mapValues { (_, panenList) -> panenList.sumOf { it.totalBuah } } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val statistikJenisBuahPerPemanen: StateFlow<Map<String, Map<String, Int>>> = panenDao.getAllPanen()
+    val statistikJenisBuahPerPemanen: StateFlow<Map<String, Map<String, Int>>> = panenList
         .map { panenList ->
             panenList.groupBy { it.namaPemanen }.mapValues { (_, dataList) ->
                 mapOf(
@@ -156,7 +166,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val statistikJenisBuahPerBlok: StateFlow<Map<String, Map<String, Int>>> = panenDao.getAllPanen()
+    val statistikJenisBuahPerBlok: StateFlow<Map<String, Map<String, Int>>> = panenList
         .map { panenList ->
             panenList.groupBy { it.blok }.mapValues { (_, dataList) ->
                 mapOf(
@@ -171,7 +181,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val totalJenisBuah: StateFlow<Map<String, Int>> = panenDao.getAllPanen()
+    val totalJenisBuah: StateFlow<Map<String, Int>> = panenList
         .map { panenList ->
             mapOf(
                 "Buah N" to panenList.sumOf { it.buahN },
@@ -210,7 +220,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun setBuahAB(value: Int) { _buahAB.value = value }
     fun setBuahBL(value: Int) { _buahBL.value = value }
 
-    // Membuat objek PanenData dari state saat ini
     fun createPanenData(id: Int, tanggalWaktu: String, firebaseImageUrl: String? = null): PanenData {
         return PanenData(
             id = id,
@@ -235,7 +244,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    // Validasi data form
     fun validatePanenData(nfcAdapter: android.nfc.NfcAdapter?): Pair<Boolean, String?> {
         if (_selectedForeman.value == "Pilih Mandor") {
             return Pair(false, "Harap pilih nama mandor.")
@@ -269,7 +277,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return Pair(true, null)
     }
 
-    // Mengatur ulang form
     fun resetPanenForm() {
         _locationPart1.value = ""
         _locationPart2.value = ""
@@ -286,14 +293,16 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _buahE.value = 0
         _buahAB.value = 0
         _buahBL.value = 0
+        isEditing = false
+        Log.d("PanenViewModel", "Form reset completed")
     }
 
-    // Memuat data untuk edit
     fun loadEditData(panenData: PanenData) {
+        isEditing = true
+        _uniqueNo.value = panenData.uniqueNo // Pertahankan uniqueNo asli
         _locationPart1.value = panenData.locationPart1
         _locationPart2.value = panenData.locationPart2
         _imageUri.value = panenData.localImageUri?.toUri()
-        _uniqueNo.value = panenData.uniqueNo
         _selectedForeman.value = panenData.kemandoran
         _selectedHarvester.value = panenData.namaPemanen
         _selectedBlock.value = panenData.blok
@@ -309,6 +318,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
             onSuccess = { /* Bitmap sudah diatur */ },
             onError = { /* Kesalahan ditangani di UI */ }
         )
+        Log.d("PanenViewModel", "Loaded edit data with uniqueNo: ${_uniqueNo.value}")
     }
 
     @SuppressLint("MissingPermission")
@@ -405,14 +415,12 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Membersihkan gambar
     fun clearImage() {
         _imageUri.value = null
         _imageBitmap.value?.recycle()
         _imageBitmap.value = null
     }
 
-    // Menyimpan data panen dengan gambar terkompresi
     fun compressImageAndSavePanen(panenData: PanenData, imageUri: Uri?) {
         viewModelScope.launch {
             if (imageUri == null) {
@@ -437,7 +445,7 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 panenDao.insertPanen(panenData)
-                // Tidak perlu memanggil startSyncWorker() di sini karena init block akan menangani sinkronisasi otomatis
+                Log.d("PanenViewModel", "Saved PanenData with uniqueNo: ${panenData.uniqueNo}")
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error saving panen data to local DB", e)
             }
@@ -510,30 +518,27 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Memperbarui data panen
     fun updatePanenData(panen: PanenData) {
         viewModelScope.launch {
             try {
                 panenDao.updatePanen(panen)
+                Log.d("PanenViewModel", "Updated PanenData with uniqueNo: ${panen.uniqueNo}")
             } catch (e: Exception) {
                 Log.e("PanenViewModel", "Error updating panen data", e)
             }
         }
     }
 
-    // Memuat data panen berdasarkan ID
     fun loadPanenDataById(id: Int) {
         viewModelScope.launch {
             _panenDataToEdit.value = panenDao.getPanenById(id)
         }
     }
 
-    // Mengosongkan data edit
     fun clearPanenDataToEdit() {
         _panenDataToEdit.value = null
     }
 
-    // Menghapus gambar dari Firebase Storage
     private suspend fun deleteImageFromFirebaseStorage(imageUrl: String?) {
         if (imageUrl.isNullOrEmpty()) {
             return
@@ -546,7 +551,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Menghapus data panen terpilih
     fun deleteSelectedPanenData(ids: List<Int>) {
         viewModelScope.launch {
             val dataToDelete = panenDao.getPanenByIds(ids)
@@ -562,7 +566,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Memicu WorkManager untuk sinkronisasi
     private fun startSyncWorker() {
         Log.d("PanenViewModel", "Checking network status before enqueuing...")
 
@@ -592,7 +595,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Membuat kode unik
     fun generateUniqueCode(dateTime: LocalDateTime, block: String, totalBuah: Int): String {
         val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
@@ -604,7 +606,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return "$uniqueNoFormat$formattedDate$formattedTime$formattedBlock$formattedBuah"
     }
 
-    // Fungsi untuk filter dan sort
     fun setSortBy(criteria: String) {
         _sortBy.value = criteria
     }
@@ -661,7 +662,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         return if (blokFilter == "Semua") list else list.filter { it.blok == blokFilter }
     }
 
-    //Fungsi Untuk Ekspor Data
     val allPanenData: StateFlow<List<PanenData>> =
         panenDao.getAllPanen()
             .map { it }

@@ -11,6 +11,9 @@ interface PanenDao {
     @Query("SELECT * FROM panen_entries ORDER BY id DESC")
     fun getAllPanen(): Flow<List<PanenData>>
 
+    @Query("SELECT * FROM panen_entries WHERE tanggalWaktu LIKE :todayDate || '%' ORDER BY id DESC")
+    fun getPanenByDate(todayDate: String): Flow<List<PanenData>>
+
     @Query("SELECT * FROM panen_entries WHERE id = :panenId")
     suspend fun getPanenById(panenId: Int): PanenData?
 

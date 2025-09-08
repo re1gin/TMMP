@@ -1,7 +1,5 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,6 +27,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -57,7 +57,6 @@ import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DriverContent(
     navController: NavController,
@@ -131,19 +130,25 @@ fun DriverContent(
                     )
                 }
 
-                // Kanan
                 Box(
-                    modifier = Modifier
-                        .background(MainColor, CircleShape)
-                        .padding(horizontal = 10.dp, vertical = 3.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Mandor Loding",
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Light,
-                        color = Black
-                    )
+                    Button(
+                        onClick = { navController.navigate("nfc_scanner_screen") },
+                        colors = ButtonDefaults.buttonColors(containerColor = OldGrey),
+                        shape = RoundedCornerShape(15.dp),
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(60.dp),
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Nfc,
+                            contentDescription = "Baca NFC",
+                            tint = White,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    }
                 }
             }
 
@@ -163,7 +168,6 @@ fun DriverContent(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Baris tombol Aksi Utama
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -230,7 +234,6 @@ fun DriverContent(
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DashboardCardDriver(navController: NavController, pengirimanViewModel: PengirimanViewModel = viewModel()) {
     val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()

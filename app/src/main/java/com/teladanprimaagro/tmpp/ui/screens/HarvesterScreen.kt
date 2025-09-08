@@ -20,11 +20,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Equalizer
-import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.Button
@@ -121,7 +120,6 @@ fun HarvesterContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Kiri
                 Column(
                     horizontalAlignment = Alignment.Start
                 ) {
@@ -185,7 +183,7 @@ fun HarvesterContent(
             ) {
                 MenuButton(
                     text = "Panen",
-                    icon = Icons.Default.Add,
+                    icon = Icons.Default.Create,
                     onClick = { navController.navigate("panenInputScreen/-1") },
                     modifier = Modifier.weight(1f),
                     backgroundColor = MainColor
@@ -242,14 +240,6 @@ fun HarvesterContent(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     backgroundColor = LightGrey
                 )
-
-                CustomMenuButton(
-                    text = "Ekspor",
-                    icon = Icons.Default.FileUpload,
-                    onClick = { navController.navigate("panen_export_screen") },
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    backgroundColor = LightGrey
-                )
             }
         }
     }
@@ -260,7 +250,6 @@ fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) 
     val totalDataMasuk by panenViewModel.totalDataMasuk.collectAsState()
     val totalSemuaBuah by panenViewModel.totalSemuaBuah.collectAsState()
 
-    // Get the current date
     val currentDate = remember {
         val formatter = SimpleDateFormat("EEEE, dd-MM-yyyy", Locale.getDefault())
         formatter.format(Date())
@@ -337,7 +326,6 @@ fun DashboardCard(navController: NavController, panenViewModel: PanenViewModel) 
     }
 }
 
-// DataBox helper
 @Composable
 fun DataBox(title: String, value: String, modifier: Modifier = Modifier) {
     Column(
@@ -382,7 +370,7 @@ fun MenuButton(
                     imageVector = icon,
                     contentDescription = text,
                     tint = Black.copy(0.8f),
-                    modifier = Modifier.size(46.dp)
+                    modifier = Modifier.size(40.dp)
                 )
             }
 

@@ -111,7 +111,7 @@ fun RekapPanenScreen(
     var pemanenDropdownExpanded by remember { mutableStateOf(false) }
     var blokDropdownExpanded by remember { mutableStateOf(false) }
 
-    // State baru untuk dialog konfirmasi sandi
+    // State untuk dialog konfirmasi sandi
     var showPasswordDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -153,7 +153,6 @@ fun RekapPanenScreen(
                 .background(MainBackground)
                 .padding(paddingValues)
         ) {
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,36 +180,28 @@ fun RekapPanenScreen(
                                 .fillMaxWidth(),
                             textStyle = MaterialTheme.typography.bodyMedium.copy(
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium),
+                                fontWeight = FontWeight.Medium
+                            ),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = White,
                                 unfocusedTextColor = White,
                                 errorTextColor = MaterialTheme.colorScheme.error,
-
-                                // Warna container
                                 focusedContainerColor = OldGrey,
                                 unfocusedContainerColor = OldGrey,
                                 disabledContainerColor = OldGrey,
                                 errorContainerColor = MaterialTheme.colorScheme.error,
-
-                                // Warna cursor
                                 cursorColor = MaterialTheme.colorScheme.onPrimary,
                                 errorCursorColor = MaterialTheme.colorScheme.error,
-
-                                // Hilangkan garis bawah
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = MaterialTheme.colorScheme.error,
-
-                                // Warna label
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
                                 errorLabelColor = MaterialTheme.colorScheme.error
                             )
                         )
-
                         ExposedDropdownMenu(
                             expanded = sortDropdownExpanded,
                             onDismissRequest = { sortDropdownExpanded = false },
@@ -222,7 +213,9 @@ fun RekapPanenScreen(
                                         Text(
                                             text = sortCriteria,
                                             color = White,
-                                            fontSize = 15.sp)},
+                                            fontSize = 15.sp
+                                        )
+                                    },
                                     onClick = {
                                         panenViewModel.setSortBy(sortCriteria)
                                         sortDropdownExpanded = false
@@ -231,9 +224,7 @@ fun RekapPanenScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.width(10.dp))
-
                     OutlinedButton(
                         onClick = { panenViewModel.toggleSortOrder() },
                         shape = RoundedCornerShape(10.dp),
@@ -244,11 +235,10 @@ fun RekapPanenScreen(
                         Icon(
                             imageVector = if (sortOrderAscending) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
                             contentDescription = if (sortOrderAscending) "Urutkan Menaik" else "Urutkan Menurun",
-                            tint = Black,
+                            tint = Black
                         )
                     }
                 }
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
@@ -269,36 +259,28 @@ fun RekapPanenScreen(
                                 .fillMaxWidth(),
                             textStyle = MaterialTheme.typography.bodyMedium.copy(
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium),
+                                fontWeight = FontWeight.Medium
+                            ),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = White,
                                 unfocusedTextColor = White,
                                 errorTextColor = MaterialTheme.colorScheme.error,
-
-                                // Warna container
                                 focusedContainerColor = OldGrey,
                                 unfocusedContainerColor = OldGrey,
                                 disabledContainerColor = OldGrey,
                                 errorContainerColor = MaterialTheme.colorScheme.error,
-
-                                // Warna cursor
                                 cursorColor = MaterialTheme.colorScheme.onPrimary,
                                 errorCursorColor = MaterialTheme.colorScheme.error,
-
-                                // Hilangkan garis bawah
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = MaterialTheme.colorScheme.error,
-
-                                // Warna label
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
-                                errorLabelColor = MaterialTheme.colorScheme.error,
+                                errorLabelColor = MaterialTheme.colorScheme.error
                             )
                         )
-
                         ExposedDropdownMenu(
                             expanded = pemanenDropdownExpanded,
                             onDismissRequest = { pemanenDropdownExpanded = false },
@@ -310,7 +292,9 @@ fun RekapPanenScreen(
                                         Text(
                                             text = pemanen,
                                             color = White,
-                                            fontSize = 15.sp) },
+                                            fontSize = 15.sp
+                                        )
+                                    },
                                     onClick = {
                                         panenViewModel.setPemanenFilter(pemanen)
                                         pemanenDropdownExpanded = false
@@ -319,9 +303,7 @@ fun RekapPanenScreen(
                             }
                         }
                     }
-
                     Spacer(modifier = Modifier.width(16.dp))
-
                     ExposedDropdownMenuBox(
                         expanded = blokDropdownExpanded,
                         onExpandedChange = { blokDropdownExpanded = !blokDropdownExpanded },
@@ -338,36 +320,28 @@ fun RekapPanenScreen(
                                 .fillMaxWidth(),
                             textStyle = MaterialTheme.typography.bodyMedium.copy(
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium),
+                                fontWeight = FontWeight.Medium
+                            ),
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = White,
                                 unfocusedTextColor = White,
                                 errorTextColor = MaterialTheme.colorScheme.error,
-
-                                // Warna container
                                 focusedContainerColor = OldGrey,
                                 unfocusedContainerColor = OldGrey,
                                 disabledContainerColor = OldGrey,
                                 errorContainerColor = MaterialTheme.colorScheme.error,
-
-                                // Warna cursor
                                 cursorColor = MaterialTheme.colorScheme.onPrimary,
                                 errorCursorColor = MaterialTheme.colorScheme.error,
-
-                                // Hilangkan garis bawah
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
                                 errorIndicatorColor = MaterialTheme.colorScheme.error,
-
-                                // Warna label
                                 focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
                                 disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
-                                errorLabelColor = MaterialTheme.colorScheme.error,
+                                errorLabelColor = MaterialTheme.colorScheme.error
                             )
                         )
-
                         ExposedDropdownMenu(
                             expanded = blokDropdownExpanded,
                             onDismissRequest = { blokDropdownExpanded = false },
@@ -379,7 +353,9 @@ fun RekapPanenScreen(
                                         Text(
                                             text = blok,
                                             color = White,
-                                            fontSize = 15.sp) },
+                                            fontSize = 15.sp
+                                        )
+                                    },
                                     onClick = {
                                         panenViewModel.setBlokFilter(blok)
                                         blokDropdownExpanded = false
@@ -408,9 +384,7 @@ fun RekapPanenScreen(
                     Spacer(modifier = Modifier.width(10.dp))
                     Text("Clear Filter", color = White)
                 }
-
                 Spacer(modifier = Modifier.height(10.dp))
-
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -431,7 +405,6 @@ fun RekapPanenScreen(
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
-
                     TableHeaderText(text = "Jam", weight = 0.10f)
                     TableHeaderText(text = "Nama", weight = 0.20f)
                     TableHeaderText(text = "Blok", weight = 0.15f)
@@ -440,7 +413,6 @@ fun RekapPanenScreen(
                         TableHeaderText(text = "Edit", weight = 0.10f)
                     }
                 }
-
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -450,9 +422,8 @@ fun RekapPanenScreen(
                     if (panenList.isEmpty()) {
                         item {
                             Text(
-                                text = "Belum ada data panen yang sesuai filter.",
-                                modifier = Modifier
-                                    .fillMaxWidth(),
+                                text = "Belum ada data panen hari ini.",
+                                modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center,
                                 color = Gray
                             )
@@ -460,7 +431,6 @@ fun RekapPanenScreen(
                     } else {
                         items(panenList, key = { it.id }) { data ->
                             val isSelected = selectedItems.contains(data.id)
-
                             PanenTableRow(
                                 data = data,
                                 isSelectionMode = isSelectionMode,
@@ -489,11 +459,9 @@ fun RekapPanenScreen(
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-
                 if (!isSelectionMode) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -502,8 +470,7 @@ fun RekapPanenScreen(
                     }
                 } else {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         Button(
@@ -522,11 +489,8 @@ fun RekapPanenScreen(
                         ) {
                             Text("Batal", fontWeight = FontWeight.Bold)
                         }
-
                         Button(
-                            onClick = {
-                                showPasswordDialog = true
-                            },
+                            onClick = { showPasswordDialog = true },
                             enabled = selectedItems.isNotEmpty(),
                             modifier = Modifier
                                 .weight(1f)
@@ -546,7 +510,6 @@ fun RekapPanenScreen(
             }
         }
     }
-
     if (showDetailDialog && selectedPanenData != null) {
         PanenDetailDialog(
             panenData = selectedPanenData!!,
@@ -556,14 +519,11 @@ fun RekapPanenScreen(
             }
         )
     }
-
-    // Dialog untuk konfirmasi sandi
     if (showPasswordDialog) {
         PasswordConfirmationDialog(
             onDismissRequest = { showPasswordDialog = false },
             onConfirm = { password ->
                 val correctPassword = "123"
-
                 if (password == correctPassword) {
                     showDeleteAllDialog = true
                 }
@@ -571,8 +531,6 @@ fun RekapPanenScreen(
             }
         )
     }
-
-    // Dialog untuk konfirmasi penghapusan (setelah sandi benar)
     if (showDeleteAllDialog) {
         Dialog(onDismissRequest = { showDeleteAllDialog = false }) {
             Card(
@@ -580,7 +538,7 @@ fun RekapPanenScreen(
                     .fillMaxWidth()
                     .padding(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(20.dp),
@@ -603,10 +561,9 @@ fun RekapPanenScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround,
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         Button(
                             onClick = { showDeleteAllDialog = false },
@@ -621,7 +578,6 @@ fun RekapPanenScreen(
                         ) {
                             Text("Tidak", fontWeight = FontWeight.Bold)
                         }
-
                         Button(
                             onClick = {
                                 panenViewModel.deleteSelectedPanenData(selectedItems.toList())

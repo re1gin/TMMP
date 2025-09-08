@@ -1,10 +1,11 @@
 package com.teladanprimaagro.tmpp.data
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.google.firebase.database.Exclude
 
-@Entity(tableName = "panen_entries")
+@Entity(tableName = "panen_entries", indices = [Index(value = ["tanggalWaktu"])])
 data class PanenData(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,

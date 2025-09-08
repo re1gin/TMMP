@@ -139,7 +139,6 @@ fun DirectNfcReadDialog(
         },
         text = {
             if (scannedNfcData == null) {
-                // Tampilan saat menunggu atau membaca tag
                 Text(
                     text = nfcReadStatusMessage,
                     textAlign = TextAlign.Center,

@@ -10,11 +10,14 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface PengirimanDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertPengiriman(pengiriman: PengirimanData)
-
     @Query("SELECT * FROM pengiriman_entries ORDER BY id DESC")
     fun getAllPengiriman(): Flow<List<PengirimanData>>
+
+    @Query("SELECT * FROM pengiriman_entries WHERE waktuPengiriman LIKE :todayDate || '%' ORDER BY id DESC")
+    fun getPengirimanByDate(todayDate: String): Flow<List<PengirimanData>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPengiriman(pengiriman: PengirimanData)
 
     @Query("SELECT * FROM pengiriman_entries WHERE isUploaded = 0 ORDER BY id DESC")
     fun getUnuploadedPengirimanDataFlow(): Flow<List<PengirimanData>>

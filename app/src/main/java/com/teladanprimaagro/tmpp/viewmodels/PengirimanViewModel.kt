@@ -15,7 +15,6 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.Gson
 import com.teladanprimaagro.tmpp.data.AppDatabase
 import com.teladanprimaagro.tmpp.data.FinalizedUniqueNoEntity
-import com.teladanprimaagro.tmpp.data.PengirimanDao
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.data.ScannedItemDao
 import com.teladanprimaagro.tmpp.data.ScannedItemEntity
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Month
 import java.time.format.DateTimeFormatter
@@ -70,10 +70,11 @@ sealed class ScanStatus {
     data class Duplicate(val uniqueNo: String) : ScanStatus()
     object Finalized : ScanStatus()
 }
+
 class PengirimanViewModel(application: Application) : AndroidViewModel(application) {
 
     // --- Repositories & Utilities ---
-    private val pengirimanDao: PengirimanDao = AppDatabase.getDatabase(application).pengirimanDao()
+    private val pengirimanDao = AppDatabase.getDatabase(application).pengirimanDao()
     private val scannedItemDao: ScannedItemDao = AppDatabase.getDatabase(application).scannedItemDao()
     private val settingsViewModel: SettingsViewModel = SettingsViewModel(application)
     private val connectivityObserver = ConnectivityObserver(application)
@@ -83,13 +84,12 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     // --- State untuk UI (Composable) ---
     val uniqueNoDisplay = mutableStateOf("Scan NFC")
-    val dateTimeDisplay = mutableStateOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss")))
+    val dateTimeDisplay = mutableStateOf(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")))
     val totalBuahCalculated = mutableIntStateOf(0)
 
     val spbNumber = mutableStateOf("")
 
     // --- Observers & Data Flow ---
-
     private val _isSessionActive = MutableStateFlow(false)
     val isSessionActive: StateFlow<Boolean> = _isSessionActive.asStateFlow()
 
@@ -97,7 +97,10 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
         .map { list -> list.map { ScannedItem(it.uniqueNo, it.tanggal, it.blok, it.totalBuah) } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    val pengirimanList: StateFlow<List<PengirimanData>> = pengirimanDao.getAllPengiriman()
+    private val todayDate: String
+        get() = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+
+    val pengirimanList: StateFlow<List<PengirimanData>> = pengirimanDao.getPengirimanByDate(todayDate)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val totalSuccessfulScans: StateFlow<Int> = pengirimanDao.getTotalScanCount()
@@ -133,8 +136,6 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
     private val allFinalizedUniqueNos = pengirimanDao.getAllFinalizedUniqueNos()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-
-
     init {
         Log.d("PengirimanViewModel", "INIT: PengirimanViewModel created.")
         viewModelScope.launch {
@@ -146,7 +147,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
                     dateTimeDisplay.value = firstItem.tanggal
                 } else {
                     uniqueNoDisplay.value = "Scan NFC"
-                    dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
+                    dateTimeDisplay.value = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
                 }
                 totalBuahCalculated.intValue = items.sumOf { it.totalBuah }
             }
@@ -250,7 +251,7 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
             val mandorLoading = settingsViewModel.selectedMandorLoading.first()
             generateSpbNumber(mandorLoading)
 
-            val waktuPengirimanFormatted = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yy HH:mm:ss"))
+            val waktuPengirimanFormatted = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
             val detailScannedItemsJson = gson.toJson(scannedItemsFromDb.map { ScannedItem(it.uniqueNo, it.tanggal, it.blok, it.totalBuah) })
             val firstScannedItem = scannedItemsFromDb.firstOrNull()
 

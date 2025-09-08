@@ -4,12 +4,17 @@ import android.content.Context
 import android.util.Log
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
-import androidx.work.WorkerParameters
 import androidx.work.Data
+import androidx.work.WorkerParameters
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.teladanprimaagro.tmpp.data.AppDatabase
+import com.teladanprimaagro.tmpp.data.PanenData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.UUID
 
@@ -24,110 +29,104 @@ class SyncPanenWorker(
         .getReference("panenEntries")
     private val storageRef = FirebaseStorage.getInstance().reference.child("images")
 
-    override suspend fun doWork(): Result {
-        Log.d("SyncPanenWorker", "Starting sync work...")
-
+    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         try {
             val unsyncedDataList = panenDao.getUnsyncedPanenData()
-
             if (unsyncedDataList.isEmpty()) {
-                Log.d("SyncPanenWorker", "No unsynced data found. Sync complete.")
-                return Result.success()
+                Log.d("SyncPanenWorker", "No unsynced data found. Returning success.")
+                return@withContext Result.success()
             }
 
-            val firebaseUpdates = mutableMapOf<String, Any>()
-
             val totalItems = unsyncedDataList.size
-            setProgress(
-                Data.Builder()
-                    .putFloat("progress", 0f)
-                    .putInt("total", totalItems)
-                    .build()
-            )
+            Log.d("SyncPanenWorker", "Found $totalItems unsynced items.")
+            setProgress(Data.Builder().putFloat("progress", 0f).putInt("total", totalItems).build())
 
-            for ((index, panenData) in unsyncedDataList.withIndex()) {
-                try {
+            // Unggah gambar secara paralel
+            val deferredUpdates = unsyncedDataList.map { panenData ->
+                async {
                     var firebaseImageUrl: String? = panenData.firebaseImageUrl
-
-                    // Unggah gambar jika belum pernah diunggah
-                    if (panenData.localImageUri != null && panenData.firebaseImageUrl.isNullOrEmpty()) {
-                        val localFile = File(panenData.localImageUri.toUri().path ?: continue)
-
-                        if (localFile.exists()) {
-                            val imageName = UUID.randomUUID().toString()
-                            val imageRef = storageRef.child("$imageName.jpg")
-
-                            // Retry upload maksimal 3x, tanpa delay
-                            var attempts = 0
-                            var uploaded = false
-                            while (attempts < 3 && !uploaded) {
-                                try {
-                                    Log.d("SyncPanenWorker", "Uploading image (try ${attempts + 1}) for uniqueNo: ${panenData.uniqueNo}")
-                                    imageRef.putFile(panenData.localImageUri.toUri()).await()
-                                    firebaseImageUrl = imageRef.downloadUrl.await().toString()
-                                    uploaded = true
-                                } catch (e: Exception) {
-                                    attempts++
-                                    Log.w("SyncPanenWorker", "Upload failed, retrying...", e)
-                                }
+                    try {
+                        if (!panenData.localImageUri.isNullOrEmpty() && panenData.firebaseImageUrl.isNullOrEmpty()) {
+                            val localFile = File(panenData.localImageUri.toUri().path ?: throw IllegalArgumentException("Invalid local image URI path"))
+                            if (localFile.exists()) {
+                                val imageName = UUID.randomUUID().toString()
+                                val imageRef = storageRef.child("$imageName.jpg")
+                                imageRef.putFile(panenData.localImageUri.toUri()).await()
+                                firebaseImageUrl = imageRef.downloadUrl.await().toString()
+                                Log.d("SyncPanenWorker", "Image uploaded successfully for uniqueNo: ${panenData.uniqueNo}")
+                            } else {
+                                Log.e("SyncPanenWorker", "Local image file not found: ${panenData.localImageUri}")
                             }
-                            if (!uploaded) {
-                                Log.e("SyncPanenWorker", "Image upload failed after 3 attempts: ${panenData.localImageUri}")
-                                firebaseImageUrl = null
-                            }
-                        } else {
-                            Log.e("SyncPanenWorker", "Local image file not found: ${panenData.localImageUri}")
-                            firebaseImageUrl = null
                         }
+                    } catch (e: Exception) {
+                        Log.e("SyncPanenWorker", "Error uploading image for uniqueNo: ${panenData.uniqueNo}", e)
+                        // Jika gagal upload gambar, tetap lanjutkan sinkronisasi data tanpa gambar
+                        firebaseImageUrl = null
                     }
-
-                    // Data untuk Firebase
-                    val firebaseData = panenData.copy(
-                        firebaseImageUrl = firebaseImageUrl,
-                        isSynced = true,
-                        localImageUri = null
-                    )
-
-                    firebaseUpdates[panenData.uniqueNo] = firebaseData
-
-                    // Update progress
-                    val progress = ((index + 1).toFloat() / totalItems.toFloat())
-                    val progressData = Data.Builder()
-                        .putString("currentUniqueNo", panenData.uniqueNo)
-                        .putFloat("progress", progress)
-                        .build()
-                    setProgress(progressData)
-
-                    Log.d("SyncPanenWorker", "Progress for ${panenData.uniqueNo}: ${progress * 100}%")
-
-                } catch (e: Exception) {
-                    Log.e("SyncPanenWorker", "Error processing panen data for uniqueNo: ${panenData.uniqueNo}. Skipping...", e)
-                    continue
+                    panenData to firebaseImageUrl
                 }
+            }
+
+            val results = deferredUpdates.awaitAll()
+
+            val firebaseUpdates = mutableMapOf<String, Any>()
+            val updatedPanenDataList = mutableListOf<PanenData>()
+
+            // Proses hasil unggahan dan persiapkan data untuk Firebase
+            for ((panenData, firebaseImageUrl) in results) {
+                val updatedPanenData = panenData.copy(
+                    firebaseImageUrl = firebaseImageUrl,
+                    isSynced = true,
+                    localImageUri = null
+                )
+                firebaseUpdates[updatedPanenData.uniqueNo] = updatedPanenData.toFirebaseMap()
+                updatedPanenDataList.add(updatedPanenData)
             }
 
             if (firebaseUpdates.isNotEmpty()) {
                 Log.d("SyncPanenWorker", "Uploading ${firebaseUpdates.size} items in a single batch to Realtime DB.")
                 panenDbRef.updateChildren(firebaseUpdates).await()
-                Log.d("SyncPanenWorker", "Batch upload successful.")
+                Log.d("SyncPanenWorker", "Batch uploaded ${firebaseUpdates.size} items to Firebase.")
 
-                // Update status di Room setelah sukses
                 for (panenData in unsyncedDataList) {
                     val updatedLocalData = panenData.copy(
                         isSynced = true,
-                        firebaseImageUrl = (firebaseUpdates[panenData.uniqueNo] as? com.teladanprimaagro.tmpp.data.PanenData)?.firebaseImageUrl
+                        firebaseImageUrl = (firebaseUpdates[panenData.uniqueNo] as? PanenData)?.firebaseImageUrl
                     )
                     panenDao.updatePanen(updatedLocalData)
                     Log.d("SyncPanenWorker", "Panen data updated in local DB: ${updatedLocalData.uniqueNo}")
                 }
             }
 
-            Log.d("SyncPanenWorker", "Sync process finished successfully.")
-            return Result.success()
+            Log.d("SyncPanenWorker", "Updated local DB for all synced items.")
 
+            setProgress(Data.Builder().putFloat("progress", 1.0f).build())
+            Log.d("SyncPanenWorker", "Sync completed successfully.")
+            return@withContext Result.success()
         } catch (e: Exception) {
-            Log.e("SyncPanenWorker", "Major error during sync process. Retrying...", e)
-            return Result.retry()
+            Log.e("SyncPanenWorker", "Sync failed with exception.", e)
+            return@withContext Result.retry()
         }
+    }
+
+    private fun PanenData.toFirebaseMap(): Map<String, Any?> {
+        return mapOf(
+            "tanggalWaktu" to tanggalWaktu,
+            "uniqueNo" to uniqueNo,
+            "locationPart1" to locationPart1,
+            "locationPart2" to locationPart2,
+            "kemandoran" to kemandoran,
+            "namaPemanen" to namaPemanen,
+            "blok" to blok,
+            "noTph" to noTph,
+            "totalBuah" to totalBuah,
+            "buahN" to buahN,
+            "buahA" to buahA,
+            "buahOR" to buahOR,
+            "buahE" to buahE,
+            "buahAB" to buahAB,
+            "buahBL" to buahBL,
+            "firebaseImageUrl" to firebaseImageUrl
+        )
     }
 }

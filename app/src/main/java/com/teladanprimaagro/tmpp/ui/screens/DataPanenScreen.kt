@@ -70,7 +70,7 @@ fun DataPanenScreen(
     syncStatusViewModel: SyncStatusViewModel = viewModel()
 ) {
 
-    val allPanenData by panenViewModel.panenList.collectAsState()
+    val allPanenData by panenViewModel.ListPanen.collectAsState()
 
     val syncMessage by syncStatusViewModel.syncMessage.collectAsState()
     val isSyncing by syncStatusViewModel.isSyncing.collectAsState()

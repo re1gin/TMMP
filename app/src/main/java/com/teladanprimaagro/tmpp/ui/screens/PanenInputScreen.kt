@@ -3,27 +3,15 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,17 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -83,7 +61,7 @@ import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-@RequiresApi(Build.VERSION_CODES.O)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PanenInputScreen(
@@ -102,13 +80,14 @@ fun PanenInputScreen(
     val formatter = remember { DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm") }
     val dateTimeDisplay = remember { panenDataToEdit?.tanggalWaktu ?: currentDateTime.format(formatter) }
 
+    val uniqueNoDisplay = if (isEditing) panenDataToEdit.uniqueNo else panenViewModel.uniqueNo.collectAsState().value
+
     // Menggunakan state dari PanenViewModel
     val locationPart1 by panenViewModel.locationPart1.collectAsState()
     val locationPart2 by panenViewModel.locationPart2.collectAsState()
     val isFindingLocation by panenViewModel.isFindingLocation.collectAsState()
     val imageUri by panenViewModel.imageUri.collectAsState()
     val imageBitmap by panenViewModel.imageBitmap.collectAsState()
-    val uniqueNo by panenViewModel.uniqueNo.collectAsState()
     val selectedForeman by panenViewModel.selectedForeman.collectAsState()
     val selectedHarvester by panenViewModel.selectedHarvester.collectAsState()
     val selectedBlock by panenViewModel.selectedBlock.collectAsState()
@@ -266,7 +245,7 @@ fun PanenInputScreen(
             ) {
                 TextInputField(
                     label = "No. Unik",
-                    value = uniqueNo,
+                    value = uniqueNoDisplay,
                     onValueChange = {},
                     readOnly = true,
                     modifier = Modifier.fillMaxWidth()
