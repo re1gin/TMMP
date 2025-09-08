@@ -50,7 +50,6 @@ class SyncPengirimanWorker(
             val firebasePengirimanUpdates = mutableMapOf<String, Any>()
             val firebaseFinalizedUpdates = mutableMapOf<String, Any>()
 
-            // Proses PengirimanData
             for ((index, data) in unuploadedPengirimanList.withIndex()) {
                 try {
                     val simplePengirimanData = mapToSimplePengirimanData(data)
@@ -73,7 +72,6 @@ class SyncPengirimanWorker(
                 }
             }
 
-            // Proses FinalizedUniqueNos
             for ((index, item) in unuploadedFinalizedList.withIndex()) {
                 try {
                     firebaseFinalizedUpdates[item.uniqueNo] = item

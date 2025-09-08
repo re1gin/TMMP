@@ -69,7 +69,6 @@ import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RekapPengirimanScreen(
