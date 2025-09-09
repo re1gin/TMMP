@@ -1,39 +1,21 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.SignalWifi0Bar
+import androidx.compose.material.icons.filled.SignalWifi4Bar
+import androidx.compose.material.icons.filled.Update
+import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +35,8 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.ui.theme.Grey
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
@@ -84,7 +69,7 @@ fun DataPengirimanScreen(
                         text = "Status Data Pengiriman",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = White
+                        color = White,
                     )
                 },
                 navigationIcon = {
@@ -126,18 +111,38 @@ fun DataPengirimanScreen(
                 .background(MainBackground)
                 .padding(paddingValues)
         ) {
-            Text(
-                text = syncMessage,
-                style = MaterialTheme.typography.bodyMedium,
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                color = when {
-                    syncMessage.contains("berhasil", ignoreCase = true) -> SuccessGreen
-                    syncMessage.contains("gagal", ignoreCase = true) -> DangerRed
-                    else -> White
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val (icon, iconColor, message) = when {
+                    allPengirimanData.isEmpty() -> Triple(Icons.Filled.CloudOff, White, "Belum ada data yang diunggah")
+                    syncMessage.contains("berhasil", ignoreCase = true) -> Triple(Icons.Filled.CheckCircle, SuccessGreen, syncMessage)
+                    syncMessage.contains("gagal", ignoreCase = true) || syncMessage.contains("tidak ada koneksi", ignoreCase = true) -> Triple(Icons.Filled.Error, DangerRed, syncMessage)
+                    syncMessage.contains("Mengunggah") || syncMessage.contains("Sinkronisasi sedang berjalan") -> Triple(Icons.Filled.CloudSync, MainColor, syncMessage)
+                    syncMessage.contains("Menunggu koneksi") -> Triple(Icons.Filled.SignalWifi0Bar, Grey, syncMessage)
+                    syncMessage.contains("Idle, terhubung") -> Triple(Icons.Filled.SignalWifi4Bar, SuccessGreen, syncMessage)
+                    else -> Triple(Icons.Filled.CloudDone, Grey, syncMessage)
                 }
-            )
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Status Sinkronisasi",
+                    modifier = Modifier.size(24.dp),
+                    tint = iconColor
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = when {
+                        message.contains("berhasil", ignoreCase = true) -> SuccessGreen
+                        message.contains("gagal", ignoreCase = true) || message.contains("tidak ada koneksi", ignoreCase = true) || message == "Belum ada data yang diunggah" -> White
+                        else -> White
+                    }
+                )
+            }
 
             if (allPengirimanData.isNotEmpty()) {
                 val sentCount = allPengirimanData.count { it.isUploaded }
@@ -188,16 +193,40 @@ fun DataPengirimanScreen(
             }
 
             if (filteredData.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     val message = if (selectedFilter == "Sudah Terkirim") {
                         "Belum ada data pengiriman yang terkirim."
                     } else {
                         "Belum ada data pengiriman yang menunggu."
                     }
-                    Text(message, style = MaterialTheme.typography.bodyLarge)
+
+                    val icon = if (selectedFilter == "Sudah Terkirim") {
+                        Icons.Default.Upload
+                    } else {
+                        Icons.Default.Update
+                    }
+
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(72.dp),
+                        tint = LightGrey
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = message,
+                        color = LightGrey,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center
+                    )
                 }
             } else {
                 LazyColumn(

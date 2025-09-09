@@ -76,11 +76,10 @@ class SyncPengirimanWorker(
                 try {
                     firebaseFinalizedUpdates[item.uniqueNo] = item
 
-                    // Update progress untuk item ini (offset dengan jumlah pengiriman sebelumnya)
                     val offsetIndex = unuploadedPengirimanList.size + index
                     val progress = ((offsetIndex + 1).toFloat() / totalItems.toFloat())
                     val progressData = Data.Builder()
-                        .putString("currentWorkerId", item.uniqueNo)  // Gunakan uniqueNo sebagai identifier
+                        .putString("currentWorkerId", item.uniqueNo)
                         .putFloat("progress", progress)
                         .build()
                     setProgress(progressData)

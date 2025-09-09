@@ -127,9 +127,6 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     private val _selectedBlokFilter = MutableStateFlow("Semua")
     val selectedBlokFilter: StateFlow<String> = _selectedBlokFilter.asStateFlow()
 
-    val ListPanen: StateFlow<List<PanenData>> =
-        panenDao.getAllPanen().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-
     val panenList: StateFlow<List<PanenData>> =
         panenDao.getPanenByDate(todayDate)
             .combine(_sortBy) { list, sortBy -> sortPanenList(list, sortBy) }

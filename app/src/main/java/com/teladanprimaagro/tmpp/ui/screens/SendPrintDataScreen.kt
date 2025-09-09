@@ -4,6 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
+import android.bluetooth.BluetoothSocket
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -30,6 +32,7 @@ import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.White
@@ -78,15 +81,17 @@ fun SendPrintDataScreen(
         }
     }
 
+    // Mengatur warna latar belakang Scaffold
     Scaffold(
+        modifier = Modifier.background(MainBackground),
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Kirim & Cetak Data",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = White
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = White,
                     )
                 },
                 navigationIcon = {
@@ -102,13 +107,13 @@ fun SendPrintDataScreen(
                     containerColor = Color.Transparent
                 )
             )
-        }
+        },
+        containerColor = MainBackground
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(MainBackground)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -120,13 +125,23 @@ fun SendPrintDataScreen(
                     color = White
                 )
             } else {
+                Icon(
+                    imageVector = Icons.Default.Print,
+                    contentDescription = "Ikon Printer",
+                    modifier = Modifier.size(120.dp),
+                    tint = MainColor
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Data Pengiriman SPB: ${pengirimanData!!.spbNumber}",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MainColor,
-                    modifier = Modifier.padding(bottom = 24.dp)
+                    color = White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 24.dp)
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -152,20 +167,18 @@ fun SendPrintDataScreen(
                         }
                     },
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(60.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                        .fillMaxWidth(0.5f)
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MainColor)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.Print, contentDescription = "Cetak Data", modifier = Modifier.size(24.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Cetak Data", fontSize = 18.sp)
+                        Text("Cetak Data", fontSize = 18.sp, color = Black)
                     }
                 }
             }
         }
     }
-
     if (showDeviceListDialog && pengirimanData != null) {
         val bluetoothManager: BluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
@@ -219,16 +232,17 @@ private suspend fun printData(context: Context, device: BluetoothDevice, data: P
             return@withContext
         }
 
+        var socket: BluetoothSocket? = null
+        var outputStream: OutputStream? = null
+
         try {
-            val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
+            socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
             socket.connect()
-            val outputStream: OutputStream = socket.outputStream
+            outputStream = socket.outputStream
 
             val formattedData = ThermalPrinter(data)
             outputStream.write(formattedData.toByteArray())
             outputStream.flush()
-            outputStream.close()
-            socket.close()
 
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "Data berhasil dikirim ke printer.", Toast.LENGTH_SHORT).show()
@@ -237,6 +251,14 @@ private suspend fun printData(context: Context, device: BluetoothDevice, data: P
             Log.e("BluetoothPrint", "Gagal mengirim data ke printer: ${e.message}", e)
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "Gagal mencetak: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        } finally {
+            try {
+                // Pastikan untuk menutup stream dan socket di blok 'finally'
+                outputStream?.close()
+                socket?.close()
+            } catch (closeException: Exception) {
+                Log.e("BluetoothPrint", "Gagal menutup socket/stream: ${closeException.message}", closeException)
             }
         }
     }
