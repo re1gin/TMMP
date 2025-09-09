@@ -1,9 +1,6 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-
-import android.os.Build
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -64,6 +62,7 @@ import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
 import com.teladanprimaagro.tmpp.ui.theme.White
@@ -157,14 +156,26 @@ fun RekapPengirimanScreen(
             ) {
                 if (pengirimanList.isEmpty()) {
                     item {
-                        Text(
-                            text = "Belum ada data pengiriman.",
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp),
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                                .padding(top = 100.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "No data icon",
+                                tint = OldGrey,
+                                modifier = Modifier.size(50.dp)
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Belum ada data panen hari ini.",
+                                textAlign = TextAlign.Center,
+                                color = OldGrey
+                            )
+                        }
                     }
                 } else {
                     items(pengirimanList, key = { it.id }) { data ->

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +34,7 @@ import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 
@@ -90,9 +92,8 @@ fun StatistikPanenScreen(
             item {
                 Text(
                     text = "Ringkasan Statistik Panen Hari ini",
-                    style = MaterialTheme.typography.titleMedium,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.White,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -188,22 +189,35 @@ fun StatistikSection(title: String, data: Map<String, Int>, barColor: Color) {
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
-            color = Color.White,
             fontSize = 14.sp,
+            color = White,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
         HorizontalDivider(Modifier.padding(vertical = 8.dp), color = White)
 
         if (data.isEmpty()) {
-            Text(
-                text = "Belum ada data panen.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.6f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Equalizer,
+                    contentDescription = "No data icon",
+                    tint = OldGrey,
+                    modifier = Modifier.size(50.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Belum ada data panen hari ini.",
+                    textAlign = TextAlign.Center,
+                    color = OldGrey
+                )
+            }
         } else {
             data.forEach { (key, value) ->
                 BarChartItem(
@@ -292,21 +306,35 @@ fun FruitTableSection(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Medium,
             fontSize = 14.sp,
-            color = Color.White,
+            color = White,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
-        HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Color.DarkGray)
+        HorizontalDivider(Modifier.padding(vertical = 8.dp), color = White)
 
         if (data.isEmpty()) {
-            Text(
-                text = "Belum ada data panen buah.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.6f)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Equalizer,
+                    contentDescription = "No data icon",
+                    tint = OldGrey,
+                    modifier = Modifier.size(50.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Belum ada data panen hari ini.",
+                    textAlign = TextAlign.Center,
+                    color = OldGrey
+                )
+            }
         } else {
             // Header Tabel
             Row(

@@ -1,6 +1,7 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
 import android.annotation.SuppressLint
+import android.hardware.lights.Light
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,12 +14,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -51,6 +54,7 @@ import com.teladanprimaagro.tmpp.ui.components.DropdownInputField
 import com.teladanprimaagro.tmpp.ui.components.TextInputField
 import com.teladanprimaagro.tmpp.ui.components.TotalBuahDisplay
 import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
@@ -205,17 +209,26 @@ fun PengirimanInputScreen(
                 ) {
                     if (scannedItems.isEmpty()) {
                         item {
-                            Box(
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(200.dp)
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
+                                    .padding(50.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
                             ) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = "No data icon",
+                                    tint = LightGrey,
+                                    modifier = Modifier.size(50.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    "Belum ada item yang discan. Scan tag NFC!",
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodyMedium
+                                    text = "Belum ada data panen hari ini.",
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    textAlign = TextAlign.Center,
+                                    color = LightGrey
                                 )
                             }
                         }

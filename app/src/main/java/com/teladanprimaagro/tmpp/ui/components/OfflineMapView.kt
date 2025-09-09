@@ -93,7 +93,6 @@ fun OfflineMapView(
                 }
             }
 
-            // Marker lokasi user → ikon berbeda (misalnya lingkaran biru)
             currentLocation?.let { location ->
                 val userMarker = Marker(mapView).apply {
                     position = location

@@ -7,7 +7,8 @@ import com.google.firebase.database.Exclude
 
 @Entity(tableName = "pengiriman_entries", indices = [Index(value = ["waktuPengiriman"])])
 data class PengirimanData(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val waktuPengiriman: String,
     val spbNumber: String,
     val namaSupir: String,

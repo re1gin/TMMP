@@ -104,12 +104,9 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     private val _uniqueNo = MutableStateFlow("")
-    val uniqueNo: StateFlow<String> = combine(_selectedBlock, totalBuah
-    ) { block, total ->
-        generateUniqueCode(LocalDateTime.now(), block, total)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+    val uniqueNo: StateFlow<String> = _uniqueNo.asStateFlow()
 
-    private var isEditing = false // Menandai apakah dalam mode edit
+    private var isEditing = false
 
     // State untuk data dan filter
     private val _panenDataToEdit = MutableStateFlow<PanenData?>(null)
@@ -204,6 +201,12 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
                         startSyncWorker()
                     }
                 }
+
+            _panenDataToEdit.collect { panenData ->
+                if (panenData == null) {
+                    _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
+                }
+            }
         }
     }
 
@@ -211,20 +214,40 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun setLocationPart2(value: String) { _locationPart2.value = value }
     fun setSelectedForeman(value: String) { _selectedForeman.value = value }
     fun setSelectedHarvester(value: String) { _selectedHarvester.value = value }
-    fun setSelectedBlock(value: String) { _selectedBlock.value = value }
+    fun setSelectedBlock(value: String) {
+        _selectedBlock.value = value
+        if (!isEditing) {
+            _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), value, totalBuah.value)
+        }
+    }
     fun setSelectedTph(value: String) { _selectedTph.value = value }
-    fun setBuahN(value: Int) { _buahN.value = value }
+    fun setBuahN(value: Int) {
+        _buahN.value = value
+        if (!isEditing) {
+            _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
+        }
+    }
     fun setBuahA(value: Int) { _buahA.value = value }
-    fun setBuahOR(value: Int) { _buahOR.value = value }
+    fun setBuahOR(value: Int) {
+        _buahOR.value = value
+        if (!isEditing) {
+            _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
+        }
+    }
     fun setBuahE(value: Int) { _buahE.value = value }
-    fun setBuahAB(value: Int) { _buahAB.value = value }
+    fun setBuahAB(value: Int) {
+        _buahAB.value = value
+        if (!isEditing) {
+            _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
+        }
+    }
     fun setBuahBL(value: Int) { _buahBL.value = value }
 
     fun createPanenData(id: Int, tanggalWaktu: String, firebaseImageUrl: String? = null): PanenData {
         return PanenData(
             id = id,
             tanggalWaktu = tanggalWaktu,
-            uniqueNo = uniqueNo.value,
+            uniqueNo = _uniqueNo.value,
             locationPart1 = locationPart1.value,
             locationPart2 = locationPart2.value,
             kemandoran = selectedForeman.value,
@@ -294,12 +317,13 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
         _buahAB.value = 0
         _buahBL.value = 0
         isEditing = false
+        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
         Log.d("PanenViewModel", "Form reset completed")
     }
 
     fun loadEditData(panenData: PanenData) {
         isEditing = true
-        _uniqueNo.value = panenData.uniqueNo // Pertahankan uniqueNo asli
+        _uniqueNo.value = panenData.uniqueNo
         _locationPart1.value = panenData.locationPart1
         _locationPart2.value = panenData.locationPart2
         _imageUri.value = panenData.localImageUri?.toUri()
@@ -537,6 +561,8 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearPanenDataToEdit() {
         _panenDataToEdit.value = null
+        isEditing = false
+        _uniqueNo.value = generateUniqueCode(LocalDateTime.now(), _selectedBlock.value, totalBuah.value)
     }
 
     private suspend fun deleteImageFromFirebaseStorage(imageUrl: String?) {

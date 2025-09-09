@@ -222,15 +222,16 @@ fun DataPanenScreen(
                         imageVector = icon,
                         contentDescription = null,
                         modifier = Modifier.size(72.dp),
-                        tint = LightGrey
+                        tint = OldGrey
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
                     Text(
                         text = message,
-                        color = LightGrey,
-                        style = MaterialTheme.typography.bodyLarge,
+                        color = OldGrey,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center
                     )
                 }
