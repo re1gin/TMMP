@@ -36,7 +36,6 @@ import com.teladanprimaagro.tmpp.data.PengirimanData
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.Grey
-import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
@@ -44,6 +43,8 @@ import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SyncStatusViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +61,16 @@ fun DataPengirimanScreen(
     val currentSyncId by syncStatusViewModel.currentSyncId.collectAsState()
 
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
+
+    val todayDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+    val displayedData = remember(allPengirimanData) {
+        allPengirimanData.filter {
+            // Tampilkan semua data yang belum terunggah
+            !it.isUploaded ||
+                    // Tampilkan data yang sudah terunggah hanya jika tanggalnya hari ini
+                    it.waktuPengiriman.contains(todayDate)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -118,7 +129,7 @@ fun DataPengirimanScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 val (icon, iconColor, message) = when {
-                    allPengirimanData.isEmpty() -> Triple(Icons.Filled.CloudOff, White, "Belum ada data yang diunggah")
+                    displayedData.isEmpty() -> Triple(Icons.Filled.CloudOff, White, "Belum ada data yang diunggah")
                     syncMessage.contains("berhasil", ignoreCase = true) -> Triple(Icons.Filled.CheckCircle, SuccessGreen, syncMessage)
                     syncMessage.contains("gagal", ignoreCase = true) || syncMessage.contains("tidak ada koneksi", ignoreCase = true) -> Triple(Icons.Filled.Error, DangerRed, syncMessage)
                     syncMessage.contains("Mengunggah") || syncMessage.contains("Sinkronisasi sedang berjalan") -> Triple(Icons.Filled.CloudSync, MainColor, syncMessage)
@@ -144,9 +155,9 @@ fun DataPengirimanScreen(
                 )
             }
 
-            if (allPengirimanData.isNotEmpty()) {
-                val sentCount = allPengirimanData.count { it.isUploaded }
-                val unsentCount = allPengirimanData.count { !it.isUploaded }
+            if (displayedData.isNotEmpty()) {
+                val sentCount = displayedData.count { it.isUploaded }
+                val unsentCount = displayedData.count { !it.isUploaded }
 
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
@@ -187,8 +198,8 @@ fun DataPengirimanScreen(
             }
 
             val filteredData = when (selectedFilter) {
-                "Sudah Terkirim" -> allPengirimanData.filter { it.isUploaded }
-                "Belum Terkirim" -> allPengirimanData.filter { !it.isUploaded }
+                "Sudah Terkirim" -> displayedData.filter { it.isUploaded }
+                "Belum Terkirim" -> displayedData.filter { !it.isUploaded }
                 else -> emptyList()
             }
 
@@ -201,7 +212,7 @@ fun DataPengirimanScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     val message = if (selectedFilter == "Sudah Terkirim") {
-                        "Belum ada data pengiriman yang terkirim."
+                        "Belum ada data pengiriman yang terkirim hari ini."
                     } else {
                         "Belum ada data pengiriman yang menunggu."
                     }

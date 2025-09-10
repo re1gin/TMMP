@@ -6,15 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudSync
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.SignalWifi0Bar
-import androidx.compose.material.icons.filled.SignalWifi4Bar
-import androidx.compose.material.icons.filled.Update
-import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,6 +36,8 @@ import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SyncStatusViewModel
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +53,13 @@ fun DataPanenScreen(
     val currentSyncId by syncStatusViewModel.currentSyncId.collectAsState()
 
     var selectedFilter by remember { mutableStateOf("Sudah Terkirim") }
+
+    val todayDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
+    val displayedData = remember(allPanenData) {
+        allPanenData.filter {
+            !it.isSynced || it.tanggalWaktu.contains(todayDate)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -116,43 +117,75 @@ fun DataPanenScreen(
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val (icon, iconColor, message) = when {
-                        allPanenData.isEmpty() -> Triple(Icons.Filled.CloudOff, White, "Belum ada data yang diunggah")
-                        syncMessage.contains("berhasil", ignoreCase = true) -> Triple(Icons.Filled.CheckCircle, SuccessGreen, syncMessage)
-                        syncMessage.contains("gagal", ignoreCase = true) || syncMessage.contains("tidak ada koneksi", ignoreCase = true) -> Triple(Icons.Filled.Error, DangerRed, syncMessage)
-                        syncMessage.contains("Mengunggah") || syncMessage.contains("Sinkronisasi sedang berjalan") -> Triple(Icons.Filled.CloudSync, MainColor, syncMessage)
-                        syncMessage.contains("Menunggu koneksi") -> Triple(Icons.Filled.SignalWifi0Bar, Grey, syncMessage)
-                        syncMessage.contains("Idle, terhubung") -> Triple(Icons.Filled.SignalWifi4Bar, SuccessGreen, syncMessage)
-                        else -> Triple(Icons.Filled.CloudDone, Grey, syncMessage)
-                    }
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = "Status Sinkronisasi",
-                        modifier = Modifier.size(24.dp),
-                        tint = iconColor
+                val (icon, iconColor, message) = when {
+                    displayedData.isEmpty() -> Triple(
+                        Icons.Filled.CloudOff,
+                        White,
+                        "Belum ada data yang diunggah"
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = message,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = when {
-                            message.contains("berhasil", ignoreCase = true) -> SuccessGreen
-                            message.contains("gagal", ignoreCase = true) || message.contains("tidak ada koneksi", ignoreCase = true) || message == "Belum ada data yang diunggah" -> White
-                            else -> White
-                        }
+
+                    syncMessage.contains(
+                        "berhasil",
+                        ignoreCase = true
+                    ) -> Triple(Icons.Filled.CheckCircle, SuccessGreen, syncMessage)
+
+                    syncMessage.contains(
+                        "gagal",
+                        ignoreCase = true
+                    ) || syncMessage.contains("tidak ada koneksi", ignoreCase = true) -> Triple(
+                        Icons.Filled.Error,
+                        DangerRed,
+                        syncMessage
                     )
+
+                    syncMessage.contains("Mengunggah") || syncMessage.contains("Sinkronisasi sedang berjalan") -> Triple(
+                        Icons.Filled.CloudSync,
+                        MainColor,
+                        syncMessage
+                    )
+
+                    syncMessage.contains("Menunggu koneksi") -> Triple(
+                        Icons.Filled.SignalWifi0Bar,
+                        Grey,
+                        syncMessage
+                    )
+
+                    syncMessage.contains("Idle, terhubung") -> Triple(
+                        Icons.Filled.SignalWifi4Bar,
+                        SuccessGreen,
+                        syncMessage
+                    )
+
+                    else -> Triple(Icons.Filled.CloudDone, Grey, syncMessage)
                 }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = "Status Sinkronisasi",
+                    modifier = Modifier.size(24.dp),
+                    tint = iconColor
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = when {
+                        message.contains("berhasil", ignoreCase = true) -> SuccessGreen
+                        message.contains(
+                            "gagal",
+                            ignoreCase = true
+                        ) || message.contains(
+                            "tidak ada koneksi",
+                            ignoreCase = true
+                        ) || message == "Belum ada data yang diunggah" -> White
+
+                        else -> White
+                    }
+                )
             }
 
-            if (allPanenData.isNotEmpty()) {
-                val syncedCount = allPanenData.count { it.isSynced }
-                val unsyncedCount = allPanenData.count { !it.isSynced }
+            if (displayedData.isNotEmpty()) {
+                val syncedCount = displayedData.count { it.isSynced }
+                val unsyncedCount = displayedData.count { !it.isSynced }
 
                 SingleChoiceSegmentedButtonRow(
                     modifier = Modifier
@@ -193,8 +226,8 @@ fun DataPanenScreen(
             }
 
             val filteredData = when (selectedFilter) {
-                "Sudah Terkirim" -> allPanenData.filter { it.isSynced }
-                "Belum Terkirim" -> allPanenData.filter { !it.isSynced }
+                "Sudah Terkirim" -> displayedData.filter { it.isSynced }
+                "Belum Terkirim" -> displayedData.filter { !it.isSynced }
                 else -> emptyList()
             }
 
@@ -207,7 +240,7 @@ fun DataPanenScreen(
                     verticalArrangement = Arrangement.Center
                 ) {
                     val message = if (selectedFilter == "Sudah Terkirim") {
-                        "Belum ada data pengiriman yang terkirim."
+                        "Belum ada data pengiriman yang terkirim hari ini."
                     } else {
                         "Belum ada data pengiriman yang menunggu."
                     }
@@ -245,7 +278,10 @@ fun DataPanenScreen(
                         if (panenItem.isSynced) {
                             DataTerkirimCard(panenItem = panenItem)
                         } else {
-                            val isItemSyncing = isSyncing && (currentSyncId == panenItem.uniqueNo || syncMessage.contains(panenItem.uniqueNo))
+                            val isItemSyncing =
+                                isSyncing && (currentSyncId == panenItem.uniqueNo || syncMessage.contains(
+                                    panenItem.uniqueNo
+                                ))
                             val progress = if (isItemSyncing) syncProgress else 0f
 
                             DataBelumTerkirimCard(

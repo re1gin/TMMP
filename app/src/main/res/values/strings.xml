@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">TMPP</string>
+    <string name="default_web_client_id">248356156096-hfbamen8t89kc052riqvcvsoh04ac0qp.apps.googleusercontent.com</string>
 
     <!-- Strings for NfcWriteDialog -->
     <string name="nfc_write_title">Tulis Tag NFC</string>

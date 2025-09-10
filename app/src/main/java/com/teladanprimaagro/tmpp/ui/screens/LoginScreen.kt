@@ -4,28 +4,25 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.teladanprimaagro.tmpp.R
-import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
-import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
@@ -33,15 +30,12 @@ import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
-    navController: NavController,
-    settingsViewModel: SettingsViewModel
-) {
+fun LoginScreen(navController: NavController) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var loginError by remember { mutableStateOf(false) }
-
+    val firebaseAuth = FirebaseAuth.getInstance()
 
     Column(
         modifier = Modifier
@@ -50,12 +44,10 @@ fun LoginScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Image(
                 painter = painterResource(id = R.drawable.logo_agro),
-                contentDescription = "App Logo",
+                contentDescription = "Logo Aplikasi",
                 modifier = Modifier.size(90.dp)
             )
             Spacer(modifier = Modifier.height(20.dp))
@@ -67,9 +59,8 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(120.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
-        // Input Username
         OutlinedTextField(
             value = username,
             onValueChange = {
@@ -102,7 +93,6 @@ fun LoginScreen(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Input Password
         OutlinedTextField(
             value = password,
             onValueChange = {
@@ -140,46 +130,41 @@ fun LoginScreen(
             )
         )
 
-        // Pesan Error
-        if (loginError) {
-            Text(
-                text = "Username atau password salah",
-                color = DangerRed,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Tombol Login
         Button(
             onClick = {
-                val authenticatedUserRole: UserRole? = when {
-                    username.trim() == "pemanen" && password.trim() == "panen123" -> UserRole.HARVESTER
-                    username.trim() == "supir" && password.trim() == "supir123" -> UserRole.DRIVER
-                    else -> null
-                }
-
-                if (authenticatedUserRole != null) {
-                    settingsViewModel.loginSuccess(authenticatedUserRole)
-                    navController.navigate("main_screen/${authenticatedUserRole.name}") {
-                        popUpTo("login_screen") { inclusive = true }
+                loginError = false
+                firebaseAuth.signInWithEmailAndPassword(username, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            navController.navigate("role_selection_screen") {
+                                popUpTo("login_screen") { inclusive = true }
+                            }
+                        } else {
+                            loginError = true
+                        }
                     }
-                } else {
-                    loginError = true
-                }
             },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .height(48.dp),
-            shape = RoundedCornerShape(8.dp),
+            shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MainColor.copy(0.7f),
                 contentColor = White
             )
         ) {
-            Text("LOGIN", fontWeight = FontWeight.Bold)
+            Text("Login", fontWeight = FontWeight.Bold)
+        }
+
+        if (loginError) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "Email atau password salah",
+                color = DangerRed,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

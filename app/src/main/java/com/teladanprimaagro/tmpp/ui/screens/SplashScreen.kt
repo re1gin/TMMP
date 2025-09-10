@@ -13,10 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.compose.material3.*
-import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -26,16 +25,13 @@ fun SplashScreen(
 ) {
     LaunchedEffect(Unit) {
         delay(3000)
-
         val isLoggedIn = settingsViewModel.isUserLoggedIn()
         val userRole = settingsViewModel.getUserRole()
-
         if (isLoggedIn && userRole != null) {
             navController.navigate("main_screen/${userRole.name}") {
                 popUpTo("splash_screen") { inclusive = true }
             }
         } else {
-            // Jika belum login, navigasi ke LoginScreen
             navController.navigate("login_screen") {
                 popUpTo("splash_screen") { inclusive = true }
             }

@@ -28,6 +28,7 @@ import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.PetaScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
 import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.RoleSelectionScreen
 import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
 import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
 import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
@@ -54,11 +55,21 @@ fun AppNavigation(
         composable("splash_screen") {
             SplashScreen(
                 navController = navController,
-                settingsViewModel = settingsViewModel,
+                settingsViewModel = settingsViewModel
             )
         }
+
         composable("login_screen") {
-            LoginScreen(navController = navController, settingsViewModel = settingsViewModel)
+            LoginScreen(
+                navController = navController,
+            )
+        }
+
+        composable("role_selection_screen") {
+            RoleSelectionScreen(
+                navController = navController,
+                settingsViewModel = settingsViewModel
+            )
         }
 
         composable(
@@ -67,20 +78,11 @@ fun AppNavigation(
         ) { backStackEntry ->
             val userRoleString = backStackEntry.arguments?.getString("userRole")
             val userRole = userRoleString?.let { UserRole.valueOf(it) } ?: UserRole.HARVESTER
-
             MainScreen(
                 mainNavController = navController,
                 userRole = userRole,
                 settingsViewModel = settingsViewModel
             )
-        }
-
-        composable(
-            route = "send_print_data/{pengirimanId}",
-            arguments = listOf(navArgument("pengirimanId") { type = NavType.IntType })
-        ) { backStackEntry ->
-            val pengirimanId = backStackEntry.arguments?.getInt("pengirimanId") ?: -1
-            SendPrintDataScreen(navController, pengirimanId)
         }
 
         //Screen Harvester
@@ -229,6 +231,13 @@ fun AppNavigation(
             )
         }
 
+        composable(
+            route = "send_print_data/{pengirimanId}",
+            arguments = listOf(navArgument("pengirimanId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val pengirimanId = backStackEntry.arguments?.getInt("pengirimanId") ?: -1
+            SendPrintDataScreen(navController, pengirimanId)
+        }
 
         composable("nfc_scanner_screen") {
             NfcScannerScreen(navController = navController, sharedNfcViewModel = sharedNfcViewModel)

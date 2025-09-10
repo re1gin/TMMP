@@ -13,7 +13,20 @@
           "package_name": "com.teladanprimaagro.tmpp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "248356156096-hfbamen8t89kc052riqvcvsoh04ac0qp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.teladanprimaagro.tmpp",
+            "certificate_hash": "ff0f90d9cc10f1932dfd78bd9d05b2151778a14c"
+          }
+        },
+        {
+          "client_id": "248356156096-d39khgmvb7lss8sd4dbje4kktrps2f41.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyB79sSaAwVztoSDF86Kukig1hZ7cMfarBk"
@@ -21,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "248356156096-d39khgmvb7lss8sd4dbje4kktrps2f41.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

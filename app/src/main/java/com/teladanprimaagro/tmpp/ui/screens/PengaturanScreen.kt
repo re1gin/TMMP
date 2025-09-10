@@ -3,7 +3,6 @@ package com.teladanprimaagro.tmpp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
@@ -27,7 +26,6 @@ import com.teladanprimaagro.tmpp.data.UserRole
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
-import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,7 +38,6 @@ fun PengaturanScreen(
     var showPasswordDialog by remember { mutableStateOf(false) }
     var pendingNavigationRoute by remember { mutableStateOf<String?>(null) }
     val adminPassword = "1"
-    var showThemeDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -143,7 +140,7 @@ fun PengaturanScreen(
                     iconTint = MaterialTheme.colorScheme.error
                 ) {
                     settingsViewModel.logout()
-                    navController.navigate("login_screen") {
+                    navController.navigate("role_selection_screen") {
                         popUpTo(navController.graph.id) {
                             inclusive = true
                         }
@@ -168,44 +165,6 @@ fun PengaturanScreen(
                 showPasswordDialog = false
                 pendingNavigationRoute = null
             }
-        )
-    }
-
-    // Dialog untuk memilih tema
-    if (showThemeDialog) {
-        AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = { Text("Pilih Tema", color = MaterialTheme.colorScheme.onSurface) },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Button(
-                        onClick = {
-                            settingsViewModel.setYellowNeonTheme(false)
-                            showThemeDialog = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            "Blue Neon",
-                            color = Color.Blue)
-                    }
-                    Button(
-                        onClick = {
-                            settingsViewModel.setYellowNeonTheme(true)
-                            showThemeDialog = false
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            "Yellow Neon",
-                            color = Color.Yellow)
-                    }
-                }
-            },
-            confirmButton = {}
         )
     }
 }

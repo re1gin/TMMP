@@ -33,9 +33,6 @@ private const val DEFAULT_AFD_CODE = "AFD1"
 
 private const val KEY_SELECTED_MANDOR_LOADING = "selected_mandor_loading"
 
-// --- Konstanta Tema Baru ---
-private const val KEY_IS_YELLOW_NEON_THEME = "is_yellow_neon_theme"
-// --- Akhir Konstanta Tema Baru ---
 
 private fun getSpbCounterKeyForMandor(mandor: String): String = "spb_counter_$mandor"
 
@@ -60,11 +57,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val selectedMandorLoading: StateFlow<String> = _selectedMandorLoading.asStateFlow()
 
     // --- Properti Tema Baru ---
-    private val _isYellowNeonTheme = MutableStateFlow(
-        sharedPreferences.getBoolean(KEY_IS_YELLOW_NEON_THEME, false)
-    )
-    val isYellowNeonTheme: StateFlow<Boolean> = _isYellowNeonTheme.asStateFlow()
-    // --- Akhir Properti Tema Baru ---
+
 
     init {
         loadDataLists()
@@ -181,15 +174,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         }
         _selectedMandorLoading.value = mandor
     }
-
-    // --- Fungsi Tema Baru ---
-    fun setYellowNeonTheme(isYellowNeon: Boolean) {
-        sharedPreferences.edit {
-            putBoolean(KEY_IS_YELLOW_NEON_THEME, isYellowNeon)
-        }
-        _isYellowNeonTheme.value = isYellowNeon
-    }
-    // --- Akhir Fungsi Tema Baru ---
 
     fun addMandor(name: String) {
         val trimmedName = name.trim()
