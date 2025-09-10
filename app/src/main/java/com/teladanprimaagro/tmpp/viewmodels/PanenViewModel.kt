@@ -624,12 +624,16 @@ class PanenViewModel(application: Application) : AndroidViewModel(application) {
     fun generateUniqueCode(dateTime: LocalDateTime, block: String, totalBuah: Int): String {
         val uniqueNoFormat = settingsViewModel.getUniqueNoFormat()
         val dateFormatter = DateTimeFormatter.ofPattern("ddMMyyyy")
-        val timeFormatter = DateTimeFormatter.ofPattern("HHmm")
         val formattedDate = dateTime.format(dateFormatter)
-        val formattedTime = dateTime.format(timeFormatter)
+        val milliseconds = System.currentTimeMillis()
+        val seconds = (milliseconds / 1000) % 60
+        val millis = milliseconds % 1000
+        val formattedSeconds = seconds.toString().padStart(2, '0')
+        val formattedMillis = millis.toString().padStart(3, '0')
         val formattedBlock = if (block == "Pilih Blok") "ABC" else block.replace("[^a-zA-Z0-9]".toRegex(), "")
         val formattedBuah = totalBuah.toString().padStart(3, '0')
-        return "$uniqueNoFormat$formattedDate$formattedTime$formattedBlock$formattedBuah"
+
+        return "$uniqueNoFormat$formattedDate$formattedSeconds$formattedMillis$formattedBlock$formattedBuah"
     }
 
     fun setSortBy(criteria: String) {
