@@ -20,7 +20,6 @@ import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.Grey
 import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
-import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,12 +55,10 @@ fun TextInputField(
             // Warna teks
             focusedTextColor = Black.copy(0.5f),
             unfocusedTextColor = White,
-            errorTextColor = MaterialTheme.colorScheme.error,
 
             // Warna container (background TextField)
             focusedContainerColor = LightGrey,
             unfocusedContainerColor = Grey.copy(0.7f),
-            errorContainerColor = MaterialTheme.colorScheme.error,
 
             // Warna indicator (garis bawah, kita buat transparan)
             focusedIndicatorColor = Color.Transparent,
@@ -69,8 +66,7 @@ fun TextInputField(
 
             // Warna label
             focusedLabelColor = Black,
-            unfocusedLabelColor = MainColor,
-            errorLabelColor = MaterialTheme.colorScheme.error,
+            unfocusedLabelColor = MainColor
         )
     )
 }

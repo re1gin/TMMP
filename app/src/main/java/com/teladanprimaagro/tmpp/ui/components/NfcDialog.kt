@@ -2,6 +2,10 @@ package com.teladanprimaagro.tmpp.ui.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
@@ -10,57 +14,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
+import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.SuccessGreen
 import com.teladanprimaagro.tmpp.ui.theme.WarningYellow
-
-//@Composable
-//fun NfcReadDialog(
-//    showDialog: Boolean,
-//    onDismissRequest: () -> Unit,
-//    sharedNfcViewModel: SharedNfcViewModel
-//) {
-//    val nfcState by sharedNfcViewModel.nfcState.collectAsState()
-//
-//    AnimatedVisibility(
-//        visible = showDialog && nfcState !is NfcOperationState.Idle,
-//        enter = fadeIn(),
-//        exit = fadeOut()
-//    ) {
-//        AlertDialog(
-//            onDismissRequest = onDismissRequest,
-//            title = { Text(stringResource(R.string.nfc_read_title)) },
-//            text = {
-//                when (val state = nfcState) {
-//                    is NfcOperationState.WaitingForRead -> Text("Dekatkan tag NFC untuk membaca data.")
-//                    is NfcOperationState.Reading -> Column(
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                        Text("Sedang membaca tag NFC...")
-//                    }
-//                    is NfcOperationState.ReadSuccess -> Text("Data berhasil dibaca: ${state.data.uniqueNo}")
-//                    is NfcOperationState.ReadError -> Text(state.message)
-//                    else -> Text(stringResource(R.string.unknown_nfc_state))
-//                }
-//            },
-//            confirmButton = {
-//                if (nfcState is NfcOperationState.ReadError) {
-//                    Button(onClick = { sharedNfcViewModel.setWaitingForRead() }) {
-//                        Text(stringResource(R.string.retry_button))
-//                    }
-//                }
-//            },
-//            dismissButton = {
-//                Button(onClick = onDismissRequest) {
-//                    Text(stringResource(R.string.cancel_button))
-//                }
-//            }
-//        )
-//    }
-//}
 
 @Composable
 fun SuccessDialog(onDismiss: () -> Unit) {
@@ -71,9 +30,16 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Success",
+                    tint = SuccessGreen,
+                    modifier = Modifier.size(50.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Data Berhasil ✓",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Scan Berhasil",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = SuccessGreen
                 )
@@ -95,9 +61,9 @@ fun SuccessDialog(onDismiss: () -> Unit) {
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen) // Warna hijau kustom
+                    colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)
                 ) {
-                    Text("Ya", color = Color.Black)
+                    Text("Tutup", color = Color.Black)
                 }
             }
         },
@@ -115,12 +81,21 @@ fun FailureDialog(message: String, onDismiss: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    imageVector = Icons.Default.Cancel,
+                    contentDescription = "Failed",
+                    tint = DangerRed,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Gagal ❌",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Gagal",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = DangerRed
                 )
+
+
             }
         },
         text = {
@@ -139,13 +114,13 @@ fun FailureDialog(message: String, onDismiss: () -> Unit) {
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed) // Warna merah kustom
+                    colors = ButtonDefaults.buttonColors(containerColor = DangerRed)
                 ) {
                     Text("Tutup", color = Color.White)
                 }
             }
         },
-        containerColor = BackgroundDarkGrey, // Warna latar belakang dialog
+        containerColor = BackgroundDarkGrey,
         shape = RoundedCornerShape(16.dp)
     )
 }
@@ -163,11 +138,18 @@ fun DuplicateScanDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = "Warning",
+                    tint = WarningYellow,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
-                    text = "Peringatan ⚠️",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Peringatan",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = WarningYellow
+                    color = Color.White
                 )
             }
         },
@@ -189,7 +171,7 @@ fun DuplicateScanDialog(
                     modifier = Modifier.width(120.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = WarningYellow)
                 ) {
-                    Text("Tutup", color = Color.Black)
+                    Text("Tutup", color = Color.White)
                 }
             }
         },
@@ -209,9 +191,16 @@ fun SuccessScanDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = "Success",
+                    tint = SuccessGreen,
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Scan Berhasil ✓",
-                    style = MaterialTheme.typography.headlineSmall,
+                    text = "Scan Berhasil",
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = SuccessGreen
                 )
@@ -235,7 +224,7 @@ fun SuccessScanDialog(
                     modifier = Modifier.width(120.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = SuccessGreen)
                 ) {
-                    Text("Selesai", color = Color.Black)
+                    Text("Tutup", color = Black)
                 }
             }
         },

@@ -1,39 +1,53 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocalShipping
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
+import com.teladanprimaagro.tmpp.ui.components.PasswordDialog
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.White
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
-import com.teladanprimaagro.tmpp.ui.theme.DangerRed
+import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,35 +66,68 @@ fun RoleSelectionScreen(navController: NavController, settingsViewModel: Setting
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
             modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .background(Color.DarkGray, RoundedCornerShape(16.dp))
-                .padding(24.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
         ) {
             Text(
-                text = "Pilih Peran Anda",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
+                text = "Tentukan Peran Anda!",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = White,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 48.dp)
             )
 
-            // Tombol untuk Harvester
-            RoleButton(
-                icon = Icons.Default.Person,
-                label = "Harvester",
-                onClick = { showPasswordHarvester = true },
-                color = MainColor
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularRoleButton(
+                    iconResId = R.drawable.agriculture,
+                    label = "Harvester",
+                    onClick = { showPasswordHarvester = true },
+                    circleColor = Color.Transparent
+                )
 
-            // Tombol untuk Driver
-            Spacer(modifier = Modifier.height(16.dp))
-            RoleButton(
-                icon = Icons.Default.LocalShipping,
-                label = "Driver",
-                onClick = { showPasswordDriver = true },
-                color = MainColor
-            )
+                // Tombol untuk Driver
+                CircularRoleButton(
+                    iconResId = R.drawable.car,
+                    label = "Driver",
+                    onClick = { showPasswordDriver = true },
+                    circleColor = Color.Transparent
+                )
+            }
+
+            Spacer(modifier = Modifier.height(50.dp))
+//            TextButton(
+//                onClick = {
+//                    settingsViewModel.exitToApp()
+//                    navController.navigate("login_screen") {
+//                        popUpTo("role_selection_screen") { inclusive = true }
+//                    }
+//                },
+//                modifier = Modifier.wrapContentSize()
+//            ) {
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.Center
+//                ) {
+//                    Text(
+//                        text = "Logout",
+//                        color = DangerRed,
+//                        fontSize = 18.sp, // Ukuran teks logout
+//                        fontWeight = FontWeight.SemiBold,
+//                    )
+//                    Spacer(modifier = Modifier.width(8.dp))
+//                    Icon(
+//                        imageVector = Icons.AutoMirrored.Filled.Logout,
+//                        contentDescription = "Logout Icon",
+//                        tint = DangerRed,
+//                        modifier = Modifier.size(20.dp) // Ukuran ikon logout
+//                    )
+//                }
+//            }
         }
 
         // Dialog Password untuk Harvester
@@ -95,8 +142,6 @@ fun RoleSelectionScreen(navController: NavController, settingsViewModel: Setting
                         navController.navigate("main_screen/${UserRole.HARVESTER.name}") {
                             popUpTo("role_selection_screen") { inclusive = true }
                         }
-                    } else {
-                        // Tidak perlu logika di sini karena PasswordDialog akan menampilkannya
                     }
                 },
                 correctPassword = "panen123"
@@ -115,8 +160,6 @@ fun RoleSelectionScreen(navController: NavController, settingsViewModel: Setting
                         navController.navigate("main_screen/${UserRole.DRIVER.name}") {
                             popUpTo("role_selection_screen") { inclusive = true }
                         }
-                    } else {
-                        // Tidak perlu logika di sini
                     }
                 },
                 correctPassword = "supir123"
@@ -142,108 +185,42 @@ fun RoleSelectionScreen(navController: NavController, settingsViewModel: Setting
 }
 
 @Composable
-fun RoleButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+fun CircularRoleButton(
+    @DrawableRes iconResId: Int,
     label: String,
     onClick: () -> Unit,
-    color: Color
+    circleColor: Color
 ) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(70.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = color),
-        shape = RoundedCornerShape(12.dp),
-        contentPadding = PaddingValues(horizontal = 24.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.width(IntrinsicSize.Min) // Agar lebar kolom menyesuaikan konten
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+        // Lingkaran untuk ikon
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .size(100.dp) // Ukuran lingkaran
+                .border(2.dp, MainColor, CircleShape)
+                .background(circleColor, CircleShape),
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
+            contentPadding = PaddingValues(0.dp)
         ) {
             Icon(
-                imageVector = icon,
+                painter = painterResource(id = iconResId),
                 contentDescription = null,
-                tint = White,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = label,
-                color = White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+                tint = MainColor,
+                modifier = Modifier.size(50.dp)
             )
         }
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = label,
+            color = White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordDialog(onDismissRequest: () -> Unit, onConfirm: (String) -> Unit, correctPassword: String) {
-    var password by remember { mutableStateOf("") }
-    var isPasswordVisible by remember { mutableStateOf(false) }
-    var isPasswordError by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = {
-            Text(
-                text = "Masukkan Password",
-                color = Color.Black
-            )
-        },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = {
-                        password = it
-                        isPasswordError = false
-                    },
-                    label = { Text("Password") },
-                    isError = isPasswordError,
-                    singleLine = true,
-                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    trailingIcon = {
-                        val image = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff
-                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
-                            Icon(imageVector = image, contentDescription = "Toggle password visibility")
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (isPasswordError) {
-                    Text(
-                        text = "Password salah. Silakan coba lagi.",
-                        color = DangerRed,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    if (password == correctPassword) {
-                        onConfirm(password)
-                    } else {
-                        isPasswordError = true
-                    }
-                }
-            ) {
-                Text("Konfirmasi")
-            }
-        },
-        dismissButton = {
-            Button(
-                onClick = onDismissRequest
-            ) {
-                Text("Batal")
-            }
-        }
-    )
 }

@@ -170,7 +170,7 @@ fun StatistikPanenScreen(
                         FruitTableSection(
                             data = statistikJenisBuahPerBlok,
                             totalJenisBuah = totalJenisBuah,
-                            title = "Detail Buah per Blok" // Assuming this section would be added
+                            title = "Detail Buah per Blok"
                         )
                     }
                 }

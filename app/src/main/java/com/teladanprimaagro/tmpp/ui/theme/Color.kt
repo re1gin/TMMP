@@ -10,14 +10,12 @@ val Brown = Color(0xFF312400)
 
 
 
-
-
 val DangerRed = Color(0xFFE50000)
 val WarningYellow = Color(0xFFFFA500)
 val SuccessGreen = Color(0xFF54D700)
 val InfoBlue = Color(0xFF0090FF)
 
-val MainColor = Color(0xFFFB9800)
+val MainColor = Color(0xFF38D300)
 val MainBackground = Color(0xFF202020)
 
 val OldGrey = Color(0xFF5E5E5E)

@@ -16,25 +16,24 @@ import androidx.core.view.WindowCompat
 
 private val MainColorPalette = lightColorScheme(
     primary = MainBackground,
-    onPrimary = Orange,
+    onPrimary = MainColor,
 
     secondary = DarkBrown1,
-    onSecondary = Orange,
+    onSecondary = MainColor,
 
     background = Black,
     onBackground = OliveGreen,
 
     surface = DarkBrown1,
     onSurface = Black,
-    surfaceVariant = Orange,
+    surfaceVariant = MainColor,
     onSurfaceVariant = White,
 
-    outline = Orange,
+    outline = MainColor,
     surfaceContainer = BackgroundDarkGrey,
     surfaceBright = Brown,
 )
 
-// Bentuk (Shapes)
 val MainShapes = Shapes(
     small = RoundedCornerShape(4.dp),
     medium = RoundedCornerShape(8.dp),

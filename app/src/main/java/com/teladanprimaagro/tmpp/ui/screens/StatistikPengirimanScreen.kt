@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +50,7 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.OldGrey
 import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 
@@ -176,12 +179,26 @@ fun ReportStatistikSection(
         HorizontalDivider(Modifier.padding(top = 8.dp, bottom = 8.dp))
 
         if (data.isEmpty()) {
-            Text(
-                text = "Belum ada data.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MainColor.copy(alpha = 0.8f),
-                modifier = Modifier.padding(top = 8.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Equalizer,
+                    contentDescription = "No data icon",
+                    tint = OldGrey,
+                    modifier = Modifier.size(50.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Belum ada data panen hari ini.",
+                    textAlign = TextAlign.Center,
+                    color = OldGrey
+                )
+            }
         } else {
             data.forEach { (key, value) ->
                 ReportBarChartItem(

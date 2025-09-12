@@ -26,13 +26,14 @@ import androidx.compose.ui.window.Dialog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.PengirimanData
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.viewmodels.ScannedItem
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun PengirimanDetailDialog(
     pengirimanEntry: PengirimanData,
@@ -95,7 +96,7 @@ fun PengirimanDetailDialog(
                         text = "Data Lengkap",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = MainColor,
                         modifier = Modifier.align(Alignment.Center)
                     )
                     IconButton(
@@ -105,7 +106,7 @@ fun PengirimanDetailDialog(
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Tutup",
-                            tint = MaterialTheme.colorScheme.onPrimary
+                            tint = MainColor
                         )
                     }
                 }
@@ -215,7 +216,7 @@ fun PengirimanDetailDialog(
                         .fillMaxWidth()
                         .height(50.dp),
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onPrimary.copy(0.7f)) // Menggunakan warna primary dari tema
+                    colors = ButtonDefaults.buttonColors(containerColor = MainColor) // Menggunakan warna primary dari tema
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -224,14 +225,14 @@ fun PengirimanDetailDialog(
                         Icon(
                             imageVector = Icons.Default.Print,
                             contentDescription = "Kirim/Cetak Data",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Black
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = "Kirim & Cetak Data",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Black
                         )
                     }
                 }

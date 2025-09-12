@@ -1,6 +1,5 @@
 package com.teladanprimaagro.tmpp.ui.screens
 
-import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -44,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Gray
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,7 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PengirimanData
-import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
+import com.teladanprimaagro.tmpp.ui.components.PasswordDialog
 import com.teladanprimaagro.tmpp.ui.components.PengirimanDetailDialog
 import com.teladanprimaagro.tmpp.ui.components.PengirimanTableRow
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
@@ -74,8 +72,6 @@ fun RekapPengirimanScreen(
     navController: NavController,
     pengirimanViewModel: PengirimanViewModel = viewModel()
 ) {
-    val context = LocalContext.current
-
     val pengirimanList by pengirimanViewModel.pengirimanList.collectAsState()
     val totalDataMasuk by pengirimanViewModel.totalDataMasuk.collectAsState()
     val totalSemuaBuah by pengirimanViewModel.totalSemuaBuah.collectAsState()
@@ -281,17 +277,13 @@ fun RekapPengirimanScreen(
     }
 
     if (showPasswordDialog) {
-        PasswordConfirmationDialog(
+        PasswordDialog(
             onDismissRequest = { showPasswordDialog = false },
             onConfirm = { password ->
-                val correctPassword = "123" // GANTI DENGAN SANDI YANG BENAR
-                if (password == correctPassword) {
-                    showDeleteConfirmationDialog = true
-                } else {
-                    Toast.makeText(context, "Sandi salah!", Toast.LENGTH_SHORT).show()
-                }
+                showDeleteConfirmationDialog = true
                 showPasswordDialog = false
-            }
+            },
+            correctPassword = "123" // GANTI DENGAN SANDI YANG BENAR
         )
     }
 

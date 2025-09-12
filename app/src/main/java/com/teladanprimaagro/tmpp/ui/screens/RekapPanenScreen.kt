@@ -2,7 +2,17 @@ package com.teladanprimaagro.tmpp.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,7 +23,25 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,13 +62,11 @@ import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.components.PanenDetailDialog
 import com.teladanprimaagro.tmpp.ui.components.PanenTableRow
-import com.teladanprimaagro.tmpp.ui.components.PasswordConfirmationDialog
+import com.teladanprimaagro.tmpp.ui.components.PasswordDialog
 import com.teladanprimaagro.tmpp.ui.components.SummaryBox
 import com.teladanprimaagro.tmpp.ui.components.TableHeaderText
 import com.teladanprimaagro.tmpp.ui.theme.Black
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
-import com.teladanprimaagro.tmpp.ui.theme.Grey
-import com.teladanprimaagro.tmpp.ui.theme.LightGrey
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 import com.teladanprimaagro.tmpp.ui.theme.OldGrey
@@ -160,21 +186,15 @@ fun RekapPanenScreen(
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = White,
                                 unfocusedTextColor = White,
-                                errorTextColor = MaterialTheme.colorScheme.error,
                                 focusedContainerColor = OldGrey,
                                 unfocusedContainerColor = OldGrey,
                                 disabledContainerColor = OldGrey,
-                                errorContainerColor = MaterialTheme.colorScheme.error,
-                                cursorColor = MaterialTheme.colorScheme.onPrimary,
-                                errorCursorColor = MaterialTheme.colorScheme.error,
+                                cursorColor = MainColor,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = MaterialTheme.colorScheme.error,
-                                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-                                disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
-                                errorLabelColor = MaterialTheme.colorScheme.error
+                                focusedLabelColor = MainColor,
+                                unfocusedLabelColor = MainColor
                             )
                         )
                         ExposedDropdownMenu(
@@ -239,27 +259,21 @@ fun RekapPanenScreen(
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = White,
                                 unfocusedTextColor = White,
-                                errorTextColor = MaterialTheme.colorScheme.error,
                                 focusedContainerColor = OldGrey,
                                 unfocusedContainerColor = OldGrey,
                                 disabledContainerColor = OldGrey,
-                                errorContainerColor = MaterialTheme.colorScheme.error,
-                                cursorColor = MaterialTheme.colorScheme.onPrimary,
-                                errorCursorColor = MaterialTheme.colorScheme.error,
+                                cursorColor = MainColor,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
                                 disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = MaterialTheme.colorScheme.error,
-                                focusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-                                unfocusedLabelColor = MaterialTheme.colorScheme.onSecondary,
-                                disabledLabelColor = MaterialTheme.colorScheme.onSecondary.copy(alpha = 0.38f),
-                                errorLabelColor = MaterialTheme.colorScheme.error
+                                focusedLabelColor = MainColor,
+                                unfocusedLabelColor = MainColor
                             )
                         )
                         ExposedDropdownMenu(
                             expanded = pemanenDropdownExpanded,
                             onDismissRequest = { pemanenDropdownExpanded = false },
-                            modifier = Modifier.background(OldGrey)
+                            modifier = Modifier.background(OldGrey.copy(0.5f))
                         ) {
                             pemanenFilterOptions.value.forEach { pemanen ->
                                 DropdownMenuItem(
@@ -509,15 +523,13 @@ fun RekapPanenScreen(
         )
     }
     if (showPasswordDialog) {
-        PasswordConfirmationDialog(
+        PasswordDialog(
             onDismissRequest = { showPasswordDialog = false },
             onConfirm = { password ->
-                val correctPassword = "123"
-                if (password == correctPassword) {
-                    showDeleteAllDialog = true
-                }
+                showDeleteAllDialog = true
                 showPasswordDialog = false
-            }
+            },
+            correctPassword = "123" // GANTI DENGAN SANDI YANG BENAR
         )
     }
     if (showDeleteAllDialog) {

@@ -232,7 +232,6 @@ class SharedNfcViewModel : ViewModel() {
                 onResult(null, errorMessage)
             }
         } else {
-            setReadError("Stiker NFC tidak terdeteksi dengan benar.")
             onResult(null, "Stiker NFC tidak terdeteksi dengan benar.")
         }
     }

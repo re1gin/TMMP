@@ -9,6 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.teladanprimaagro.tmpp.data.UserRole
 import androidx.core.content.edit
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,9 +31,7 @@ private const val KEY_SPB_FORMAT = "spb_format"
 private const val DEFAULT_SPB_FORMAT = "AME/TPE"
 private const val KEY_AFD_CODE = "afd_code"
 private const val DEFAULT_AFD_CODE = "AFD1"
-
 private const val KEY_SELECTED_MANDOR_LOADING = "selected_mandor_loading"
-
 
 private fun getSpbCounterKeyForMandor(mandor: String): String = "spb_counter_$mandor"
 
@@ -55,9 +54,6 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             ?: mandorLoadingOptions.first()
     )
     val selectedMandorLoading: StateFlow<String> = _selectedMandorLoading.asStateFlow()
-
-    // --- Properti Tema Baru ---
-
 
     init {
         loadDataLists()
@@ -151,6 +147,10 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
     fun logout() {
         saveSessionStatus(false, null)
+    }
+
+    fun exitToApp() {
+        FirebaseAuth.getInstance().signOut()
     }
 
     fun isUserLoggedIn(): Boolean {

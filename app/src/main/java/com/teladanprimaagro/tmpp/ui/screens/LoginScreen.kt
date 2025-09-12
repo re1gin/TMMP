@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
@@ -35,6 +37,8 @@ fun LoginScreen(navController: NavController) {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var loginError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("Email atau password salah") }
+    var isLoading by remember { mutableStateOf(false) }
     val firebaseAuth = FirebaseAuth.getInstance()
 
     Column(
@@ -134,15 +138,24 @@ fun LoginScreen(navController: NavController) {
 
         Button(
             onClick = {
+                isLoading = true
                 loginError = false
                 firebaseAuth.signInWithEmailAndPassword(username, password)
                     .addOnCompleteListener { task ->
+                        isLoading = false
                         if (task.isSuccessful) {
                             navController.navigate("role_selection_screen") {
                                 popUpTo("login_screen") { inclusive = true }
                             }
-                        } else {
-                            loginError = true
+                        }
+                    }
+                    .addOnFailureListener { exception ->
+                        isLoading = false
+                        loginError = true
+                        errorMessage = when (exception) {
+                            is FirebaseAuthInvalidUserException -> "Akun tidak ditemukan atau telah dihapus."
+                            is FirebaseAuthInvalidCredentialsException -> "Password yang Anda masukkan salah."
+                            else -> "Terjadi kesalahan saat login. Periksa koneksi internet Anda."
                         }
                     }
             },
@@ -153,15 +166,23 @@ fun LoginScreen(navController: NavController) {
             colors = ButtonDefaults.buttonColors(
                 containerColor = MainColor.copy(0.7f),
                 contentColor = White
-            )
+            ),
+            enabled = !isLoading // Nonaktifkan tombol saat loading
         ) {
-            Text("Login", fontWeight = FontWeight.Bold)
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = White,
+                    modifier = Modifier.size(24.dp)
+                )
+            } else {
+                Text("Login", fontWeight = FontWeight.Bold)
+            }
         }
 
         if (loginError) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Email atau password salah",
+                text = errorMessage,
                 color = DangerRed,
                 style = MaterialTheme.typography.bodySmall
             )

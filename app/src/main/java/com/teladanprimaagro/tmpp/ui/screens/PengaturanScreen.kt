@@ -3,27 +3,22 @@ package com.teladanprimaagro.tmpp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.components.PasswordDialog
+import com.teladanprimaagro.tmpp.ui.theme.DangerRed
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.ui.theme.MainColor
 
@@ -51,12 +46,12 @@ fun PengaturanScreen(
                             text = "Pengaturan",
                             fontSize = 20.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Black
+                            color = MainColor
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MainColor
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -135,9 +130,9 @@ fun PengaturanScreen(
                 Spacer(modifier = Modifier.weight(1f))
 
                 SettingMenuItem(
-                    text = "Logout",
+                    text = "Keluar Aplikasi",
                     icon = Icons.AutoMirrored.Filled.ExitToApp,
-                    iconTint = MaterialTheme.colorScheme.error
+                    iconTint = DangerRed
                 ) {
                     settingsViewModel.logout()
                     navController.navigate("role_selection_screen") {
@@ -151,20 +146,16 @@ fun PengaturanScreen(
     }
 
     if (showPasswordDialog) {
-        PasswordConfirmationDialog(
-            onConfirm = { enteredPassword ->
-                if (enteredPassword == adminPassword) {
+        PasswordDialog(
+            onDismissRequest = { showPasswordDialog = false},
+            onConfirm = { password ->
+                if (password == adminPassword) {
                     pendingNavigationRoute?.let { route ->
                         navController.navigate(route)
                     }
-                    showPasswordDialog = false
-                    pendingNavigationRoute = null
                 }
             },
-            onDismiss = {
-                showPasswordDialog = false
-                pendingNavigationRoute = null
-            }
+            correctPassword = adminPassword
         )
     }
 }
@@ -196,62 +187,4 @@ fun SettingMenuItem(
             tint = iconTint
         )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasswordConfirmationDialog(
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    var passwordInput by remember { mutableStateOf("") }
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Konfirmasi Sandi", color = Color.Black) },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = passwordInput,
-                    onValueChange = { passwordInput = it },
-                    label = { Text("Sandi Admin", color = Color.Black) },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                    visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                    trailingIcon = {
-                        val image = if (passwordVisible)
-                            Icons.Filled.Visibility
-                        else Icons.Filled.VisibilityOff
-
-                        val description = if (passwordVisible) "Sembunyikan sandi" else "Tampilkan sandi"
-
-                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                            Icon(imageVector = image,
-                                contentDescription = description,
-                                tint = MaterialTheme.colorScheme.onPrimary)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = { onConfirm(passwordInput) },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Konfirmasi", color = MaterialTheme.colorScheme.onPrimary)
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Batal", color = MaterialTheme.colorScheme.onSurface)
-            }
-        }
-    )
 }

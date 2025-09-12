@@ -71,7 +71,6 @@ fun DropdownInputField(
                 // Warna container (background TextField)
                 focusedContainerColor = LightGrey,
                 unfocusedContainerColor = Grey.copy(0.7f),
-                errorContainerColor = MaterialTheme.colorScheme.error,
 
                 // Warna indicator (garis bawah, kita buat transparan)
                 focusedIndicatorColor = Color.Transparent,
@@ -80,11 +79,9 @@ fun DropdownInputField(
                 // Warna label
                 focusedLabelColor = Black,
                 unfocusedLabelColor = MainColor,
-                errorLabelColor = MaterialTheme.colorScheme.error,
 
                 // Warna cursor
-                cursorColor = MaterialTheme.colorScheme.onPrimary,
-                errorCursorColor = MaterialTheme.colorScheme.error,
+                cursorColor = MainColor
             )
         )
 

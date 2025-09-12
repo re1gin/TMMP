@@ -13,6 +13,8 @@ import android.os.Build
 import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,16 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.teladanprimaagro.tmpp.data.PanenData
 import com.teladanprimaagro.tmpp.ui.theme.BackgroundDarkGrey
-import com.teladanprimaagro.tmpp.ui.theme.InfoBlue
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
+import com.teladanprimaagro.tmpp.ui.theme.White
 import com.teladanprimaagro.tmpp.viewmodels.NfcOperationState
 import com.teladanprimaagro.tmpp.viewmodels.SharedNfcViewModel
 
@@ -161,11 +165,18 @@ fun NfcWriteDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Icon(
+                    imageVector = Icons.Default.Nfc,
+                    contentDescription = "Nfc",
+                    tint = MainColor,
+                    modifier = Modifier.size(50.dp)
+                )
+                Spacer(modifier = Modifier.height(10.dp))
                 Text(
                     text = "Menginput Tag NFC!",
-                    style = MaterialTheme.typography.headlineSmall,
+                    fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = InfoBlue
+                    color = White
                 )
             }
         },
@@ -174,7 +185,7 @@ fun NfcWriteDialog(
                 text = nfcWriteStatusMessage,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White
+                color = White
             )
         },
         confirmButton = {
@@ -185,9 +196,9 @@ fun NfcWriteDialog(
                 Button(
                     onClick = onDismissRequest,
                     modifier = Modifier.width(120.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = InfoBlue)
+                    colors = ButtonDefaults.buttonColors(containerColor = MainColor)
                 ) {
-                    Text("Batal", color = Color.Black)
+                    Text("Batal", color = Black)
                 }
             }
         },

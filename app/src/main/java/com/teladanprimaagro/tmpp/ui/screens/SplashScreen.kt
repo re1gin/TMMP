@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
 import com.teladanprimaagro.tmpp.R
 import com.teladanprimaagro.tmpp.ui.theme.MainBackground
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -25,11 +26,19 @@ fun SplashScreen(
 ) {
     LaunchedEffect(Unit) {
         delay(3000)
+        val firebaseAuth = FirebaseAuth.getInstance()
         val isLoggedIn = settingsViewModel.isUserLoggedIn()
         val userRole = settingsViewModel.getUserRole()
-        if (isLoggedIn && userRole != null) {
-            navController.navigate("main_screen/${userRole.name}") {
-                popUpTo("splash_screen") { inclusive = true }
+
+        if (firebaseAuth.currentUser != null) {
+            if (isLoggedIn && userRole != null) {
+                navController.navigate("main_screen/${userRole.name}") {
+                    popUpTo("splash_screen") { inclusive = true }
+                }
+            } else {
+                navController.navigate("role_selection_screen") {
+                    popUpTo("splash_screen") { inclusive = true }
+                }
             }
         } else {
             navController.navigate("login_screen") {
@@ -46,7 +55,7 @@ fun SplashScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.splash_new),
             contentDescription = "App Logo",
             modifier = Modifier.size(180.dp)
         )

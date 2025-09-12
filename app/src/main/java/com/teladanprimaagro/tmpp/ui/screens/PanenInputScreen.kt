@@ -438,7 +438,7 @@ fun PanenInputScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .background(Grey, RoundedCornerShape(10.dp))
+                        .background(Grey.copy(0.7f), RoundedCornerShape(10.dp))
                         .clip(RoundedCornerShape(10.dp))
                         .clickable(enabled = !isImageLoading) {
                             if (ContextCompat.checkSelfPermission(
@@ -483,13 +483,13 @@ fun PanenInputScreen(
                             Icon(
                                 imageVector = Icons.Default.CameraAlt,
                                 contentDescription = "Ambil Gambar",
-                                tint = Black,
+                                tint = White,
                                 modifier = Modifier.size(64.dp)
                             )
                             Spacer(modifier = Modifier.height(10.dp))
                             Text(
                                 text = "Ambil Gambar",
-                                color = Black,
+                                color = White,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium
                             )

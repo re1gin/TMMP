@@ -19,7 +19,10 @@ import coil.compose.rememberAsyncImagePainter
 import com.teladanprimaagro.tmpp.data.PanenData
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
+import com.teladanprimaagro.tmpp.ui.theme.Black
+import com.teladanprimaagro.tmpp.ui.theme.MainColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,10 +51,10 @@ fun PanenDetailDialog(
             ) {
                 Text(
                     text = "Detail Data Panen",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MainColor,
+                    modifier = Modifier.padding(bottom = 20.dp)
                 )
 
                 val imageToDisplay = panenData.localImageUri ?: panenData.firebaseImageUrl
@@ -97,9 +100,9 @@ fun PanenDetailDialog(
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surface)
+                    colors = ButtonDefaults.buttonColors(containerColor = MainColor)
                 ) {
-                    Text("Tutup")
+                    Text("Tutup", color = Black)
                 }
             }
         }
