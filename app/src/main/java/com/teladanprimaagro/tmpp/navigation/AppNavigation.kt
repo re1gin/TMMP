@@ -11,31 +11,30 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.teladanprimaagro.tmpp.data.UserRole
-import com.teladanprimaagro.tmpp.ui.screens.DataPanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.DataPengirimanScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaBlokScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaKemandoranScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaKendaraanScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaPemanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaSupirScreen
-import com.teladanprimaagro.tmpp.ui.screens.KelolaTphScreen
-import com.teladanprimaagro.tmpp.ui.screens.LoginScreen
-import com.teladanprimaagro.tmpp.ui.screens.MainScreen
-import com.teladanprimaagro.tmpp.ui.screens.NfcScannerScreen
-import com.teladanprimaagro.tmpp.ui.screens.PanenExportScreen
-import com.teladanprimaagro.tmpp.ui.screens.PanenInputScreen
-import com.teladanprimaagro.tmpp.ui.screens.PengirimanInputScreen
-import com.teladanprimaagro.tmpp.ui.screens.PetaScreen
-import com.teladanprimaagro.tmpp.ui.screens.RekapPanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.RekapPengirimanScreen
-import com.teladanprimaagro.tmpp.ui.screens.RoleSelectionScreen
-import com.teladanprimaagro.tmpp.ui.screens.ScanInputScreen
-import com.teladanprimaagro.tmpp.ui.screens.SendPrintDataScreen
-import com.teladanprimaagro.tmpp.ui.screens.SpbSettingsScreen
-import com.teladanprimaagro.tmpp.ui.screens.SplashScreen
-import com.teladanprimaagro.tmpp.ui.screens.StatistikPanenScreen
-import com.teladanprimaagro.tmpp.ui.screens.StatistikPengirimanScreen
-import com.teladanprimaagro.tmpp.ui.screens.UbahFormatUniqueNoScreen
+import com.teladanprimaagro.tmpp.ui.screens.harvester.DataPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.DataPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaBlokScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaKemandoranScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaKendaraanScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaPemanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaSupirScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.KelolaTphScreen
+import com.teladanprimaagro.tmpp.ui.screens.main.LoginScreen
+import com.teladanprimaagro.tmpp.ui.screens.main.MainScreen
+import com.teladanprimaagro.tmpp.ui.screens.main.NfcScannerScreen
+import com.teladanprimaagro.tmpp.ui.screens.harvester.PanenInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.PengirimanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.harvester.PetaScreen
+import com.teladanprimaagro.tmpp.ui.screens.harvester.RekapPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.RekapPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.main.RoleSelectionScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.ScanInputScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.SendPrintDataScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.SpbSettingsScreen
+import com.teladanprimaagro.tmpp.ui.screens.main.SplashScreen
+import com.teladanprimaagro.tmpp.ui.screens.harvester.StatistikPanenScreen
+import com.teladanprimaagro.tmpp.ui.screens.driver.StatistikPengirimanScreen
+import com.teladanprimaagro.tmpp.ui.screens.setting.UbahFormatUniqueNoScreen
 import com.teladanprimaagro.tmpp.viewmodels.PanenViewModel
 import com.teladanprimaagro.tmpp.viewmodels.PengirimanViewModel
 import com.teladanprimaagro.tmpp.viewmodels.SettingsViewModel
@@ -168,11 +167,6 @@ fun AppNavigation(
             KelolaTphScreen(
                 navController, settingsViewModel
             )
-        }
-
-        composable("panen_export_screen") {
-            PanenExportScreen(navController, panenViewModel)
-
         }
 
 

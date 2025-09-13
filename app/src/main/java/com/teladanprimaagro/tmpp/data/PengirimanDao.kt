@@ -25,7 +25,6 @@ interface PengirimanDao {
     @Query("SELECT * FROM pengiriman_entries WHERE id = :id")
     suspend fun getPengirimanById(id: Int): PengirimanData?
 
-    // --- FUNGSI BARU: Mengambil beberapa entri pengiriman berdasarkan daftar ID ---
     @Query("SELECT * FROM pengiriman_entries WHERE id IN (:ids)")
     suspend fun getPengirimanByIds(ids: List<Int>): List<PengirimanData>
 
@@ -58,6 +57,9 @@ interface PengirimanDao {
 
     @Query("DELETE FROM finalized_unique_nos")
     suspend fun clearAllFinalizedUniqueNos()
+
+    @Query("DELETE FROM finalized_unique_nos WHERE uniqueNo IN (:uniqueNos)")
+    suspend fun deleteFinalizedUniqueNos(uniqueNos: List<String>)
 
     @Query("SELECT * FROM pengiriman_entries WHERE isUploaded = 0")
     suspend fun getUnuploadedPengirimanData(): List<PengirimanData>

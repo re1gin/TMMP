@@ -20,14 +20,7 @@ import com.teladanprimaagro.tmpp.data.ScannedItemDao
 import com.teladanprimaagro.tmpp.data.ScannedItemEntity
 import com.teladanprimaagro.tmpp.util.ConnectivityObserver
 import com.teladanprimaagro.tmpp.workers.SyncPengirimanWorker
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.time.LocalDate
@@ -36,7 +29,6 @@ import java.time.Month
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-// Data Classes (tetap sama)
 data class ScannedItem(
     val uniqueNo: String,
     val tanggal: String,
@@ -286,8 +278,11 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
 
     fun deleteSelectedPengirimanData(ids: List<Int>) {
         viewModelScope.launch {
+            var uniqueNosToDelete: List<String> = emptyList()
+
             try {
                 val dataToDelete = pengirimanDao.getPengirimanByIds(ids)
+                val tempUniqueNos = mutableListOf<String>()
 
                 for (data in dataToDelete) {
                     val firebaseKey = data.spbNumber.replace('/', '-')
@@ -300,13 +295,20 @@ class PengirimanViewModel(application: Application) : AndroidViewModel(applicati
                     rawDetailScannedItems.forEach { item ->
                         finalizedUniqueNoDbRef.child(item.uniqueNo).removeValue().await()
                         Log.d("PengirimanViewModel", "FIREBASE: Finalized uniqueNo ${item.uniqueNo} deleted.")
+                        tempUniqueNos.add(item.uniqueNo)
                     }
                 }
+                uniqueNosToDelete = tempUniqueNos
             } catch (e: Exception) {
                 Log.e("PengirimanViewModel", "Failed to delete multiple data from Firebase: ${e.message}")
             } finally {
                 pengirimanDao.deleteMultiplePengiriman(ids)
                 Log.d("PengirimanViewModel", "ROOM: Deleted multiple pengiriman data with IDs: $ids")
+
+                if (uniqueNosToDelete.isNotEmpty()) {
+                    pengirimanDao.deleteFinalizedUniqueNos(uniqueNosToDelete)
+                    Log.d("PengirimanViewModel", "ROOM: Deleted finalized uniqueNos: $uniqueNosToDelete")
+                }
             }
         }
     }

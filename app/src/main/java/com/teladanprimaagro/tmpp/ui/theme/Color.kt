@@ -16,6 +16,7 @@ val SuccessGreen = Color(0xFF54D700)
 val InfoBlue = Color(0xFF0090FF)
 
 val MainColor = Color(0xFF38D300)
+val MainColor2 = Color(0xFF38D300) //Hapus angkanya untuk kembali ke warna default
 val MainBackground = Color(0xFF202020)
 
 val OldGrey = Color(0xFF5E5E5E)

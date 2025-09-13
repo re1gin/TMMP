@@ -16,8 +16,8 @@ android {
         applicationId = "com.teladanprimaagro.tmpp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.2"
+        versionCode = 3
+        versionName = "2.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -73,12 +73,11 @@ dependencies {
     testImplementation(libs.junit)
     implementation (libs.room.runtime)
     implementation(libs.androidx.room.ktx)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.runtime.livedata)
 
     implementation(libs.osmdroid.android)
     implementation(libs.osmdroid.mapsforge)
-
-    implementation(libs.androidx.runtime.livedata)
-    kapt(libs.androidx.room.compiler)
 
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
